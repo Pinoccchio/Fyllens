@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:fyllens/presentation/shared/widgets/custom_textfield.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
+import 'package:fyllens/core/constants/app_routes.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -209,10 +211,11 @@ class LoginPage extends StatelessWidget {
 
   /// Build sign up link at bottom
   Widget _buildSignUpLink() {
-    return TextButton(
-      onPressed: () {
-        // TODO: Navigate to register page
-      },
+    return Builder(
+      builder: (context) => TextButton(
+        onPressed: () {
+          context.go(AppRoutes.register);
+        },
       style: TextButton.styleFrom(
         padding: const EdgeInsets.symmetric(
           vertical: AppSpacing.sm,
@@ -233,6 +236,7 @@ class LoginPage extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

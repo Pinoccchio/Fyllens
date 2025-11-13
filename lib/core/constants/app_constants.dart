@@ -10,11 +10,14 @@ class AppConstants {
 
   // Auth Page Strings
   static const String signIn = 'Sign In';
+  static const String createAccount = 'Create Account';
   static const String login = 'LOGIN';
+  static const String signUp = 'SIGN UP';
   static const String register = 'REGISTER';
   static const String usernameHint = 'Username';
   static const String emailHint = 'Email';
   static const String passwordHint = 'Password';
+  static const String confirmPasswordHint = 'Confirm Password';
   static const String forgotPassword = 'Forgot Password?';
   static const String dontHaveAccount = "Don't have an account? Register now!";
   static const String alreadyHaveAccount = 'Already have an account? Sign in!';

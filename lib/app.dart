@@ -66,7 +66,7 @@ class MyApp extends StatelessWidget {
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => const RegisterPage(),
+        builder: (context, state) => RegisterPage(),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
