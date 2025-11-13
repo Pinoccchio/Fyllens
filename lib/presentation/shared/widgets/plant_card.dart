@@ -20,11 +20,11 @@ class PlantCard extends StatelessWidget {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
@@ -35,11 +35,11 @@ class PlantCard extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   color: AppColors.primaryGreen.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: plant.imageUrl != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                         child: Image.network(
                           plant.imageUrl!,
                           fit: BoxFit.cover,

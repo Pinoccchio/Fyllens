@@ -21,11 +21,11 @@ class ScanResultCard extends StatelessWidget {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMedium),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
@@ -39,10 +39,10 @@ class ScanResultCard extends StatelessWidget {
                     height: 60,
                     decoration: BoxDecoration(
                       color: AppColors.primaryGreen.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                       child: Image.network(
                         scanResult.imageUrl,
                         fit: BoxFit.cover,
@@ -89,7 +89,7 @@ class ScanResultCard extends StatelessWidget {
                   padding: const EdgeInsets.all(AppSpacing.sm),
                   decoration: BoxDecoration(
                     color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSmall),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Row(
                     children: [

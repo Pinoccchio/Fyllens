@@ -27,7 +27,7 @@ class AppTheme {
       // AppBar theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
-        foregroundColor: AppColors.textPrimaryLight,
+        foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         centerTitle: true,
       ),
@@ -37,16 +37,16 @@ class AppTheme {
         displayLarge: AppTextStyles.heading1,
         displayMedium: AppTextStyles.heading2,
         displaySmall: AppTextStyles.heading3,
-        bodyLarge: AppTextStyles.bodyText,
-        bodyMedium: AppTextStyles.bodyText,
-        labelLarge: AppTextStyles.button,
+        bodyLarge: AppTextStyles.bodyLarge,
+        bodyMedium: AppTextStyles.bodyMedium,
+        labelLarge: AppTextStyles.buttonLarge,
       ),
 
       // Button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
-          foregroundColor: AppColors.textPrimaryLight,
+          foregroundColor: AppColors.textOnPrimary,
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
@@ -93,26 +93,26 @@ class AppTheme {
       // AppBar theme
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.primaryGreen,
-        foregroundColor: AppColors.textPrimaryLight,
+        foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         centerTitle: true,
       ),
 
       // Text theme
       textTheme: TextTheme(
-        displayLarge: AppTextStyles.heading1.copyWith(color: AppColors.textPrimaryLight),
-        displayMedium: AppTextStyles.heading2.copyWith(color: AppColors.textPrimaryLight),
-        displaySmall: AppTextStyles.heading3.copyWith(color: AppColors.textPrimaryLight),
-        bodyLarge: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimaryLight),
-        bodyMedium: AppTextStyles.bodyText.copyWith(color: AppColors.textPrimaryLight),
-        labelLarge: AppTextStyles.button,
+        displayLarge: AppTextStyles.heading1.copyWith(color: AppColors.textOnPrimary),
+        displayMedium: AppTextStyles.heading2.copyWith(color: AppColors.textOnPrimary),
+        displaySmall: AppTextStyles.heading3.copyWith(color: AppColors.textOnPrimary),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.textOnPrimary),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.textOnPrimary),
+        labelLarge: AppTextStyles.buttonLarge,
       ),
 
       // Button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreen,
-          foregroundColor: AppColors.textPrimaryLight,
+          foregroundColor: AppColors.textOnPrimary,
           padding: const EdgeInsets.symmetric(vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
