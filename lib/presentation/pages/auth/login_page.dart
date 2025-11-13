@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fyllens/components/green_textfield.dart';
+import 'package:fyllens/presentation/shared/widgets/custom_textfield.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -17,16 +17,16 @@ class LoginPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 50),
-          
+
               // logo
               Icon(
                   Icons.energy_savings_leaf,
                   size: 100,
                 color: Colors.green[700],
               ),
-          
+
               const SizedBox(height: 50),
-          
+
               // App Name
               Text(
                 'FYLLENS',
@@ -39,7 +39,7 @@ class LoginPage extends StatelessWidget {
               ),
 
               const SizedBox(height: 25),
-          
+
               // forgot password
               Container(
                 width: double.infinity,
@@ -67,7 +67,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 25),
 
                     // username textfield
-                    GreenTextfield(
+                    CustomTextfield(
                       controller: usernameController,
                       obscureText: false,
                       hintText: "Username",
@@ -76,7 +76,7 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(height: 15),
 
                     // password textfield
-                    GreenTextfield(
+                    CustomTextfield(
                       controller: passwordController,
                       obscureText: true,
                       hintText: "Password",
