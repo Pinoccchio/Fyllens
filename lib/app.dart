@@ -11,15 +11,18 @@ import 'package:fyllens/presentation/pages/onboarding/onboarding_page.dart';
 import 'package:fyllens/presentation/pages/auth/login_page.dart';
 import 'package:fyllens/presentation/pages/auth/register_page.dart';
 import 'package:fyllens/presentation/pages/auth/forgot_password_page.dart';
-import 'package:fyllens/presentation/pages/home/home_page.dart';
-import 'package:fyllens/presentation/pages/library/library_page.dart';
-import 'package:fyllens/presentation/pages/scan/scan_page.dart';
-import 'package:fyllens/presentation/pages/history/history_page.dart';
-import 'package:fyllens/presentation/pages/profile/profile_page.dart';
+import 'package:fyllens/presentation/pages/main/main_screen.dart';
 import 'package:fyllens/presentation/pages/profile/edit_profile_page.dart';
 
-/// Main app widget
-/// Configures MaterialApp with theme and routing
+/// Root app widget
+///
+/// Sets up the MaterialApp with GoRouter for navigation and ThemeProvider
+/// for light/dark mode switching. This is the entry point for the entire app.
+///
+/// Navigation flow:
+/// - Splash → Onboarding (first time) or Login (returning user)
+/// - Login/Register → Main Screen (5 tabs)
+/// - Main Screen stays persistent while navigating between tabs
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -31,35 +34,38 @@ class MyApp extends StatelessWidget {
           title: 'Fyllens',
           debugShowCheckedModeBanner: false,
 
-          // Theme configuration
+          // Theme setup - supports light and dark modes
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.themeMode,
+          themeMode: themeProvider.themeMode, // Reactive to user preference
 
-          // Routing configuration
+          // GoRouter handles all navigation
           routerConfig: _router,
         );
       },
     );
   }
 
-  /// Router configuration
+  /// App navigation setup using GoRouter
+  ///
+  /// All routes are defined here. Using GoRouter instead of Navigator for:
+  /// - Declarative routing (easier to understand flow)
+  /// - Deep linking support
+  /// - URL-based navigation (useful for web builds later)
   static final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.splash, // Start with splash screen
+    initialLocation: AppRoutes.splash, // Always start with splash
     routes: [
-      // Splash screen
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashPage(),
       ),
 
-      // Onboarding
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingPage(),
       ),
 
-      // Auth routes
+      // Auth flow: register → login → main app
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => LoginPage(),
@@ -73,27 +79,13 @@ class MyApp extends StatelessWidget {
         builder: (context, state) => const ForgotPasswordPage(),
       ),
 
-      // Main app routes
+      // Main screen with 5-tab bottom navigation (home, library, scan, history, profile)
       GoRoute(
         path: AppRoutes.home,
-        builder: (context, state) => const HomePage(),
+        builder: (context, state) => const MainScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.library,
-        builder: (context, state) => const LibraryPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.scan,
-        builder: (context, state) => const ScanPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.history,
-        builder: (context, state) => const HistoryPage(),
-      ),
-      GoRoute(
-        path: AppRoutes.profile,
-        builder: (context, state) => const ProfilePage(),
-      ),
+
+      // Profile sub-routes
       GoRoute(
         path: AppRoutes.editProfile,
         builder: (context, state) => const EditProfilePage(),

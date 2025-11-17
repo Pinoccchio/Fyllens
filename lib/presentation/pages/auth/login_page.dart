@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
-import 'package:fyllens/features/authentication/presentation/providers/auth_provider.dart';
 import 'package:fyllens/presentation/shared/widgets/floating_circles.dart';
 import 'package:fyllens/presentation/shared/widgets/modern_icon_container.dart';
 
+/// Login screen with email and password fields
+///
+/// NOTE: This is currently a UI prototype. Login button goes directly to main screen
+/// without validation or authentication. Fields are optional just for demonstration.
+///
+/// TODO: Integrate with auth service for actual login
+/// TODO: Add email/password validation
+/// TODO: Handle login errors and show user feedback
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -18,31 +24,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
-  // Text editing controllers
+  /// Animation controller for fade and slide effects (duration: 600ms)
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation; // Opacity 0 → 1
+  late Animation<Offset> _slideAnimation; // Slide up on load
+
+  /// Form input controllers
+  /// Fields are optional in this prototype - no validation enforced yet
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
 
-  // Animation controller
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  /// Controls password visibility (default: hidden)
+  bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
+
+    // Setup animations that play when page loads
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
+    // Fade in animation - content goes from invisible to visible
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
+    // Slide up animation - form slides up slightly as it appears
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
+      begin: const Offset(0, 0.3), // Start 30% down
+      end: Offset.zero, // End at normal position
     ).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
     );
@@ -58,27 +71,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     super.dispose();
   }
 
-  /// Handle login button press
-  Future<void> _handleLogin() async {
-    // Clear any previous errors
-    context.read<AuthProvider>().clearError();
-
-    // Validate form
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    // Attempt login
-    final authProvider = context.read<AuthProvider>();
-    final success = await authProvider.signIn(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-
-    // Navigate to home on success
-    if (success && mounted) {
-      context.go(AppRoutes.home);
-    }
+  /// Login button handler
+  /// TODO: Replace with actual authentication logic
+  void _handleLogin() {
+    // Currently just navigates to main screen without checking credentials
+    context.go(AppRoutes.home);
   }
 
   @override
@@ -150,11 +147,11 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     );
   }
 
-  /// Build logo and app branding section with modern icon
+  /// App logo and branding at top of screen
   Widget _buildLogoSection() {
     return Column(
       children: [
-        // Modern App Icon with glow effect
+        // Animated app icon with gradient glow effect
         ModernIconContainer(
           icon: Icons.energy_savings_leaf,
           iconSize: 60,
@@ -167,7 +164,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
 
         const SizedBox(height: AppSpacing.md),
 
-        // App Name with fade animation
+        // App name (fades in)
         FadeTransition(
           opacity: _fadeAnimation,
           child: Text(
@@ -179,7 +176,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
 
         const SizedBox(height: AppSpacing.sm),
 
-        // App Subtitle with fade animation
+        // App description (fades in)
         FadeTransition(
           opacity: _fadeAnimation,
           child: Text(
@@ -192,216 +189,140 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
     );
   }
 
-  /// Build login form section
+  /// Login form with email, password, and sign in button
   Widget _buildLoginForm(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Sign In Heading
-            Text(
-              AppConstants.signIn,
-              style: AppTextStyles.heading1,
-              textAlign: TextAlign.center,
-            ),
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Sign In Heading
+          Text(
+            AppConstants.signIn,
+            style: AppTextStyles.heading1,
+            textAlign: TextAlign.center,
+          ),
 
-            const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.lg),
 
-            // Email TextField
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                hintText: 'Email',
-                prefixIcon: const Icon(
-                  Icons.email_outlined,
-                  color: AppColors.iconSecondary,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: BorderSide(color: AppColors.borderLight),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: const BorderSide(color: Colors.red),
-                ),
+          // Description
+          Text(
+            'Welcome back to ${AppConstants.appName}!',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          // Email Field (optional, no validation)
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            style: AppTextStyles.bodyMedium,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              prefixIcon: Icon(Icons.email_outlined, color: AppColors.primaryGreenModern),
+              filled: true,
+              fillColor: AppColors.backgroundSoft,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
               ),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter your email';
-                }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
-                }
-                return null;
-              },
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Password TextField
-            TextFormField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: InputDecoration(
-                hintText: AppConstants.passwordHint,
-                prefixIcon: const Icon(
-                  Icons.lock_outline,
-                  color: AppColors.iconSecondary,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: BorderSide(color: AppColors.borderLight),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  borderSide: const BorderSide(color: Colors.red),
-                ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your password';
-                }
-                if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
-                }
-                return null;
-              },
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+              ),
             ),
+          ),
 
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
 
-            // Forgot Password Link
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
+          // Password field with show/hide toggle
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            style: AppTextStyles.bodyMedium,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              prefixIcon: Icon(Icons.lock_outline, color: AppColors.primaryGreenModern),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                  color: AppColors.primaryGreenModern,
+                ),
                 onPressed: () {
-                  context.go(AppRoutes.forgotPassword);
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
                 },
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm,
-                    vertical: AppSpacing.xs,
-                  ),
-                  minimumSize: const Size(0, AppSpacing.touchTarget),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: Text(
-                  AppConstants.forgotPassword,
-                  style: AppTextStyles.linkMedium,
-                ),
+              ),
+              filled: true,
+              fillColor: AppColors.backgroundSoft,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
               ),
             ),
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xl),
 
-            // Error Message Display
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, _) {
-                if (authProvider.errorMessage != null) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                        border: Border.all(color: Colors.red.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              authProvider.errorMessage!,
-                              style: TextStyle(
-                                color: Colors.red.shade700,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
+          // Login Button
+          _buildLoginButton(),
 
-            // Login Button
-            _buildLoginButton(),
+          const SizedBox(height: AppSpacing.md),
 
-            const SizedBox(height: AppSpacing.md),
-
-            // Sign Up Link
-            _buildSignUpLink(),
-          ],
-        ),
+          // Sign Up Link
+          _buildSignUpLink(),
+        ],
       ),
     );
   }
 
-  /// Build primary login button with loading state
+  /// Build primary login button
   Widget _buildLoginButton() {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, _) {
-        return SizedBox(
-          height: AppSpacing.buttonHeight,
-          child: ElevatedButton(
-            onPressed: authProvider.isLoading ? null : _handleLogin,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGreenModern,
-              foregroundColor: AppColors.textOnPrimary,
-              elevation: 8,
-              shadowColor: AppColors.primaryGreenModern.withValues(alpha: 0.4),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              ),
-              disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
-            ),
-            child: authProvider.isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text(AppConstants.login, style: AppTextStyles.buttonLarge),
+    return SizedBox(
+      height: AppSpacing.buttonHeight,
+      child: ElevatedButton(
+        onPressed: _handleLogin,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primaryGreenModern,
+          foregroundColor: AppColors.textOnPrimary,
+          elevation: 8,
+          shadowColor: AppColors.primaryGreenModern.withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
-        );
-      },
+        ),
+        child: Text(AppConstants.login, style: AppTextStyles.buttonLarge),
+      ),
     );
   }
 
