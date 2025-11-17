@@ -7,6 +7,8 @@ import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/features/authentication/presentation/providers/auth_provider.dart';
+import 'package:fyllens/presentation/shared/widgets/floating_circles.dart';
+import 'package:fyllens/presentation/shared/widgets/modern_icon_container.dart';
 
 /// Register page
 /// User registration screen with modern flat UI design
@@ -17,7 +19,7 @@ class RegisterPage extends StatefulWidget {
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
-class _RegisterPageState extends State<RegisterPage> {
+class _RegisterPageState extends State<RegisterPage> with SingleTickerProviderStateMixin {
   // Text editing controllers
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -25,12 +27,40 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
+  // Animation controller
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+
+    _animationController.forward();
+  }
+
   @override
   void dispose() {
     _emailController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -60,35 +90,63 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: AppSpacing.maxContentWidth,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.screenPaddingHorizontal,
+      backgroundColor: AppColors.backgroundSoft,
+      body: FloatingCirclesBackground(
+        circles: [
+          FloatingCircleData(
+            top: 0.1,
+            left: 30,
+            size: 80,
+            color: AppColors.primaryGreenModern.withValues(alpha: 0.08),
+          ),
+          FloatingCircleData(
+            top: 0.15,
+            right: 40,
+            size: 60,
+            color: AppColors.accentMint.withValues(alpha: 0.1),
+          ),
+          FloatingCircleData(
+            bottom: 0.2,
+            left: 50,
+            size: 70,
+            color: AppColors.primaryGreenLight.withValues(alpha: 0.08),
+          ),
+        ],
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppSpacing.maxContentWidth,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: AppSpacing.xxl),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenPaddingHorizontal,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: AppSpacing.xxl),
 
-                    // Logo Section
-                    _buildLogoSection(),
+                      // Logo Section
+                      _buildLogoSection(),
 
-                    const SizedBox(height: AppSpacing.xxl),
+                      const SizedBox(height: AppSpacing.xxl),
 
-                    // Register Form
-                    _buildRegisterForm(context),
+                      // Register Form with animation
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: _buildRegisterForm(context),
+                        ),
+                      ),
 
-                    const SizedBox(height: AppSpacing.xxl),
-                  ],
+                      const SizedBox(height: AppSpacing.xxl),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -98,41 +156,43 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  /// Build logo and app branding section
+  /// Build logo and app branding section with modern icon
   Widget _buildLogoSection() {
     return Column(
       children: [
-        // App Icon
-        Container(
-          width: AppSpacing.iconXl,
-          height: AppSpacing.iconXl,
-          decoration: BoxDecoration(
-            color: AppColors.primaryGreen.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.energy_savings_leaf,
-            size: AppSpacing.iconLg,
-            color: AppColors.primaryGreen,
-          ),
+        // Modern App Icon with glow effect
+        ModernIconContainer(
+          icon: Icons.energy_savings_leaf,
+          iconSize: 60,
+          iconColor: AppColors.primaryGreenModern,
+          primaryColor: AppColors.primaryGreenModern,
+          secondaryColor: AppColors.accentMint,
+          containerSize: 160,
+          animationController: _animationController,
         ),
 
         const SizedBox(height: AppSpacing.md),
 
-        // App Name
-        Text(
-          AppConstants.appName,
-          style: AppTextStyles.appTitle,
-          textAlign: TextAlign.center,
+        // App Name with fade animation
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: Text(
+            AppConstants.appName,
+            style: AppTextStyles.appTitle,
+            textAlign: TextAlign.center,
+          ),
         ),
 
         const SizedBox(height: AppSpacing.sm),
 
-        // App Subtitle
-        Text(
-          AppConstants.appDescription,
-          style: AppTextStyles.appSubtitle,
-          textAlign: TextAlign.center,
+        // App Subtitle with fade animation
+        FadeTransition(
+          opacity: _fadeAnimation,
+          child: Text(
+            AppConstants.appDescription,
+            style: AppTextStyles.appSubtitle,
+            textAlign: TextAlign.center,
+          ),
         ),
       ],
     );
@@ -149,9 +209,9 @@ class _RegisterPageState extends State<RegisterPage> {
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           boxShadow: [
             BoxShadow(
-              color: AppColors.shadowLight,
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -370,10 +430,10 @@ class _RegisterPageState extends State<RegisterPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryGreenModern,
               foregroundColor: AppColors.textOnPrimary,
-              elevation: AppSpacing.elevation4,
-              shadowColor: AppColors.shadowMedium,
+              elevation: 8,
+              shadowColor: AppColors.primaryGreenModern.withValues(alpha: 0.4),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               ),
               disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
             ),
