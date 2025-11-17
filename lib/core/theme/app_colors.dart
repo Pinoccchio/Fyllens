@@ -16,6 +16,11 @@ class AppColors {
   static const Color accentGreen = Color(0xFF4CAF50); // Material green[500]
   static const Color accentGreenHover = Color(0xFF66BB6A); // green[400]
 
+  // Modern Flat UI Colors (inspired by contemporary plant apps)
+  static const Color primaryGreenModern = Color(0xFF66BB6A); // Brighter, more vibrant green
+  static const Color accentMint = Color(0xFF81C784); // Mint green for highlights
+  static const Color backgroundSoft = Color(0xFFFAFAFA); // Softer than F5F5F5 for modern cards
+
   // Background Colors
   static const Color backgroundLight = Color(0xFFF5F5F5); // Slightly off-white, reduces eye strain
   static const Color backgroundWhite = Colors.white;

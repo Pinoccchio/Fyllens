@@ -57,7 +57,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
               boxShadow: _isFocused
                   ? [
                       BoxShadow(
-                        color: AppColors.primaryGreen.withOpacity(0.1),
+                        color: AppColors.primaryGreen.withValues(alpha: 0.1),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -118,7 +118,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
                 filled: true,
                 fillColor: widget.enabled
                     ? AppColors.surfaceGray
-                    : AppColors.surfaceGray.withOpacity(0.5),
+                    : AppColors.surfaceGray.withValues(alpha: 0.5),
 
                 // Content padding
                 contentPadding: EdgeInsets.symmetric(

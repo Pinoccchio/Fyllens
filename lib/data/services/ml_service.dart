@@ -1,7 +1,9 @@
 import 'dart:io';
+import 'package:injectable/injectable.dart';
 
 /// Machine Learning service
 /// Handles ML model integration for plant deficiency detection
+@singleton
 class MLService {
   // TODO: Integrate ML model (TensorFlow Lite, ML Kit, or API)
 

@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:fyllens/data/services/local_storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Theme provider
 /// Manages app theme (light/dark mode)
 class ThemeProvider with ChangeNotifier {
   ThemeMode _themeMode = ThemeMode.light;
-  LocalStorageService? _storageService;
+  SharedPreferences? _preferences;
 
   ThemeMode get themeMode => _themeMode;
   bool get isDarkMode => _themeMode == ThemeMode.dark;
 
+  // Storage key
+  static const String _keyThemeMode = 'theme_mode';
+
   /// Initialize theme from storage
   Future<void> initialize() async {
-    _storageService = await LocalStorageService.getInstance();
-    final savedTheme = _storageService!.getString(LocalStorageService.keyThemeMode);
+    _preferences = await SharedPreferences.getInstance();
+    final savedTheme = _preferences!.getString(_keyThemeMode);
 
     if (savedTheme != null) {
       _themeMode = savedTheme == 'dark' ? ThemeMode.dark : ThemeMode.light;
@@ -26,8 +29,8 @@ class ThemeProvider with ChangeNotifier {
     _themeMode = _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
 
     // Save to storage
-    await _storageService?.saveString(
-      LocalStorageService.keyThemeMode,
+    await _preferences?.setString(
+      _keyThemeMode,
       _themeMode == ThemeMode.dark ? 'dark' : 'light',
     );
 
@@ -39,8 +42,8 @@ class ThemeProvider with ChangeNotifier {
     _themeMode = mode;
 
     // Save to storage
-    await _storageService?.saveString(
-      LocalStorageService.keyThemeMode,
+    await _preferences?.setString(
+      _keyThemeMode,
       mode == ThemeMode.dark ? 'dark' : 'light',
     );
 

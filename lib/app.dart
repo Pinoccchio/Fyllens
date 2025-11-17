@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
 
   /// Router configuration
   static final GoRouter _router = GoRouter(
-    initialLocation: AppRoutes.login, // Start with login page
+    initialLocation: AppRoutes.splash, // Start with splash screen
     routes: [
       // Splash screen
       GoRoute(

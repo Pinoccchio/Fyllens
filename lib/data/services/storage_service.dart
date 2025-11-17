@@ -1,10 +1,14 @@
 import 'dart:io';
+import 'package:injectable/injectable.dart';
 import 'package:fyllens/data/services/supabase_service.dart';
 
 /// Storage service
 /// Handles file uploads and downloads using Supabase Storage
+@singleton
 class StorageService {
-  final SupabaseService _supabaseService = SupabaseService.instance;
+  final SupabaseService _supabaseService;
+
+  StorageService(this._supabaseService);
 
   /// Upload an image file
   Future<String> uploadImage({

@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
                 child: Icon(
                   Icons.dashboard,
                   size: 80,
-                  color: AppColors.primaryGreen.withOpacity(0.5),
+                  color: AppColors.primaryGreen.withValues(alpha: 0.5),
                 ),
               ),
               const SizedBox(height: 20),

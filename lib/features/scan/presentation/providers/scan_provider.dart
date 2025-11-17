@@ -1,22 +1,23 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:fyllens/data/repositories/scan_repository.dart';
-import 'package:fyllens/data/models/scan_result_model.dart';
+import 'package:injectable/injectable.dart';
+import '../../domain/entities/scan_result_entity.dart';
+import '../../domain/usecases/perform_scan_usecase.dart';
 
-/// Scan provider
-/// Manages scanning state and operations
+@injectable
 class ScanProvider with ChangeNotifier {
-  final ScanRepository _scanRepository = ScanRepository();
+  final PerformScanUseCase _performScanUseCase;
+
+  ScanProvider(this._performScanUseCase);
 
   bool _isScanning = false;
-  ScanResultModel? _currentScanResult;
+  ScanResultEntity? _currentScanResult;
   String? _errorMessage;
 
   bool get isScanning => _isScanning;
-  ScanResultModel? get currentScanResult => _currentScanResult;
+  ScanResultEntity? get currentScanResult => _currentScanResult;
   String? get errorMessage => _errorMessage;
 
-  /// Perform a plant scan
   Future<bool> performScan({
     required File imageFile,
     required String plantId,
@@ -28,7 +29,7 @@ class ScanProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _scanRepository.performScan(
+      final result = await _performScanUseCase.execute(
         imageFile: imageFile,
         plantId: plantId,
         plantName: plantName,
@@ -40,22 +41,28 @@ class ScanProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isScanning = false;
       notifyListeners();
       return false;
     }
   }
 
-  /// Clear current scan result
   void clearCurrentScan() {
     _currentScanResult = null;
     notifyListeners();
   }
 
-  /// Clear error message
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  String _extractErrorMessage(Object error) {
+    final errorStr = error.toString();
+    if (errorStr.startsWith('Exception: ')) {
+      return errorStr.substring(11);
+    }
+    return errorStr;
   }
 }

@@ -1,9 +1,13 @@
+import 'package:injectable/injectable.dart';
 import 'package:fyllens/data/services/supabase_service.dart';
 
 /// Database service
 /// Handles CRUD operations with Supabase database
+@singleton
 class DatabaseService {
-  final SupabaseService _supabaseService = SupabaseService.instance;
+  final SupabaseService _supabaseService;
+
+  DatabaseService(this._supabaseService);
 
   /// Generic method to fetch all records from a table
   Future<List<Map<String, dynamic>>> fetchAll(String tableName) async {

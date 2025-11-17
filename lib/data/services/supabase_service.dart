@@ -1,21 +1,14 @@
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fyllens/core/config/supabase_config.dart';
 
 /// Supabase service singleton
 /// Provides access to Supabase client throughout the app
+@singleton
 class SupabaseService {
-  static SupabaseService? _instance;
   static SupabaseClient? _client;
 
-  SupabaseService._();
-
-  /// Get singleton instance
-  static SupabaseService get instance {
-    _instance ??= SupabaseService._();
-    return _instance!;
-  }
-
-  /// Initialize Supabase
+  /// Initialize Supabase - MUST be called before configureDependencies()
   static Future<void> initialize() async {
     await Supabase.initialize(
       url: SupabaseConfig.supabaseUrl,

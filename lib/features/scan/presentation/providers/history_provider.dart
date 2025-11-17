@@ -1,60 +1,63 @@
 import 'package:flutter/foundation.dart';
-import 'package:fyllens/data/repositories/scan_repository.dart';
-import 'package:fyllens/data/models/scan_result_model.dart';
+import 'package:injectable/injectable.dart';
+import '../../domain/entities/scan_result_entity.dart';
+import '../../domain/usecases/get_user_scans_usecase.dart';
+import '../../domain/usecases/delete_scan_usecase.dart';
 
-/// History provider
-/// Manages scan history state
+@injectable
 class HistoryProvider with ChangeNotifier {
-  final ScanRepository _scanRepository = ScanRepository();
+  final GetUserScansUseCase _getUserScansUseCase;
+  final DeleteScanUseCase _deleteScanUseCase;
 
-  List<ScanResultModel> _scanHistory = [];
+  HistoryProvider(
+    this._getUserScansUseCase,
+    this._deleteScanUseCase,
+  );
+
+  List<ScanResultEntity> _scanHistory = [];
   bool _isLoading = false;
   String? _errorMessage;
 
-  List<ScanResultModel> get scanHistory => _scanHistory;
+  List<ScanResultEntity> get scanHistory => _scanHistory;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasHistory => _scanHistory.isNotEmpty;
 
-  /// Load scan history for a user
   Future<void> loadHistory(String userId) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final history = await _scanRepository.getUserScans(userId);
+      final history = await _getUserScansUseCase.execute(userId);
       _scanHistory = history;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Refresh history
   Future<void> refreshHistory(String userId) async {
     await loadHistory(userId);
   }
 
-  /// Delete a scan from history
   Future<bool> deleteScan(String scanId) async {
     try {
-      await _scanRepository.deleteScan(scanId);
+      await _deleteScanUseCase.execute(scanId);
       _scanHistory.removeWhere((scan) => scan.id == scanId);
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       notifyListeners();
       return false;
     }
   }
 
-  /// Get scan by ID
-  ScanResultModel? getScanById(String scanId) {
+  ScanResultEntity? getScanById(String scanId) {
     try {
       return _scanHistory.firstWhere((scan) => scan.id == scanId);
     } catch (e) {
@@ -62,15 +65,21 @@ class HistoryProvider with ChangeNotifier {
     }
   }
 
-  /// Clear error message
   void clearError() {
     _errorMessage = null;
     notifyListeners();
   }
 
-  /// Clear history
   void clearHistory() {
     _scanHistory = [];
     notifyListeners();
+  }
+
+  String _extractErrorMessage(Object error) {
+    final errorStr = error.toString();
+    if (errorStr.startsWith('Exception: ')) {
+      return errorStr.substring(11);
+    }
+    return errorStr;
   }
 }

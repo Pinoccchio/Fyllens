@@ -23,7 +23,7 @@ class HistoryPage extends StatelessWidget {
               Icon(
                 Icons.history,
                 size: 80,
-                color: AppColors.primaryGreen.withOpacity(0.5),
+                color: AppColors.primaryGreen.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 20),
               const Text(

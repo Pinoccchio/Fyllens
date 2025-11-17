@@ -13,20 +13,20 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      primaryColor: AppColors.primaryGreen,
+      primaryColor: AppColors.primaryGreenModern,
       scaffoldBackgroundColor: AppColors.backgroundLight,
 
       // Color scheme
       colorScheme: ColorScheme.light(
-        primary: AppColors.primaryGreen,
-        secondary: AppColors.primaryGreen,
+        primary: AppColors.primaryGreenModern,
+        secondary: AppColors.accentMint,
         surface: AppColors.surfaceLight,
         error: Colors.red,
       ),
 
       // AppBar theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryGreen,
+        backgroundColor: AppColors.primaryGreenModern,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         centerTitle: true,
@@ -45,11 +45,12 @@ class AppTheme {
       // Button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGreen,
+          backgroundColor: AppColors.primaryGreenModern,
           foregroundColor: AppColors.textOnPrimary,
           padding: const EdgeInsets.symmetric(vertical: 15),
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
@@ -59,16 +60,16 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceLight,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: const BorderSide(color: AppColors.borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: AppColors.borderFocused),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
         ),
       ),
     );
@@ -79,20 +80,20 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.primaryGreen,
+      primaryColor: AppColors.primaryGreenModern,
       scaffoldBackgroundColor: AppColors.backgroundDark,
 
       // Color scheme
       colorScheme: ColorScheme.dark(
-        primary: AppColors.primaryGreen,
-        secondary: AppColors.primaryGreen,
+        primary: AppColors.primaryGreenModern,
+        secondary: AppColors.accentMint,
         surface: AppColors.surfaceDark,
         error: Colors.red,
       ),
 
       // AppBar theme
       appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.primaryGreen,
+        backgroundColor: AppColors.primaryGreenModern,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
         centerTitle: true,
@@ -111,11 +112,12 @@ class AppTheme {
       // Button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGreen,
+          backgroundColor: AppColors.primaryGreenModern,
           foregroundColor: AppColors.textOnPrimary,
           padding: const EdgeInsets.symmetric(vertical: 15),
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(16),
           ),
         ),
       ),
@@ -125,16 +127,16 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surfaceDark,
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: AppColors.surfaceDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: AppColors.surfaceDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: AppColors.borderFocused),
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
         ),
       ),
     );

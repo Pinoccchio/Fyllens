@@ -1,10 +1,14 @@
+import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fyllens/data/services/supabase_service.dart';
 
 /// Authentication service
 /// Handles all authentication operations using Supabase Auth
+@injectable
 class AuthService {
-  final SupabaseService _supabaseService = SupabaseService.instance;
+  final SupabaseService _supabaseService;
+
+  AuthService(this._supabaseService);
 
   /// Get current user
   User? get currentUser => _supabaseService.auth.currentUser;

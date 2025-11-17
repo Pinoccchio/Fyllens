@@ -1,22 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:fyllens/presentation/shared/widgets/custom_textfield.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
+import 'package:fyllens/features/authentication/presentation/providers/auth_provider.dart';
 
 /// Register page
 /// User registration screen with modern flat UI design
-class RegisterPage extends StatelessWidget {
-  RegisterPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
   // Text editing controllers
-  final emailController = TextEditingController();
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _usernameController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _usernameController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  /// Handle registration button press
+  Future<void> _handleSignUp() async {
+    // Clear any previous errors
+    context.read<AuthProvider>().clearError();
+
+    // Validate form
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Attempt sign up
+    final authProvider = context.read<AuthProvider>();
+    final success = await authProvider.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    // Navigate to home on success
+    if (success && mounted) {
+      context.go(AppRoutes.home);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +107,7 @@ class RegisterPage extends StatelessWidget {
           width: AppSpacing.iconXl,
           height: AppSpacing.iconXl,
           decoration: BoxDecoration(
-            color: AppColors.primaryGreen.withOpacity(0.1),
+            color: AppColors.primaryGreen.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: const Icon(
@@ -101,118 +140,256 @@ class RegisterPage extends StatelessWidget {
 
   /// Build register form section
   Widget _buildRegisterForm(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Create Account Heading
-          Text(
-            AppConstants.createAccount,
-            style: AppTextStyles.heading1,
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // Email TextField
-          CustomTextfield(
-            controller: emailController,
-            obscureText: false,
-            hintText: AppConstants.emailHint,
-            keyboardType: TextInputType.emailAddress,
-            prefixIcon: const Icon(
-              Icons.email_outlined,
-              color: AppColors.iconSecondary,
+    return Form(
+      key: _formKey,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.shadowLight,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          // Username TextField
-          CustomTextfield(
-            controller: usernameController,
-            obscureText: false,
-            hintText: AppConstants.usernameHint,
-            prefixIcon: const Icon(
-              Icons.person_outline,
-              color: AppColors.iconSecondary,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Create Account Heading
+            Text(
+              AppConstants.createAccount,
+              style: AppTextStyles.heading1,
+              textAlign: TextAlign.center,
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
 
-          // Password TextField
-          CustomTextfield(
-            controller: passwordController,
-            obscureText: true,
-            hintText: AppConstants.passwordHint,
-            prefixIcon: const Icon(
-              Icons.lock_outline,
-              color: AppColors.iconSecondary,
+            // Email TextField
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                hintText: AppConstants.emailHint,
+                prefixIcon: const Icon(
+                  Icons.email_outlined,
+                  color: AppColors.iconSecondary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: Colors.red),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Please enter your email';
+                }
+                if (!value.contains('@')) {
+                  return 'Please enter a valid email';
+                }
+                return null;
+              },
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
 
-          // Confirm Password TextField
-          CustomTextfield(
-            controller: confirmPasswordController,
-            obscureText: true,
-            hintText: AppConstants.confirmPasswordHint,
-            prefixIcon: const Icon(
-              Icons.lock_outline,
-              color: AppColors.iconSecondary,
+            // Username TextField (Optional - not validated for now)
+            TextFormField(
+              controller: _usernameController,
+              decoration: InputDecoration(
+                hintText: AppConstants.usernameHint,
+                prefixIcon: const Icon(
+                  Icons.person_outline,
+                  color: AppColors.iconSecondary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                ),
+              ),
             ),
-          ),
 
-          const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.md),
 
-          // Sign Up Button
-          _buildSignUpButton(),
+            // Password TextField
+            TextFormField(
+              controller: _passwordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: AppConstants.passwordHint,
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  color: AppColors.iconSecondary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: Colors.red),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your password';
+                }
+                if (value.length < 6) {
+                  return 'Password must be at least 6 characters';
+                }
+                return null;
+              },
+            ),
 
-          const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.md),
 
-          // Sign In Link
-          _buildSignInLink(context),
-        ],
+            // Confirm Password TextField
+            TextFormField(
+              controller: _confirmPasswordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: AppConstants.confirmPasswordHint,
+                prefixIcon: const Icon(
+                  Icons.lock_outline,
+                  color: AppColors.iconSecondary,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: BorderSide(color: AppColors.borderLight),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  borderSide: const BorderSide(color: Colors.red),
+                ),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please confirm your password';
+                }
+                if (value != _passwordController.text) {
+                  return 'Passwords do not match';
+                }
+                return null;
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.sm),
+
+            // Error Message Display
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, _) {
+                if (authProvider.errorMessage != null) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.sm),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                        border: Border.all(color: Colors.red.shade200),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              authProvider.errorMessage!,
+                              style: TextStyle(
+                                color: Colors.red.shade700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // Sign Up Button
+            _buildSignUpButton(),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // Sign In Link
+            _buildSignInLink(context),
+          ],
+        ),
       ),
     );
   }
 
-  /// Build primary sign up button
+  /// Build primary sign up button with loading state
   Widget _buildSignUpButton() {
-    return SizedBox(
-      height: AppSpacing.buttonHeight,
-      child: ElevatedButton(
-        onPressed: () {
-          // TODO: Implement registration logic
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGreen,
-          foregroundColor: AppColors.textOnPrimary,
-          elevation: AppSpacing.elevation2,
-          shadowColor: AppColors.shadowMedium,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+    return Consumer<AuthProvider>(
+      builder: (context, authProvider, _) {
+        return SizedBox(
+          height: AppSpacing.buttonHeight,
+          child: ElevatedButton(
+            onPressed: authProvider.isLoading ? null : _handleSignUp,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreenModern,
+              foregroundColor: AppColors.textOnPrimary,
+              elevation: AppSpacing.elevation4,
+              shadowColor: AppColors.shadowMedium,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusPill),
+              ),
+              disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
+            ),
+            child: authProvider.isLoading
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  )
+                : Text(AppConstants.signUp, style: AppTextStyles.buttonLarge),
           ),
-        ),
-        child: Text(
-          AppConstants.signUp,
-          style: AppTextStyles.buttonLarge,
-        ),
-      ),
+        );
+      },
     );
   }
 

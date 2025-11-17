@@ -1,18 +1,35 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:fyllens/data/repositories/profile_repository.dart';
-import 'package:fyllens/data/models/user_profile_model.dart';
+import 'package:injectable/injectable.dart';
+import '../../domain/entities/user_profile_entity.dart';
+import '../../domain/usecases/get_user_profile_usecase.dart';
+import '../../domain/usecases/create_profile_usecase.dart';
+import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/upload_profile_picture_usecase.dart';
 
-/// Profile provider
-/// Manages user profile state
+/// Profile provider (presentation layer)
+/// Manages user profile state using Provider pattern with Clean Architecture
+@injectable
 class ProfileProvider with ChangeNotifier {
-  final ProfileRepository _profileRepository = ProfileRepository();
+  final GetUserProfileUseCase _getUserProfileUseCase;
+  final CreateProfileUseCase _createProfileUseCase;
+  final UpdateProfileUseCase _updateProfileUseCase;
+  final UploadProfilePictureUseCase _uploadProfilePictureUseCase;
 
-  UserProfileModel? _userProfile;
+  ProfileProvider(
+    this._getUserProfileUseCase,
+    this._createProfileUseCase,
+    this._updateProfileUseCase,
+    this._uploadProfilePictureUseCase,
+  );
+
+  // State properties
+  UserProfileEntity? _userProfile;
   bool _isLoading = false;
   String? _errorMessage;
 
-  UserProfileModel? get userProfile => _userProfile;
+  // Getters
+  UserProfileEntity? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasProfile => _userProfile != null;
@@ -24,12 +41,12 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final profile = await _profileRepository.getUserProfile(userId);
+      final profile = await _getUserProfileUseCase.execute(userId);
       _userProfile = profile;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isLoading = false;
       notifyListeners();
     }
@@ -46,7 +63,7 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final profile = await _profileRepository.createUserProfile(
+      final profile = await _createProfileUseCase.execute(
         userId: userId,
         email: email,
         displayName: displayName,
@@ -56,7 +73,7 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -74,7 +91,7 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final profile = await _profileRepository.updateUserProfile(
+      final profile = await _updateProfileUseCase.execute(
         userId: userId,
         displayName: displayName,
         avatarUrl: avatarUrl,
@@ -84,7 +101,7 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isLoading = false;
       notifyListeners();
       return false;
@@ -101,7 +118,7 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final url = await _profileRepository.uploadProfilePicture(
+      final url = await _uploadProfilePictureUseCase.execute(
         userId: userId,
         imageFile: imageFile,
       );
@@ -109,7 +126,7 @@ class ProfileProvider with ChangeNotifier {
       notifyListeners();
       return url;
     } catch (e) {
-      _errorMessage = e.toString();
+      _errorMessage = _extractErrorMessage(e);
       _isLoading = false;
       notifyListeners();
       return null;
@@ -126,5 +143,17 @@ class ProfileProvider with ChangeNotifier {
   void clearError() {
     _errorMessage = null;
     notifyListeners();
+  }
+
+  /// Extract user-friendly error message from exception
+  String _extractErrorMessage(Object error) {
+    final errorStr = error.toString();
+
+    // Remove "Exception: " prefix if present
+    if (errorStr.startsWith('Exception: ')) {
+      return errorStr.substring(11);
+    }
+
+    return errorStr;
   }
 }
