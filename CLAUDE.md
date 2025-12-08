@@ -6,12 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Fyllens is a Flutter mobile application for plant nutrient deficiency identification using machine learning. The app uses Supabase as the backend for authentication, database, and storage, and integrates a CNN model for deficiency detection.
 
+**Tech Stack:** Flutter 3.35.7, Dart 3.9.2, Supabase, Provider, GoRouter, GetIt + Injectable
+
 ## Development Commands
 
 ### Setup and Dependencies
 ```bash
 cd Fyllens
 flutter pub get
+# Generate dependency injection code (required after modifying @injectable classes)
+flutter pub run build_runner build --delete-conflicting-outputs
 ```
 
 ### Environment Setup
@@ -81,8 +85,12 @@ lib/
 ├── main.dart                          # App entry point with Provider setup
 ├── app.dart                           # MaterialApp configuration with routing
 ├── core/
+│   ├── di/
+│   │   ├── injection.dart            # DI setup (GetIt + Injectable)
+│   │   ├── injection.config.dart     # GENERATED - don't edit manually
+│   │   └── register_module.dart      # Dependency modules
 │   ├── theme/
-│   │   ├── app_colors.dart           # Centralized color palette
+│   │   ├── app_colors.dart           # Centralized color palette (WCAG compliant)
 │   │   ├── app_text_styles.dart      # Typography system
 │   │   └── app_theme.dart            # Light & dark ThemeData
 │   ├── constants/
@@ -95,104 +103,92 @@ lib/
 │       ├── validators.dart           # Form validators
 │       └── extensions.dart           # Dart extensions
 ├── data/
-│   ├── models/
-│   │   ├── user_profile_model.dart
-│   │   ├── plant_model.dart
-│   │   ├── scan_result_model.dart
-│   │   └── deficiency_model.dart
-│   ├── services/
-│   │   ├── supabase_service.dart     # Supabase client singleton
-│   │   ├── auth_service.dart         # Authentication operations
-│   │   ├── database_service.dart     # CRUD operations
-│   │   ├── storage_service.dart      # File storage
-│   │   ├── ml_service.dart           # ML model integration
-│   │   └── local_storage_service.dart # SharedPreferences wrapper
-│   └── repositories/
-│       ├── auth_repository.dart      # Auth business logic
-│       ├── scan_repository.dart      # Scan operations
-│       ├── plant_repository.dart     # Plant data management
-│       └── profile_repository.dart   # User profile operations
+│   ├── models/                        # Legacy data models (being phased out)
+│   └── services/
+│       ├── supabase_service.dart     # Supabase client singleton
+│       ├── auth_service.dart         # Authentication operations
+│       ├── database_service.dart     # CRUD operations
+│       ├── storage_service.dart      # File storage
+│       ├── ml_service.dart           # ML model integration
+│       └── local_storage_service.dart # SharedPreferences wrapper
+├── features/                          # Feature modules (Clean Architecture)
+│   ├── authentication/
+│   │   ├── data/
+│   │   │   ├── models/
+│   │   │   └── repositories/
+│   │   ├── domain/
+│   │   │   ├── entities/
+│   │   │   ├── repositories/
+│   │   │   └── usecases/
+│   │   └── presentation/
+│   │       └── providers/
+│   ├── profile/
+│   │   └── presentation/providers/
+│   └── scan/
+│       └── presentation/providers/
 ├── providers/
-│   ├── auth_provider.dart            # Auth state management
-│   ├── theme_provider.dart           # Theme toggle
-│   ├── scan_provider.dart            # Scanning state
-│   ├── history_provider.dart         # Scan history
-│   └── profile_provider.dart         # User profile
+│   └── theme_provider.dart           # Theme state (non-feature)
 └── presentation/
     ├── shared/
-    │   ├── widgets/
-    │   │   ├── custom_button.dart
-    │   │   ├── custom_textfield.dart
-    │   │   ├── loading_indicator.dart
-    │   │   ├── plant_card.dart
-    │   │   └── scan_result_card.dart
+    │   ├── widgets/                   # Reusable UI components
     │   └── layouts/
-    │       └── main_layout.dart
-    └── pages/
-        ├── splash/
-        ├── onboarding/
-        ├── auth/
-        │   ├── login_page.dart
-        │   ├── register_page.dart
-        │   └── forgot_password_page.dart
-        ├── home/
-        ├── library/
-        ├── scan/
-        ├── history/
-        └── profile/
+    └── pages/                         # Page UI implementations
 ```
 
 ### Architecture Patterns
 
-**1. State Management:** Provider pattern
+**1. Clean Architecture (Feature Modules)**
+- Each feature in `features/` follows Clean Architecture with data/domain/presentation layers
+- **Domain Layer:** Entities, repository abstractions, use cases (framework-independent)
+- **Data Layer:** Repository implementations, models (DTOs), data sources
+- **Presentation Layer:** Providers (state management), pages
+
+**2. State Management:** Provider pattern
 - All providers extend `ChangeNotifier`
 - Providers registered in `main.dart` using `MultiProvider`
-- Access providers using `Provider.of<T>(context)` or `context.watch<T>()`
+- Access providers using `context.watch<T>()` for reactive widgets, `context.read<T>()` for one-time access
+- Feature providers decorated with `@injectable` for DI
 
-**2. Data Layer:**
-- **Models:** Plain Dart classes with `fromJson`/`toJson` methods
-- **Services:** Low-level operations (API calls, database queries)
-- **Repositories:** Business logic layer that uses services
+**3. Dependency Injection:** GetIt + Injectable
+- Service locator pattern via GetIt (`sl<T>()`)
+- Code generation with `@injectable` decorator
+- **Important:** Run `flutter pub run build_runner build` after modifying @injectable classes
+- Generated config in `lib/core/di/injection.config.dart` (don't edit manually)
 
-**3. Navigation:** GoRouter
+**4. Navigation:** GoRouter
 - Centralized routes in `core/constants/app_routes.dart`
 - Router configuration in `app.dart`
 - Navigate using `context.go(AppRoutes.routeName)`
+- Initial route: `/` (splash) → `/onboarding` → auth → `/home` (main with 5 tabs)
 
-**4. Theme System:**
-- Colors centralized in `app_colors.dart`
+**5. Theme System:**
+- Colors centralized in `app_colors.dart` (WCAG AA compliant)
+- Primary color scheme: Green (#2E7D32, #43A047, #1B5E20)
 - Text styles in `app_text_styles.dart`
 - Light and dark themes in `app_theme.dart`
 - Theme switching via `ThemeProvider`
 
-### UI Theme
+### Adding New Features
 
-The app uses a consistent green color scheme representing eco-friendliness:
-- **Primary Color:** `Color(0xFF388E3C)` (green[700])
-- **Dark Variant:** `Colors.green.shade900`
-- **Background:** White (light mode), `#121212` (dark mode)
-- **Icon:** `Icons.energy_savings_leaf`
+**Adding a feature module (Clean Architecture):**
+1. Create folder in `lib/features/<feature_name>/`
+2. Add data/, domain/, presentation/ subdirectories
+3. Create entities in domain/entities/
+4. Define repository interface in domain/repositories/
+5. Implement repository in data/repositories/
+6. Create use cases in domain/usecases/
+7. Create provider in presentation/providers/ with `@injectable`
+8. Run `flutter pub run build_runner build`
 
-### Current Implementation Status
+**Adding a new page:**
+- Create page file in `lib/presentation/pages/<feature>/`
+- Add route constant in `app_routes.dart`
+- Register route in `app.dart`
 
-**Completed:**
-- Project structure and architecture setup
-- Theme system with light/dark mode support
-- Provider-based state management
-- Navigation routing with GoRouter
-- Supabase integration setup
-- Login page UI (existing implementation preserved)
-- Reusable widget components
-- All data models with JSON serialization
-
-**Pending Implementation:**
-- Supabase database tables creation
-- Actual authentication logic integration
-- ML model integration for deficiency detection
-- Image upload and scanning workflow
-- Registration and password reset flows
-- All main app pages (home, library, scan, history, profile)
-- Bottom navigation integration
+**Creating reusable widgets:**
+- Place in `lib/presentation/shared/widgets/`
+- Use theme values from `app_colors.dart` and `app_text_styles.dart`
+- Make widgets configurable via constructor parameters
 
 ### Supabase Setup
 
@@ -248,28 +244,6 @@ CREATE TABLE deficiencies (
 - `avatars`: User profile pictures
 - `scan-images`: Scanned plant images
 
-### Adding New Features
-
-**1. Adding a new page:**
-- Create page file in `lib/presentation/pages/<feature>/`
-- Add route constant in `app_routes.dart`
-- Register route in `app.dart`
-
-**2. Adding a new model:**
-- Create model in `lib/data/models/`
-- Implement `fromJson` and `toJson` methods
-- Add to repository if needed
-
-**3. Adding a new service:**
-- Create service in `lib/data/services/`
-- Inject dependencies (Supabase, other services)
-- Keep methods focused and single-purpose
-
-**4. Creating reusable widgets:**
-- Place in `lib/presentation/shared/widgets/`
-- Use theme values from `app_colors.dart` and `app_text_styles.dart`
-- Make widgets configurable via constructor parameters
-
 ### Important Notes
 
 - **Never hardcode colors:** Use values from `app_colors.dart`
@@ -285,11 +259,15 @@ Key packages:
 - `supabase_flutter`: Backend integration
 - `provider`: State management
 - `go_router`: Navigation
+- `get_it` + `injectable`: Dependency injection
 - `image_picker`: Camera/gallery access
 - `shared_preferences`: Local storage
 - `flutter_dotenv`: Environment variables
 - `cached_network_image`: Image caching
-- `intl`: Date formatting
+
+Development packages:
+- `build_runner`: Code generation
+- `injectable_generator`: DI code generation
 
 ### Environment Variables
 

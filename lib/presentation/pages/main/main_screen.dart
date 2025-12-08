@@ -56,7 +56,6 @@ class _MainScreenState extends State<MainScreen> {
   ///
   /// Using custom Container instead of BottomNavigationBar for more control
   /// over styling and to support the centered scan button design.
-  /// Height is 76px to fit the 50px scan circle + text without overflow.
   Widget _buildModernBottomNav() {
     return Container(
       decoration: BoxDecoration(
@@ -70,9 +69,8 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
       child: SafeArea(
-        child: Container(
-          height: 76, // Sized to fit scan button (50px) + text + padding
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -157,8 +155,7 @@ class _MainScreenState extends State<MainScreen> {
   /// Center scan button - visually highlighted with circular background
   ///
   /// This is the middle tab (index 2) with special styling to emphasize
-  /// the camera/scan feature. Circle size is 50px to fit within the 76px
-  /// nav bar height constraint (50px circle + 10px text + spacing).
+  /// the camera/scan feature.
   Widget _buildCenterScanButton() {
     final isSelected = _currentIndex == 2;
 
@@ -168,6 +165,7 @@ class _MainScreenState extends State<MainScreen> {
         borderRadius: BorderRadius.circular(30),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
               width: 50,
@@ -198,6 +196,7 @@ class _MainScreenState extends State<MainScreen> {
                 size: 26,
               ),
             ),
+            const SizedBox(height: 2),
             Text(
               'Scan',
               style: TextStyle(

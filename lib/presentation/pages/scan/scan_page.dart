@@ -2,20 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
-import 'package:fyllens/core/constants/app_constants.dart';
-import 'package:fyllens/presentation/shared/widgets/floating_circles.dart';
+import 'package:fyllens/presentation/shared/widgets/custom_list_tile.dart';
 
 /// Scan page - Camera interface for plant analysis
 ///
-/// This is the core feature of the app. Users take photos of their plants
-/// and the app identifies nutrient deficiencies. Currently a placeholder.
-///
-/// TODO: Implement camera functionality:
-/// - Camera preview
-/// - Photo capture and storage
-/// - Image upload to backend
-/// - ML model integration for deficiency detection
-/// - Results display with recommendations
+/// This is the core feature of the app. Users select a plant species
+/// and take photos to identify nutrient deficiencies.
 class ScanPage extends StatelessWidget {
   const ScanPage({super.key});
 
@@ -23,72 +15,123 @@ class ScanPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundSoft,
-      body: FloatingCirclesBackground(
-        circles: [
-          FloatingCircleData(
-            top: 0.1,
-            left: 40,
-            size: 60,
-            color: AppColors.primaryGreenModern.withValues(alpha: 0.08),
-          ),
-          FloatingCircleData(
-            bottom: 0.2,
-            right: 40,
-            size: 70,
-            color: AppColors.accentMint.withValues(alpha: 0.1),
-          ),
-        ],
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-                      border: Border.all(
-                        color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
-                        width: 2,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Text(
+                  'Scan Plant',
+                  style: AppTextStyles.heading1,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Select plant species to scan',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Info box
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Scan Your Plant',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      Icons.camera_alt,
-                      size: 60,
-                      color: AppColors.primaryGreenModern.withValues(alpha: 0.5),
-                    ),
+                      const SizedBox(height: AppSpacing.sm),
+                      _buildTip('Ensure good lighting'),
+                      _buildTip('Focus on affected leaves'),
+                      _buildTip('Keep camera steady'),
+                      _buildTip('Capture clear images'),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                  Text(
-                    'Plant Scanner',
-                    style: AppTextStyles.heading1.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    AppConstants.comingSoon,
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    'Take photos to identify nutrient deficiencies',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                // Section title
+                Text(
+                  'Select Plant',
+                  style: AppTextStyles.heading3,
+                ),
+                const SizedBox(height: AppSpacing.md),
+                // Plant list
+                CustomListTile(
+                  icon: Icons.grass,
+                  title: 'Rice',
+                  subtitle: 'Oryza sativa',
+                  onTap: () {
+                    // TODO: Navigate to camera with Rice selected
+                  },
+                ),
+                CustomListTile(
+                  icon: Icons.grass,
+                  title: 'Corn',
+                  subtitle: 'Zea mays',
+                  onTap: () {
+                    // TODO: Navigate to camera with Corn selected
+                  },
+                ),
+                CustomListTile(
+                  icon: Icons.grass,
+                  title: 'Okra',
+                  subtitle: 'Abelmoschus esculentus',
+                  onTap: () {
+                    // TODO: Navigate to camera with Okra selected
+                  },
+                ),
+                CustomListTile(
+                  icon: Icons.grass,
+                  title: 'Cucumber',
+                  subtitle: 'Cucumis sativus',
+                  onTap: () {
+                    // TODO: Navigate to camera with Cucumber selected
+                  },
+                ),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTip(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 6),
+            child: Icon(
+              Icons.circle,
+              size: 6,
+              color: AppColors.primaryGreenModern,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              text,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
