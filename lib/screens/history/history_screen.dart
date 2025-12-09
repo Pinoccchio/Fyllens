@@ -231,8 +231,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          const Icon(
-                            Icons.access_time,
+                          Icon(
+                            AppIcons.clock,
                             size: 12,
                             color: AppColors.textSecondary,
                           ),

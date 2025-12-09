@@ -31,7 +31,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       secondaryColor: AppColors.accentMint,
     ),
     OnboardingContent(
-      icon: Icons.health_and_safety_rounded,
+      icon: AppIcons.checkCircle,
       iconColor: AppColors.accentGreen,
       title: 'Detect Deficiencies',
       subtitle:
@@ -40,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       secondaryColor: AppColors.primaryGreenLight,
     ),
     OnboardingContent(
-      icon: Icons.timeline_rounded,
+      icon: AppIcons.history,
       iconColor: AppColors.success,
       title: 'Track Progress',
       subtitle:

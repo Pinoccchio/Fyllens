@@ -174,10 +174,10 @@ class ScanResultsScreen extends StatelessWidget {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Padding(
+                                    Padding(
                                       padding: EdgeInsets.only(top: 8),
                                       child: Icon(
-                                        Icons.circle,
+                                        AppIcons.checkCircle,
                                         size: 6,
                                         color: AppColors.textPrimary,
                                       ),
@@ -325,16 +325,16 @@ class ScanResultsScreen extends StatelessWidget {
     IconData icon;
     switch (iconName) {
       case 'fertilizer':
-        icon = Icons.science_outlined;
+        icon = AppIcons.plant;
         break;
       case 'organic':
-        icon = Icons.compost_outlined;
+        icon = AppIcons.leaf;
         break;
       case 'spray':
         icon = AppIcons.waterDrop;
         break;
       default:
-        icon = Icons.check_circle_outline;
+        icon = AppIcons.checkCircle;
     }
 
     return Container(

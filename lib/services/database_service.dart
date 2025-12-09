@@ -16,14 +16,12 @@ class DatabaseService {
 
   /// Generic method to fetch all records from a table
   Future<List<Map<String, dynamic>>> fetchAll(String tableName) async {
-    // TODO: Implement fetch all logic
     final response = await _supabaseService.from(tableName).select();
     return List<Map<String, dynamic>>.from(response);
   }
 
   /// Generic method to fetch a single record by ID
   Future<Map<String, dynamic>?> fetchById(String tableName, String id) async {
-    // TODO: Implement fetch by ID logic
     final response = await _supabaseService
         .from(tableName)
         .select()
@@ -37,7 +35,6 @@ class DatabaseService {
     String tableName,
     Map<String, dynamic> data,
   ) async {
-    // TODO: Implement insert logic
     final response = await _supabaseService
         .from(tableName)
         .insert(data)
@@ -52,7 +49,6 @@ class DatabaseService {
     String id,
     Map<String, dynamic> data,
   ) async {
-    // TODO: Implement update logic
     final response = await _supabaseService
         .from(tableName)
         .update(data)
@@ -64,7 +60,6 @@ class DatabaseService {
 
   /// Generic method to delete a record
   Future<void> delete(String tableName, String id) async {
-    // TODO: Implement delete logic
     await _supabaseService.from(tableName).delete().eq('id', id);
   }
 
@@ -74,7 +69,6 @@ class DatabaseService {
     String? column,
     dynamic value,
   }) async {
-    // TODO: Implement custom query logic
     var query = _supabaseService.from(tableName).select();
 
     if (column != null && value != null) {

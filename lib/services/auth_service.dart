@@ -29,7 +29,6 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    // TODO: Implement sign in logic
     return await _supabaseService.auth.signInWithPassword(
       email: email,
       password: password,
@@ -41,7 +40,6 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    // TODO: Implement sign up logic
     return await _supabaseService.auth.signUp(
       email: email,
       password: password,
@@ -50,13 +48,11 @@ class AuthService {
 
   /// Sign out
   Future<void> signOut() async {
-    // TODO: Implement sign out logic
     await _supabaseService.auth.signOut();
   }
 
   /// Reset password
   Future<void> resetPassword({required String email}) async {
-    // TODO: Implement password reset logic
     await _supabaseService.auth.resetPasswordForEmail(email);
   }
 

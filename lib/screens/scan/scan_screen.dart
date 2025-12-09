@@ -115,10 +115,10 @@ class ScanScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 6),
             child: Icon(
-              Icons.circle,
+              AppIcons.checkCircle,
               size: 6,
               color: AppColors.primaryGreenModern,
             ),

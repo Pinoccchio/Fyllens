@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
@@ -8,6 +9,8 @@ import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/screens/shared/widgets/floating_circles.dart';
 import 'package:fyllens/screens/shared/widgets/modern_icon_container.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
+import 'package:fyllens/providers/auth_provider.dart';
+import 'package:fyllens/providers/profile_provider.dart';
 
 /// Registration screen with email and password fields
 ///
@@ -34,6 +37,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   /// Form input controllers
   /// Optional fields in this prototype - no validation yet
+  final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -64,18 +68,187 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
   @override
   void dispose() {
+    _fullNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _animationController.dispose();
     super.dispose();
   }
 
-  /// Sign up button handler
-  /// TODO: Replace with actual registration logic
-  void _handleSignUp() {
-    // Currently just goes to login screen (placeholder behavior)
-    // Real implementation should create account then navigate
-    context.go(AppRoutes.login);
+  /// Sign up button handler - Creates account, profile, then forces logout
+  Future<void> _handleSignUp() async {
+    debugPrint('\n═══════════════════════════════════════════════════════');
+    debugPrint('🚀 REGISTRATION FLOW STARTED');
+    debugPrint('═══════════════════════════════════════════════════════');
+
+    // Get form values
+    final fullName = _fullNameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Log form data (mask password)
+    debugPrint('\n📝 Form Data:');
+    debugPrint('   Full Name: $fullName');
+    debugPrint('   Email: $email');
+    debugPrint('   Password: ${"*" * password.length} (${password.length} characters)');
+
+    // Basic validation
+    debugPrint('\n🔍 Running validation...');
+
+    if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
+      debugPrint('❌ Validation failed: Empty fields detected');
+      debugPrint('   Full name empty: ${fullName.isEmpty}');
+      debugPrint('   Email empty: ${email.isEmpty}');
+      debugPrint('   Password empty: ${password.isEmpty}');
+      _showError('Please fill in all fields');
+      return;
+    }
+
+    if (fullName.length < 2) {
+      debugPrint('❌ Validation failed: Full name too short (${fullName.length} characters)');
+      _showError('Full name must be at least 2 characters');
+      return;
+    }
+
+    if (password.length < 6) {
+      debugPrint('❌ Validation failed: Password too short (${password.length} characters)');
+      _showError('Password must be at least 6 characters');
+      return;
+    }
+
+    debugPrint('✅ Validation passed');
+
+    // Get providers
+    debugPrint('\n🔌 Getting providers...');
+    final authProvider = context.read<AuthProvider>();
+    final profileProvider = context.read<ProfileProvider>();
+    debugPrint('✅ Providers obtained');
+
+    // Attempt sign up
+    debugPrint('\n🔐 Step 1: Creating authentication account...');
+    debugPrint('   Calling authProvider.signUp()...');
+
+    final success = await authProvider.signUp(
+      email: email,
+      password: password,
+      fullName: fullName,
+    );
+
+    if (!mounted) {
+      debugPrint('⚠️ Widget unmounted after signUp, aborting flow');
+      return;
+    }
+
+    if (success) {
+      debugPrint('✅ Authentication account created successfully!');
+
+      // Get the newly created user ID
+      final userId = authProvider.currentUser?.id;
+      debugPrint('   User ID: $userId');
+
+      if (userId != null) {
+        // Create user profile in database
+        debugPrint('\n💾 Step 2: Creating user profile in database...');
+        debugPrint('   User ID: $userId');
+        debugPrint('   Email: $email');
+        debugPrint('   Full Name: $fullName');
+        debugPrint('   Calling profileProvider.createProfile()...');
+
+        await profileProvider.createProfile(
+          userId: userId,
+          email: email,
+          fullName: fullName,
+        );
+
+        if (!mounted) {
+          debugPrint('⚠️ Widget unmounted after profile creation, aborting flow');
+          return;
+        }
+
+        debugPrint('✅ User profile created successfully in database!');
+
+        // Force logout - user must log in with new credentials
+        debugPrint('\n🚪 Step 3: Forcing logout...');
+        debugPrint('   Calling authProvider.signOut()...');
+
+        await authProvider.signOut();
+
+        if (!mounted) {
+          debugPrint('⚠️ Widget unmounted after logout, aborting flow');
+          return;
+        }
+
+        debugPrint('✅ Logout successful!');
+
+        // Show success message
+        debugPrint('\n🎉 Registration completed successfully!');
+        _showSuccess('Account created successfully! Please log in.');
+
+        // Navigate to login screen
+        // Wait for both message display AND auth state sync with GoRouter
+        debugPrint('   Waiting 1.1 seconds before navigation...');
+        await Future.delayed(const Duration(milliseconds: 1100));
+
+        if (!mounted) {
+          debugPrint('⚠️ Widget unmounted before navigation');
+          return;
+        }
+
+        debugPrint('🔀 Navigating to login screen...');
+        context.go(AppRoutes.login);
+
+        debugPrint('\n═══════════════════════════════════════════════════════');
+        debugPrint('✅ REGISTRATION FLOW COMPLETED SUCCESSFULLY');
+        debugPrint('═══════════════════════════════════════════════════════\n');
+      } else {
+        debugPrint('❌ ERROR: User ID is null after successful signup');
+        debugPrint('   This should never happen - auth account exists but no userId');
+        debugPrint('\n═══════════════════════════════════════════════════════');
+        debugPrint('❌ REGISTRATION FLOW FAILED - NULL USER ID');
+        debugPrint('═══════════════════════════════════════════════════════\n');
+        _showError('Registration succeeded but could not create profile');
+      }
+    } else {
+      // Show error message from provider
+      debugPrint('❌ Authentication account creation FAILED');
+      final error = authProvider.errorMessage ?? 'Registration failed. Please try again.';
+      debugPrint('   Error message: $error');
+      debugPrint('   Auth error type: ${authProvider.errorMessage?.runtimeType}');
+      debugPrint('\n═══════════════════════════════════════════════════════');
+      debugPrint('❌ REGISTRATION FLOW FAILED - AUTH ERROR');
+      debugPrint('═══════════════════════════════════════════════════════\n');
+      _showError(error);
+    }
+  }
+
+  /// Show error message using SnackBar
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red[700],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        margin: const EdgeInsets.all(AppSpacing.md),
+      ),
+    );
+  }
+
+  /// Show success message using SnackBar
+  void _showSuccess(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green[700],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        margin: const EdgeInsets.all(AppSpacing.md),
+      ),
+    );
   }
 
   @override
@@ -227,6 +400,35 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
 
             const SizedBox(height: AppSpacing.xl),
 
+            // Full Name Field
+            TextFormField(
+              controller: _fullNameController,
+              keyboardType: TextInputType.name,
+              textCapitalization: TextCapitalization.words,
+              style: AppTextStyles.bodyMedium,
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                hintText: 'Enter your full name',
+                prefixIcon: Icon(AppIcons.profile, color: AppColors.primaryGreenModern),
+                filled: true,
+                fillColor: AppColors.backgroundSoft,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: AppSpacing.md),
+
             // Email Field (optional, no validation)
             TextFormField(
               controller: _emailController,
@@ -306,12 +508,16 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       );
   }
 
-  /// Build primary sign up button
+  /// Build primary sign up button with loading state
   Widget _buildSignUpButton() {
+    final authProvider = context.watch<AuthProvider>();
+    final profileProvider = context.watch<ProfileProvider>();
+    final isLoading = authProvider.isLoading || profileProvider.isLoading;
+
     return SizedBox(
       height: AppSpacing.buttonHeight,
       child: ElevatedButton(
-        onPressed: _handleSignUp,
+        onPressed: isLoading ? null : _handleSignUp,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreenModern,
           foregroundColor: AppColors.textOnPrimary,
@@ -320,8 +526,20 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
+          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
         ),
-        child: Text(AppConstants.signUp, style: AppTextStyles.buttonLarge),
+        child: isLoading
+            ? const Center(
+                child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              )
+            : Text(AppConstants.signUp, style: AppTextStyles.buttonLarge),
       ),
     );
   }

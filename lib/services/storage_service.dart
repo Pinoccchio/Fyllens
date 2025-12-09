@@ -21,7 +21,6 @@ class StorageService {
     required String bucket,
     required String path,
   }) async {
-    // TODO: Implement image upload logic
     final bytes = await file.readAsBytes();
     await _supabaseService.storage.from(bucket).uploadBinary(path, bytes);
 
@@ -35,7 +34,6 @@ class StorageService {
     required String bucket,
     required String path,
   }) async {
-    // TODO: Implement file download logic
     final response = await _supabaseService.storage.from(bucket).download(path);
     return response;
   }
@@ -45,7 +43,6 @@ class StorageService {
     required String bucket,
     required String path,
   }) async {
-    // TODO: Implement file deletion logic
     await _supabaseService.storage.from(bucket).remove([path]);
   }
 
@@ -62,7 +59,6 @@ class StorageService {
     required String bucket,
     String? path,
   }) async {
-    // TODO: Implement list files logic
     final response = await _supabaseService.storage.from(bucket).list(
       path: path,
     );

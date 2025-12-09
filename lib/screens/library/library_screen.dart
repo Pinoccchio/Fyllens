@@ -5,6 +5,7 @@ import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/screens/shared/widgets/filter_chip_widget.dart';
 import 'package:fyllens/screens/shared/widgets/plant_grid_card.dart';
 import 'package:fyllens/screens/library/plant_detail_screen.dart';
+import 'package:fyllens/core/theme/app_icons.dart';
 
 /// Library page - Plant species database
 ///
@@ -92,8 +93,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
                       decoration: InputDecoration(
                         hintText: 'Search plants or deficiencies...',
                         hintStyle: AppTextStyles.inputHint,
-                        prefixIcon: const Icon(
-                          Icons.search,
+                        prefixIcon: Icon(
+                          AppIcons.search,
                           color: AppColors.textSecondary,
                         ),
                         border: InputBorder.none,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
@@ -8,15 +9,12 @@ import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/screens/shared/widgets/floating_circles.dart';
 import 'package:fyllens/screens/shared/widgets/modern_icon_container.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
+import 'package:fyllens/providers/auth_provider.dart';
 
 /// Login screen with email and password fields
 ///
-/// NOTE: This is currently a UI prototype. Login button goes directly to main screen
-/// without validation or authentication. Fields are optional just for demonstration.
-///
-/// TODO: Integrate with auth service for actual login
-/// TODO: Add email/password validation
-/// TODO: Handle login errors and show user feedback
+/// Handles user authentication with email and password.
+/// Shows loading state during authentication and displays errors if login fails.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -72,11 +70,53 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     super.dispose();
   }
 
-  /// Login button handler
-  /// TODO: Replace with actual authentication logic
-  void _handleLogin() {
-    // Currently just navigates to main screen without checking credentials
-    context.go(AppRoutes.home);
+  /// Login button handler - Authenticates user with email and password
+  Future<void> _handleLogin() async {
+    // Get email and password from controllers
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Basic validation
+    if (email.isEmpty || password.isEmpty) {
+      _showError('Please enter both email and password');
+      return;
+    }
+
+    // Get AuthProvider
+    final authProvider = context.read<AuthProvider>();
+
+    // Attempt sign in
+    final success = await authProvider.signIn(
+      email: email,
+      password: password,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      // GoRouter will automatically redirect to home when auth state changes
+      // No manual navigation needed - let the router redirect handle it
+      debugPrint('✅ Login successful - GoRouter will redirect to home');
+    } else {
+      // Show error message from provider
+      final error = authProvider.errorMessage ?? 'Login failed. Please try again.';
+      _showError(error);
+    }
+  }
+
+  /// Show error message using SnackBar
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red[700],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        margin: const EdgeInsets.all(AppSpacing.md),
+      ),
+    );
   }
 
   @override
@@ -307,12 +347,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
   }
 
-  /// Build primary login button
+  /// Build primary login button with loading state
   Widget _buildLoginButton() {
+    final authProvider = context.watch<AuthProvider>();
+    final isLoading = authProvider.isLoading;
+
     return SizedBox(
       height: AppSpacing.buttonHeight,
       child: ElevatedButton(
-        onPressed: _handleLogin,
+        onPressed: isLoading ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGreenModern,
           foregroundColor: AppColors.textOnPrimary,
@@ -321,8 +364,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
+          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
         ),
-        child: Text(AppConstants.login, style: AppTextStyles.buttonLarge),
+        child: isLoading
+            ? const Center(
+                child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                ),
+              )
+            : Text(AppConstants.login, style: AppTextStyles.buttonLarge),
       ),
     );
   }

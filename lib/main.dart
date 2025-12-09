@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/app.dart';
+import 'package:fyllens/core/config/supabase_config.dart';
 import 'package:fyllens/services/supabase_service.dart';
 import 'package:fyllens/services/local_storage_service.dart';
 import 'package:fyllens/providers/auth_provider.dart';
@@ -14,28 +15,51 @@ void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  // TODO: Uncomment when ready to use backend
-  // Load environment variables
-  // try {
-  //   await dotenv.load(fileName: ".env");
-  // } catch (e) {
-  //   // .env file not found, will use empty values
-  //   debugPrint('Warning: .env file not found');
-  // }
+  // Load environment variables from .env file
+  try {
+    await dotenv.load(fileName: ".env");
+    debugPrint('✅ Environment variables loaded from .env file');
+  } catch (e) {
+    debugPrint('❌ ERROR: Failed to load .env file');
+    debugPrint('   Error: $e');
+    debugPrint('   Make sure .env file exists in project root with:');
+    debugPrint('   - SUPABASE_URL=your_url_here');
+    debugPrint('   - SUPABASE_ANON_KEY=your_key_here');
+  }
 
   // Initialize services
   // LocalStorageService must be initialized before use
   await LocalStorageService.initialize();
 
-  // Initialize Supabase (OPTIONAL)
-  // App works in MOCK MODE without Supabase for UI testing
+  // Validate Supabase configuration before initializing
+  if (!SupabaseConfig.validate()) {
+    debugPrint('❌ Supabase configuration validation failed');
+    debugPrint('   App will not be able to authenticate or access database');
+  }
+
+  // Initialize Supabase
+  debugPrint('\n🔧 Initializing Supabase...');
   try {
     await SupabaseService.initialize();
     debugPrint('✅ Supabase initialized successfully');
-  } catch (e) {
-    debugPrint('⚠️ Supabase not available - running in MOCK AUTH mode');
+    // Log partial URL for verification (don't expose full URL in logs)
+    final url = SupabaseConfig.supabaseUrl;
+    if (url.isNotEmpty && url.length > 30) {
+      debugPrint('   URL: ${url.substring(0, 30)}...${url.substring(url.length - 10)}');
+    }
+  } catch (e, stackTrace) {
+    debugPrint('❌ CRITICAL ERROR: Supabase initialization FAILED');
     debugPrint('   Error: $e');
-    // App will still run with mock authentication
+    debugPrint('   Type: ${e.runtimeType}');
+    debugPrint('   Stack trace:');
+    debugPrint('$stackTrace');
+    debugPrint('\n   🔍 Troubleshooting:');
+    debugPrint('   1. Check that .env file exists');
+    debugPrint('   2. Verify SUPABASE_URL and SUPABASE_ANON_KEY are set');
+    debugPrint('   3. Ensure values are not empty strings');
+    debugPrint('   4. Check Supabase project is running');
+    debugPrint('');
+    // App will fail when trying to authenticate - this is expected
   }
 
   // Run the app

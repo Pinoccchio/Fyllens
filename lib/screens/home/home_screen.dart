@@ -4,6 +4,7 @@ import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
 import 'package:fyllens/screens/scan/scan_results_screen.dart';
+import 'package:fyllens/core/theme/app_icons.dart';
 
 /// Home page - Main dashboard
 ///
@@ -19,6 +20,29 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false, // Align title to left side
+        title: Text(
+          AppConstants.appName.toUpperCase(),
+          style: AppTextStyles.heading1.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(AppIcons.notifications),
+            color: AppColors.textSecondary,
+            onPressed: () {
+              // TODO: Navigate to notifications
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -26,10 +50,6 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
-                _buildHeader(context),
-                const SizedBox(height: AppSpacing.lg),
-
                 // Search bar
                 _buildSearchBar(),
                 const SizedBox(height: AppSpacing.lg),
@@ -52,29 +72,6 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          AppConstants.appName.toUpperCase(),
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined),
-          color: AppColors.textSecondary,
-          onPressed: () {
-            // TODO: Navigate to notifications
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildSearchBar() {
     return Container(
       decoration: BoxDecoration(
@@ -88,7 +85,7 @@ class HomeScreen extends StatelessWidget {
             color: AppColors.textSecondary,
           ),
           prefixIcon: Icon(
-            Icons.search,
+            AppIcons.search,
             color: AppColors.textSecondary,
           ),
           border: InputBorder.none,
@@ -126,8 +123,8 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.camera_alt_outlined,
+                child: Icon(
+                  AppIcons.camera,
                   color: Colors.white,
                   size: 32,
                 ),
@@ -215,7 +212,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildScanItem(
           context: context,
-          icon: Icons.grain,
+          icon: AppIcons.plant,
           plantName: 'Rice',
           deficiency: 'Nitrogen Deficiency',
           timeAgo: '2 days ago',
@@ -253,7 +250,7 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
         _buildScanItem(
           context: context,
-          icon: Icons.eco_outlined,
+          icon: AppIcons.leaf,
           plantName: 'Corn',
           deficiency: 'Potassium Deficiency',
           timeAgo: '5 days ago',
@@ -357,7 +354,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Icon(
-              Icons.chevron_right,
+              AppIcons.chevronRight,
               color: AppColors.textSecondary,
             ),
           ],
@@ -379,7 +376,7 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.sm),
         _buildTipCard(
-          icon: Icons.tips_and_updates_outlined,
+          icon: AppIcons.lightbulb,
           title: 'Daily Care Reminder',
           description: 'Regular monitoring helps catch deficiencies early',
         ),

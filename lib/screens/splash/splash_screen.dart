@@ -75,30 +75,47 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
 
   Future<void> _navigateToNextScreen() async {
     try {
-      // Check authentication status
+      // Get authentication provider (without listening to changes)
       final authProvider = context.read<AuthProvider>();
-      final isAuthenticated = authProvider.isAuthenticated;
 
-      // Debug logging
-      debugPrint('🔍 Splash Navigation Debug:');
-      debugPrint('   - isAuthenticated: $isAuthenticated');
+      // Small delay to ensure AuthProvider has fully initialized
+      // AuthProvider.initialize() is called in main.dart before app starts,
+      // but we add a safety check here
+      await Future.delayed(const Duration(milliseconds: 100));
 
       if (!mounted) return;
 
-      // Navigation logic - ALWAYS show onboarding first
-      if (isAuthenticated) {
+      // Check authentication status
+      final isAuthenticated = authProvider.isAuthenticated;
+      final currentUser = authProvider.currentUser;
+
+      // Debug logging
+      debugPrint('\n🔍 Splash Screen: Checking auth state');
+      debugPrint('   - isAuthenticated: $isAuthenticated');
+      debugPrint('   - currentUser: ${currentUser?.email ?? "null"}');
+
+      // Ensure we're still mounted before navigation
+      if (!mounted) {
+        debugPrint('   ⚠️ Widget unmounted, aborting navigation');
+        return;
+      }
+
+      // Navigation logic based on auth state
+      if (isAuthenticated && currentUser != null) {
         // User is logged in → go to home
-        debugPrint('   → Navigating to: HOME');
+        debugPrint('   ✅ User authenticated → Navigating to HOME');
         context.go(AppRoutes.home);
       } else {
-        // Not authenticated → ALWAYS show onboarding
-        debugPrint('   → Navigating to: ONBOARDING');
+        // Not authenticated → show onboarding
+        debugPrint('   🔓 Not authenticated → Navigating to ONBOARDING');
         context.go(AppRoutes.onboarding);
       }
-    } catch (e) {
-      // On error, default to onboarding
+    } catch (e, stackTrace) {
+      // On error, default to onboarding (safe fallback)
       debugPrint('❌ Splash Navigation Error: $e');
-      debugPrint('   → Navigating to: ONBOARDING (fallback)');
+      debugPrint('   Stack trace: $stackTrace');
+      debugPrint('   → Navigating to: ONBOARDING (error fallback)');
+
       if (mounted) {
         context.go(AppRoutes.onboarding);
       }

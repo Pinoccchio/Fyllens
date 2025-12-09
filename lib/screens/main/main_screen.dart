@@ -5,6 +5,7 @@ import 'package:fyllens/screens/library/library_screen.dart';
 import 'package:fyllens/screens/scan/scan_screen.dart';
 import 'package:fyllens/screens/history/history_screen.dart';
 import 'package:fyllens/screens/profile/profile_screen.dart';
+import 'package:fyllens/core/theme/app_icons.dart';
 
 /// Main screen with 5-tab bottom navigation
 ///
@@ -76,27 +77,27 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               _buildNavItem(
                 index: 0,
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
+                icon: AppIcons.home,
+                activeIcon: AppIcons.homeFilled,
                 label: 'Home',
               ),
               _buildNavItem(
                 index: 1,
-                icon: Icons.library_books_outlined,
-                activeIcon: Icons.library_books,
+                icon: AppIcons.library,
+                activeIcon: AppIcons.libraryFilled,
                 label: 'Library',
               ),
               _buildCenterScanButton(),
               _buildNavItem(
                 index: 3,
-                icon: Icons.history,
-                activeIcon: Icons.history,
+                icon: AppIcons.history,
+                activeIcon: AppIcons.historyFilled,
                 label: 'History',
               ),
               _buildNavItem(
                 index: 4,
-                icon: Icons.person_outline,
-                activeIcon: Icons.person,
+                icon: AppIcons.profile,
+                activeIcon: AppIcons.profileFilled,
                 label: 'Profile',
               ),
             ],
@@ -191,7 +192,7 @@ class _MainScreenState extends State<MainScreen> {
                     : [],
               ),
               child: Icon(
-                Icons.camera_alt,
+                AppIcons.camera,
                 color: isSelected ? Colors.white : AppColors.primaryGreenModern,
                 size: 26,
               ),
