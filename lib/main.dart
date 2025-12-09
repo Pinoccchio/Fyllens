@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/app.dart';
-import 'package:fyllens/core/di/injection.dart';
-import 'package:fyllens/data/services/supabase_service.dart';
-import 'package:fyllens/features/authentication/presentation/providers/auth_provider.dart';
-import 'package:fyllens/features/profile/presentation/providers/profile_provider.dart';
-import 'package:fyllens/features/scan/presentation/providers/scan_provider.dart';
-import 'package:fyllens/features/scan/presentation/providers/history_provider.dart';
+import 'package:fyllens/services/supabase_service.dart';
+import 'package:fyllens/services/local_storage_service.dart';
+import 'package:fyllens/providers/auth_provider.dart';
+import 'package:fyllens/providers/profile_provider.dart';
+import 'package:fyllens/providers/scan_provider.dart';
+import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/theme_provider.dart';
 
 void main() async {
@@ -23,8 +23,11 @@ void main() async {
   //   debugPrint('Warning: .env file not found');
   // }
 
-  // Initialize Supabase BEFORE dependency injection (OPTIONAL)
-  // This is required because SupabaseService needs the client to be initialized
+  // Initialize services
+  // LocalStorageService must be initialized before use
+  await LocalStorageService.initialize();
+
+  // Initialize Supabase (OPTIONAL)
   // App works in MOCK MODE without Supabase for UI testing
   try {
     await SupabaseService.initialize();
@@ -35,28 +38,24 @@ void main() async {
     // App will still run with mock authentication
   }
 
-  // Configure dependency injection
-  // This must happen AFTER Supabase initialization
-  await configureDependencies();
-
   // Run the app
   runApp(
     MultiProvider(
       providers: [
-        // Theme provider (not yet refactored - no backend dependencies)
+        // Theme provider
         ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
 
-        // Auth provider (✅ Refactored with Clean Architecture + DI)
-        ChangeNotifierProvider(create: (_) => sl<AuthProvider>()..initialize()),
+        // Auth provider
+        ChangeNotifierProvider(create: (_) => AuthProvider()..initialize()),
 
-        // Profile provider (✅ Refactored with Clean Architecture + DI)
-        ChangeNotifierProvider(create: (_) => sl<ProfileProvider>()),
+        // Profile provider
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
 
-        // Scan provider (✅ Refactored with Clean Architecture + DI)
-        ChangeNotifierProvider(create: (_) => sl<ScanProvider>()),
+        // Scan provider
+        ChangeNotifierProvider(create: (_) => ScanProvider()),
 
-        // History provider (✅ Refactored with Clean Architecture + DI)
-        ChangeNotifierProvider(create: (_) => sl<HistoryProvider>()),
+        // History provider
+        ChangeNotifierProvider(create: (_) => HistoryProvider()),
       ],
       child: const MyApp(),
     ),

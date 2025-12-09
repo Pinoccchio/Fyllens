@@ -6,13 +6,13 @@ import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/providers/theme_provider.dart';
 
 // Import pages
-import 'package:fyllens/presentation/pages/splash/splash_page.dart';
-import 'package:fyllens/presentation/pages/onboarding/onboarding_page.dart';
-import 'package:fyllens/presentation/pages/auth/login_page.dart';
-import 'package:fyllens/presentation/pages/auth/register_page.dart';
-import 'package:fyllens/presentation/pages/auth/forgot_password_page.dart';
-import 'package:fyllens/presentation/pages/main/main_screen.dart';
-import 'package:fyllens/presentation/pages/profile/edit_profile_page.dart';
+import 'package:fyllens/screens/splash/splash_screen.dart';
+import 'package:fyllens/screens/onboarding/onboarding_screen.dart';
+import 'package:fyllens/screens/auth/login_screen.dart';
+import 'package:fyllens/screens/auth/register_screen.dart';
+import 'package:fyllens/screens/auth/forgot_password_screen.dart';
+import 'package:fyllens/screens/main/main_screen.dart';
+import 'package:fyllens/screens/profile/edit_profile_screen.dart';
 
 /// Root app widget
 ///
@@ -57,26 +57,26 @@ class MyApp extends StatelessWidget {
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const SplashPage(),
+        builder: (context, state) => const SplashScreen(),
       ),
 
       GoRoute(
         path: AppRoutes.onboarding,
-        builder: (context, state) => const OnboardingPage(),
+        builder: (context, state) => const OnboardingScreen(),
       ),
 
       // Auth flow: register → login → main app
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => LoginPage(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: AppRoutes.register,
-        builder: (context, state) => RegisterPage(),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (context, state) => const ForgotPasswordPage(),
+        builder: (context, state) => const ForgotPasswordScreen(),
       ),
 
       // Main screen with 5-tab bottom navigation (home, library, scan, history, profile)
@@ -88,7 +88,7 @@ class MyApp extends StatelessWidget {
       // Profile sub-routes
       GoRoute(
         path: AppRoutes.editProfile,
-        builder: (context, state) => const EditProfilePage(),
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
   );
