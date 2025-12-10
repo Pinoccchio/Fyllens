@@ -1,0 +1,23 @@
+{
+  "crop": "CUCUMBER",
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "num_classes": 7,
+  "class_names": [
+    "Anthracnose",
+    "Bacterial_Wilt",
+    "Belly_Rot",
+    "Downy_Mildew",
+    "Gummy_Stem_Blight",
+    "Healthy",
+    "Pythium_Fruit_Rot"
+  ],
+  "input_shape": [
+    224,
+    224,
+    3
+  ]
+}

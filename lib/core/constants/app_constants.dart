@@ -6,7 +6,8 @@ class AppConstants {
 
   // App Info
   static const String appName = 'FYLLENS';
-  static const String appDescription = 'Plant Nutrient Deficiency Identification';
+  static const String appDescription =
+      'Plant Nutrient Deficiency Identification';
 
   // Auth Page Strings
   static const String signIn = 'Sign In';
@@ -53,6 +54,8 @@ class AppConstants {
 
   // Error Messages
   static const String errorGeneric = 'Something went wrong. Please try again.';
-  static const String errorNetwork = 'Network error. Please check your connection.';
-  static const String errorAuth = 'Authentication failed. Please check your credentials.';
+  static const String errorNetwork =
+      'Network error. Please check your connection.';
+  static const String errorAuth =
+      'Authentication failed. Please check your credentials.';
 }

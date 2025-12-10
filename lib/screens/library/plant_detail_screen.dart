@@ -93,7 +93,9 @@ class PlantDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
                           color: AppColors.textSecondary.withValues(alpha: 0.2),
                           width: 1,
@@ -102,10 +104,7 @@ class PlantDetailScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Overview',
-                            style: AppTextStyles.heading3,
-                          ),
+                          Text('Overview', style: AppTextStyles.heading3),
                           const SizedBox(height: AppSpacing.sm),
                           Text(
                             _getPlantOverview(plantName),
@@ -124,7 +123,9 @@ class PlantDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
                           color: AppColors.textSecondary.withValues(alpha: 0.2),
                           width: 1,
@@ -138,13 +139,30 @@ class PlantDetailScreen extends StatelessWidget {
                             style: AppTextStyles.heading3,
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          _buildDeficiencyItem('Nitrogen Deficiency', 'Common', const Color(0xFFFFB84D)),
+                          _buildDeficiencyItem(
+                            'Nitrogen Deficiency',
+                            'Common',
+                            const Color(0xFFFFB84D),
+                          ),
                           const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem('Phosphorus Deficiency', 'Moderate', const Color(0xFFFFEB99)),
+                          _buildDeficiencyItem(
+                            'Phosphorus Deficiency',
+                            'Moderate',
+                            const Color(0xFFFFEB99),
+                          ),
                           const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem('Potassium Deficiency', 'Common', const Color(0xFFFFB84D)),
+                          _buildDeficiencyItem(
+                            'Potassium Deficiency',
+                            'Common',
+                            const Color(0xFFFFB84D),
+                          ),
                           const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem('Iron Deficiency', 'Rare', const Color(0xFFB3D9FF), isLast: true),
+                          _buildDeficiencyItem(
+                            'Iron Deficiency',
+                            'Rare',
+                            const Color(0xFFB3D9FF),
+                            isLast: true,
+                          ),
                         ],
                       ),
                     ),
@@ -155,9 +173,13 @@ class PlantDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
-                          color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
+                          color: AppColors.primaryGreenModern.withValues(
+                            alpha: 0.3,
+                          ),
                           width: 1,
                         ),
                       ),
@@ -187,7 +209,9 @@ class PlantDetailScreen extends StatelessWidget {
                           backgroundColor: AppColors.primaryGreenModern,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
                           ),
                           elevation: 0,
                         ),
@@ -218,7 +242,7 @@ class PlantDetailScreen extends StatelessWidget {
   Widget _buildPlaceholder() {
     return Container(
       color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-      child:  Center(
+      child: Center(
         child: Icon(
           AppIcons.flower,
           size: 64,
@@ -228,7 +252,12 @@ class PlantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDeficiencyItem(String name, String severity, Color color, {bool isLast = false}) {
+  Widget _buildDeficiencyItem(
+    String name,
+    String severity,
+    Color color, {
+    bool isLast = false,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -241,10 +270,7 @@ class PlantDetailScreen extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 4,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -252,9 +278,11 @@ class PlantDetailScreen extends StatelessWidget {
           child: Text(
             severity,
             style: AppTextStyles.bodySmall.copyWith(
-              color: severity == 'Moderate' ? Colors.black87 :
-                     severity == 'Rare' ? const Color(0xFF1976D2) :
-                     const Color(0xFFE65100),
+              color: severity == 'Moderate'
+                  ? Colors.black87
+                  : severity == 'Rare'
+                  ? const Color(0xFF1976D2)
+                  : const Color(0xFFE65100),
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -270,11 +298,7 @@ class PlantDetailScreen extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: AppColors.primaryGreenModern,
-          ),
+          Icon(icon, size: 20, color: AppColors.primaryGreenModern),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -322,33 +346,85 @@ class PlantDetailScreen extends StatelessWidget {
     switch (plant.toLowerCase()) {
       case 'rice':
         return [
-          _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun (6-8 hours daily)'),
-          _buildConditionItem(AppIcons.waterDrop, 'Water', 'Flooded conditions preferred'),
-          _buildConditionItem(AppIcons.seedling, 'Soil pH', '5.5 to 6.5 (slightly acidic)'),
+          _buildConditionItem(
+            AppIcons.sun,
+            'Sunlight',
+            'Full sun (6-8 hours daily)',
+          ),
+          _buildConditionItem(
+            AppIcons.waterDrop,
+            'Water',
+            'Flooded conditions preferred',
+          ),
+          _buildConditionItem(
+            AppIcons.seedling,
+            'Soil pH',
+            '5.5 to 6.5 (slightly acidic)',
+          ),
         ];
       case 'corn':
         return [
-          _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun (8+ hours daily)'),
-          _buildConditionItem(AppIcons.waterDrop, 'Water', 'Regular watering, 1-2 inches weekly'),
-          _buildConditionItem(AppIcons.seedling, 'Soil pH', '6.0 to 7.0 (neutral to slightly acidic)'),
+          _buildConditionItem(
+            AppIcons.sun,
+            'Sunlight',
+            'Full sun (8+ hours daily)',
+          ),
+          _buildConditionItem(
+            AppIcons.waterDrop,
+            'Water',
+            'Regular watering, 1-2 inches weekly',
+          ),
+          _buildConditionItem(
+            AppIcons.seedling,
+            'Soil pH',
+            '6.0 to 7.0 (neutral to slightly acidic)',
+          ),
         ];
       case 'okra':
         return [
-          _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun (6-8 hours daily)'),
-          _buildConditionItem(AppIcons.waterDrop, 'Water', 'Moderate, consistent moisture'),
-          _buildConditionItem(AppIcons.seedling, 'Soil pH', '6.5 to 7.0 (slightly acidic to neutral)'),
+          _buildConditionItem(
+            AppIcons.sun,
+            'Sunlight',
+            'Full sun (6-8 hours daily)',
+          ),
+          _buildConditionItem(
+            AppIcons.waterDrop,
+            'Water',
+            'Moderate, consistent moisture',
+          ),
+          _buildConditionItem(
+            AppIcons.seedling,
+            'Soil pH',
+            '6.5 to 7.0 (slightly acidic to neutral)',
+          ),
         ];
       case 'cucumber':
         return [
-          _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun (6-8 hours daily)'),
-          _buildConditionItem(AppIcons.waterDrop, 'Water', 'Consistent moisture, avoid waterlogging'),
-          _buildConditionItem(AppIcons.seedling, 'Soil pH', '6.0 to 7.0 (slightly acidic to neutral)'),
+          _buildConditionItem(
+            AppIcons.sun,
+            'Sunlight',
+            'Full sun (6-8 hours daily)',
+          ),
+          _buildConditionItem(
+            AppIcons.waterDrop,
+            'Water',
+            'Consistent moisture, avoid waterlogging',
+          ),
+          _buildConditionItem(
+            AppIcons.seedling,
+            'Soil pH',
+            '6.0 to 7.0 (slightly acidic to neutral)',
+          ),
         ];
       default:
         return [
           _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun recommended'),
           _buildConditionItem(AppIcons.waterDrop, 'Water', 'Regular watering'),
-          _buildConditionItem(AppIcons.seedling, 'Soil pH', '6.5 to 7.0 (neutral)'),
+          _buildConditionItem(
+            AppIcons.seedling,
+            'Soil pH',
+            '6.5 to 7.0 (neutral)',
+          ),
         ];
     }
   }

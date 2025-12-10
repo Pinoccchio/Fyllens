@@ -11,10 +11,12 @@ class ProfileProvider with ChangeNotifier {
 
   User? _userProfile;
   bool _isLoading = false;
+  bool _isUploading = false;
   String? _errorMessage;
 
   User? get userProfile => _userProfile;
   bool get isLoading => _isLoading;
+  bool get isUploading => _isUploading;
   String? get errorMessage => _errorMessage;
   bool get hasProfile => _userProfile != null;
 
@@ -28,17 +30,23 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      debugPrint('   Calling DatabaseService.fetchById("user_profiles", "$userId")...');
+      debugPrint(
+        '   Calling DatabaseService.fetchById("user_profiles", "$userId")...',
+      );
       final result = await _databaseService.fetchById('user_profiles', userId);
 
       if (result != null) {
-        debugPrint('✅ ProfileProvider.loadProfile(): Profile loaded successfully!');
+        debugPrint(
+          '✅ ProfileProvider.loadProfile(): Profile loaded successfully!',
+        );
         debugPrint('   Email: ${result['email']}');
         debugPrint('   Full Name: ${result['full_name']}');
         debugPrint('   Avatar URL: ${result['avatar_url'] ?? "(none)"}');
         _userProfile = User.fromJson(result);
       } else {
-        debugPrint('⚠️ ProfileProvider.loadProfile(): No profile found for user ID: $userId');
+        debugPrint(
+          '⚠️ ProfileProvider.loadProfile(): No profile found for user ID: $userId',
+        );
       }
 
       _isLoading = false;
@@ -82,9 +90,14 @@ class ProfileProvider with ChangeNotifier {
       debugPrint('   ${profileData.toString()}');
       debugPrint('   Calling DatabaseService.insert("user_profiles", data)...');
 
-      final result = await _databaseService.insert('user_profiles', profileData);
+      final result = await _databaseService.insert(
+        'user_profiles',
+        profileData,
+      );
 
-      debugPrint('✅ ProfileProvider.createProfile(): Profile created successfully!');
+      debugPrint(
+        '✅ ProfileProvider.createProfile(): Profile created successfully!',
+      );
       debugPrint('   Profile ID: ${result['id']}');
       debugPrint('   Email: ${result['email']}');
       debugPrint('   Full Name: ${result['full_name']}');
@@ -131,11 +144,19 @@ class ProfileProvider with ChangeNotifier {
 
       debugPrint('   Update data prepared:');
       debugPrint('   ${updateData.toString()}');
-      debugPrint('   Calling DatabaseService.update("user_profiles", "$userId", data)...');
+      debugPrint(
+        '   Calling DatabaseService.update("user_profiles", "$userId", data)...',
+      );
 
-      final result = await _databaseService.update('user_profiles', userId, updateData);
+      final result = await _databaseService.update(
+        'user_profiles',
+        userId,
+        updateData,
+      );
 
-      debugPrint('✅ ProfileProvider.updateProfile(): Profile updated successfully!');
+      debugPrint(
+        '✅ ProfileProvider.updateProfile(): Profile updated successfully!',
+      );
       debugPrint('   Profile ID: ${result['id']}');
       debugPrint('   Email: ${result['email']}');
       debugPrint('   Full Name: ${result['full_name']}');
@@ -164,10 +185,15 @@ class ProfileProvider with ChangeNotifier {
     required String userId,
     required File imageFile,
   }) async {
-    debugPrint('\n📸 ProfileProvider.uploadProfilePicture(): Uploading avatar...');
+    debugPrint(
+      '\n📸 ProfileProvider.uploadProfilePicture(): Uploading avatar...',
+    );
     debugPrint('   User ID: $userId');
     debugPrint('   File path: ${imageFile.path}');
     debugPrint('   File size: ${imageFile.lengthSync()} bytes');
+
+    _isUploading = true;
+    notifyListeners();
 
     try {
       final path = '$userId/avatar.jpg';
@@ -181,8 +207,12 @@ class ProfileProvider with ChangeNotifier {
         path: path,
       );
 
-      debugPrint('✅ ProfileProvider.uploadProfilePicture(): Upload successful!');
+      debugPrint(
+        '✅ ProfileProvider.uploadProfilePicture(): Upload successful!',
+      );
       debugPrint('   Avatar URL: $url');
+      _isUploading = false;
+      notifyListeners();
       return url;
     } catch (e, stackTrace) {
       debugPrint('❌ ProfileProvider.uploadProfilePicture(): Upload FAILED');
@@ -191,6 +221,7 @@ class ProfileProvider with ChangeNotifier {
       debugPrint('   Stack trace: $stackTrace');
       _errorMessage = _extractErrorMessage(e);
       debugPrint('   Extracted error message: $_errorMessage');
+      _isUploading = false;
       notifyListeners();
       return null;
     }

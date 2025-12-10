@@ -135,14 +135,18 @@ class _CustomTextfieldState extends State<CustomTextfield> {
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.borderError : Colors.transparent,
+                    color: hasError
+                        ? AppColors.borderError
+                        : Colors.transparent,
                     width: 1,
                   ),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide(
-                    color: hasError ? AppColors.borderError : AppColors.borderFocused,
+                    color: hasError
+                        ? AppColors.borderError
+                        : AppColors.borderFocused,
                     width: 2,
                   ),
                 ),
@@ -179,11 +183,7 @@ class _CustomTextfieldState extends State<CustomTextfield> {
             padding: const EdgeInsets.only(left: AppSpacing.md),
             child: Row(
               children: [
-                Icon(
-                  AppIcons.error,
-                  size: 16,
-                  color: AppColors.error,
-                ),
+                Icon(AppIcons.error, size: 16, color: AppColors.error),
                 const SizedBox(width: AppSpacing.xs),
                 Expanded(
                   child: Text(

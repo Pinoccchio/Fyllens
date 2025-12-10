@@ -1,0 +1,22 @@
+{
+  "crop": "RICE",
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "num_classes": 6,
+  "class_names": [
+    "Bacterial_Leaf_Blight",
+    "Brown_Spot",
+    "Healthy",
+    "Leaf_Blast",
+    "Leaf_Scald",
+    "Narrow_Brown_Spot"
+  ],
+  "input_shape": [
+    224,
+    224,
+    3
+  ]
+}

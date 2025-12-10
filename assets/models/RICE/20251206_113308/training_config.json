@@ -1,0 +1,34 @@
+{
+  "crop": "RICE",
+  "crop_info": {
+    "description": "Perfectly balanced, 6 classes, 2,628 images",
+    "num_classes": 6,
+    "total_images": 2628,
+    "balanced": true,
+    "augmentation_multiplier": 1.0,
+    "use_class_weights": false,
+    "use_focal_loss": false,
+    "recommended_split": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "difficulty": "Easy - Baseline",
+    "notes": "Ideal starting point"
+  },
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "epochs": 50,
+  "learning_rate": 0.001,
+  "splits": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "class_names": [],
+  "timestamp": "2025-12-06T11:33:08.460058"
+}

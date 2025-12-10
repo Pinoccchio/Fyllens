@@ -120,8 +120,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                       child: TextButton(
                         onPressed: _completeOnboarding,
                         style: TextButton.styleFrom(
-                          backgroundColor:
-                              AppColors.borderLight.withValues(alpha: 0.5),
+                          backgroundColor: AppColors.borderLight.withValues(
+                            alpha: 0.5,
+                          ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
                             vertical: 10,
@@ -182,12 +183,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                         child: ElevatedButton(
                           onPressed: _nextPage,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                _pages[_currentPage].primaryColor,
+                            backgroundColor: _pages[_currentPage].primaryColor,
                             foregroundColor: Colors.white,
                             elevation: 8,
-                            shadowColor:
-                                _pages[_currentPage].primaryColor.withValues(alpha: 0.4),
+                            shadowColor: _pages[_currentPage].primaryColor
+                                .withValues(alpha: 0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -232,7 +232,9 @@ class _OnboardingScreenState extends State<OnboardingScreen>
         boxShadow: isActive
             ? [
                 BoxShadow(
-                  color: _pages[_currentPage].primaryColor.withValues(alpha: 0.3),
+                  color: _pages[_currentPage].primaryColor.withValues(
+                    alpha: 0.3,
+                  ),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -362,10 +364,7 @@ class _OnboardingScreen extends StatelessWidget {
                 ),
                 child: ShaderMask(
                   shaderCallback: (bounds) => LinearGradient(
-                    colors: [
-                      content.primaryColor,
-                      content.secondaryColor,
-                    ],
+                    colors: [content.primaryColor, content.secondaryColor],
                   ).createShader(bounds),
                   child: Text(
                     content.title,
@@ -384,15 +383,16 @@ class _OnboardingScreen extends StatelessWidget {
 
               // Subtitle with slide animation
               SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.3),
-                  end: Offset.zero,
-                ).animate(
-                  CurvedAnimation(
-                    parent: iconAnimationController,
-                    curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
-                  ),
-                ),
+                position:
+                    Tween<Offset>(
+                      begin: const Offset(0, 0.3),
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: iconAnimationController,
+                        curve: const Interval(0.5, 1.0, curve: Curves.easeOut),
+                      ),
+                    ),
                 child: FadeTransition(
                   opacity: Tween<double>(begin: 0.0, end: 1.0).animate(
                     CurvedAnimation(
@@ -446,10 +446,7 @@ class _OnboardingScreen extends StatelessWidget {
             child: Container(
               width: size,
               height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
           );
         },

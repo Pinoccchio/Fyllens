@@ -10,11 +10,7 @@ class PlantCard extends StatelessWidget {
   final Plant plant;
   final VoidCallback? onTap;
 
-  const PlantCard({
-    super.key,
-    required this.plant,
-    this.onTap,
-  });
+  const PlantCard({super.key, required this.plant, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,9 @@ class PlantCard extends StatelessWidget {
                 ),
                 child: plant.imageUrl != null
                     ? ClipRRect(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusSm,
+                        ),
                         child: Image.network(
                           plant.imageUrl!,
                           fit: BoxFit.cover,
@@ -69,10 +67,7 @@ class PlantCard extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       plant.species,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),

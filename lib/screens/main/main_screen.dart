@@ -45,10 +45,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
-      ),
+      body: IndexedStack(index: _currentIndex, children: _pages),
       bottomNavigationBar: _buildModernBottomNav(),
     );
   }
@@ -183,8 +180,9 @@ class _MainScreenState extends State<MainScreen> {
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: AppColors.primaryGreenModern
-                              .withValues(alpha: 0.3),
+                          color: AppColors.primaryGreenModern.withValues(
+                            alpha: 0.3,
+                          ),
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),

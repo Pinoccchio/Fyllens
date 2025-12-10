@@ -1,0 +1,15 @@
+CORN DISEASE CLASSIFICATION REPORT
+============================================================
+
+Test Accuracy: 0.9075 (90.75%)
+
+                precision    recall  f1-score   support
+
+        Blight     0.8146    0.8735    0.8430       166
+   Common_Rust     0.9887    0.9511    0.9695       184
+Gray_Leaf_Spot     0.7439    0.7011    0.7219        87
+       Healthy     0.9944    0.9944    0.9944       179
+
+      accuracy                         0.9075       616
+     macro avg     0.8854    0.8800    0.8822       616
+  weighted avg     0.9089    0.9075    0.9077       616

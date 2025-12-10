@@ -1,0 +1,18 @@
+{
+  "crop": "OKRA",
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "num_classes": 2,
+  "class_names": [
+    "Diseased",
+    "Healthy"
+  ],
+  "input_shape": [
+    224,
+    224,
+    3
+  ]
+}

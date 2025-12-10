@@ -22,7 +22,8 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   /// Animation controller for fade and slide effects (duration: 600ms)
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation; // Opacity 0 → 1
@@ -52,12 +53,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     );
 
     // Slide up animation - form slides up slightly as it appears
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3), // Start 30% down
-      end: Offset.zero, // End at normal position
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
+    _slideAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, 0.3), // Start 30% down
+          end: Offset.zero, // End at normal position
+        ).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
 
     _animationController.forward();
   }
@@ -86,10 +88,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
     final authProvider = context.read<AuthProvider>();
 
     // Attempt sign in
-    final success = await authProvider.signIn(
-      email: email,
-      password: password,
-    );
+    final success = await authProvider.signIn(email: email, password: password);
 
     if (!mounted) return;
 
@@ -99,7 +98,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
       debugPrint('✅ Login successful - GoRouter will redirect to home');
     } else {
       // Show error message from provider
-      final error = authProvider.errorMessage ?? 'Login failed. Please try again.';
+      final error =
+          authProvider.errorMessage ?? 'Login failed. Please try again.';
       _showError(error);
     }
   }
@@ -276,7 +276,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             decoration: InputDecoration(
               labelText: 'Email',
               hintText: 'Enter your email',
-              prefixIcon: Icon(AppIcons.email, color: AppColors.primaryGreenModern),
+              prefixIcon: Icon(
+                AppIcons.email,
+                color: AppColors.primaryGreenModern,
+              ),
               filled: true,
               fillColor: AppColors.backgroundSoft,
               border: OutlineInputBorder(
@@ -285,11 +288,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern,
+                  width: 2,
+                ),
               ),
             ),
           ),
@@ -304,10 +312,15 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
-              prefixIcon: Icon(AppIcons.lock, color: AppColors.primaryGreenModern),
+              prefixIcon: Icon(
+                AppIcons.lock,
+                color: AppColors.primaryGreenModern,
+              ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscurePassword ? AppIcons.visibility : AppIcons.visibilityOff,
+                  _obscurePassword
+                      ? AppIcons.visibility
+                      : AppIcons.visibilityOff,
                   color: AppColors.primaryGreenModern,
                 ),
                 onPressed: () {
@@ -324,11 +337,16 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+                ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern,
+                  width: 2,
+                ),
               ),
             ),
           ),
@@ -364,7 +382,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
-          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
+          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(
+            alpha: 0.6,
+          ),
         ),
         child: isLoading
             ? const Center(

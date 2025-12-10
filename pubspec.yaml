@@ -46,7 +46,6 @@ dependencies:
 
   # Image handling
   image_picker: ^1.0.0
-  cached_network_image: ^3.3.0
 
   # Local storage
   shared_preferences: ^2.2.0

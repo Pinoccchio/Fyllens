@@ -60,7 +60,8 @@ class CustomListTile extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: iconBackgroundColor ??
+                    color:
+                        iconBackgroundColor ??
                         AppColors.primaryGreenModern.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),

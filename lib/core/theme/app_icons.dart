@@ -38,7 +38,8 @@ abstract class AppIcons {
   static PhosphorIconData get history => PhosphorIcons.clockCounterClockwise;
 
   /// History/Clock icon (filled variant)
-  static PhosphorIconData get historyFilled => PhosphorIcons.clockCounterClockwiseFill;
+  static PhosphorIconData get historyFilled =>
+      PhosphorIcons.clockCounterClockwiseFill;
 
   /// Profile/User icon for navigation
   static PhosphorIconData get profile => PhosphorIcons.user;
@@ -145,7 +146,8 @@ abstract class AppIcons {
   static PhosphorIconData get checkCircle => PhosphorIcons.checkCircle;
 
   /// Check circle icon (filled variant)
-  static PhosphorIconData get checkCircleFilled => PhosphorIcons.checkCircleFill;
+  static PhosphorIconData get checkCircleFilled =>
+      PhosphorIcons.checkCircleFill;
 
   // ==================== STATUS & FEEDBACK ICONS ====================
 

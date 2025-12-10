@@ -1,0 +1,34 @@
+{
+  "crop": "OKRA",
+  "crop_info": {
+    "description": "Binary classification, 2 classes, 1,949 images",
+    "num_classes": 2,
+    "total_images": 1949,
+    "balanced": true,
+    "augmentation_multiplier": 1.0,
+    "use_class_weights": false,
+    "use_focal_loss": false,
+    "recommended_split": [
+      0.7,
+      0.15,
+      0.15
+    ],
+    "difficulty": "Easy - Binary",
+    "notes": "Fastest to train"
+  },
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "epochs": 50,
+  "learning_rate": 0.001,
+  "splits": {
+    "train": 0.7,
+    "val": 0.15,
+    "test": 0.15
+  },
+  "class_names": [],
+  "timestamp": "2025-12-06T11:37:06.529404"
+}

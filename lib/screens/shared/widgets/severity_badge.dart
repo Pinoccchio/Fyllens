@@ -7,10 +7,7 @@ import 'package:fyllens/core/constants/app_spacing.dart';
 class SeverityBadge extends StatelessWidget {
   final String severity;
 
-  const SeverityBadge({
-    super.key,
-    required this.severity,
-  });
+  const SeverityBadge({super.key, required this.severity});
 
   Color _getBadgeColor() {
     switch (severity.toLowerCase()) {

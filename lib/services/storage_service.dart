@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fyllens/services/supabase_service.dart';
 
 /// Storage service
@@ -22,9 +23,17 @@ class StorageService {
     required String path,
   }) async {
     final bytes = await file.readAsBytes();
-    await _supabaseService.storage.from(bucket).uploadBinary(path, bytes);
 
-    // Get public URL
+    // Use upsert: true to allow overwriting existing files (prevents 409 errors)
+    await _supabaseService.storage
+        .from(bucket)
+        .uploadBinary(
+          path,
+          bytes,
+          fileOptions: const FileOptions(upsert: true),
+        );
+
+    // Get public URL - Image.network handles freshness automatically
     final url = _supabaseService.storage.from(bucket).getPublicUrl(path);
     return url;
   }
@@ -47,21 +56,15 @@ class StorageService {
   }
 
   /// Get public URL for a file
-  String getPublicUrl({
-    required String bucket,
-    required String path,
-  }) {
+  String getPublicUrl({required String bucket, required String path}) {
     return _supabaseService.storage.from(bucket).getPublicUrl(path);
   }
 
   /// List files in a bucket path
-  Future<List> listFiles({
-    required String bucket,
-    String? path,
-  }) async {
-    final response = await _supabaseService.storage.from(bucket).list(
-      path: path,
-    );
+  Future<List> listFiles({required String bucket, String? path}) async {
+    final response = await _supabaseService.storage
+        .from(bucket)
+        .list(path: path);
     return response;
   }
 }

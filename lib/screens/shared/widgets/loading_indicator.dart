@@ -7,11 +7,7 @@ class LoadingIndicator extends StatelessWidget {
   final String? message;
   final double size;
 
-  const LoadingIndicator({
-    super.key,
-    this.message,
-    this.size = 50,
-  });
+  const LoadingIndicator({super.key, this.message, this.size = 50});
 
   @override
   Widget build(BuildContext context) {

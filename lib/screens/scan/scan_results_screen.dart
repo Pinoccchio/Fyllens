@@ -46,10 +46,7 @@ class ScanResultsScreen extends StatelessWidget {
                     constraints: const BoxConstraints(),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  Text(
-                    'Scan Results',
-                    style: AppTextStyles.heading2,
-                  ),
+                  Text('Scan Results', style: AppTextStyles.heading2),
                 ],
               ),
             ),
@@ -84,7 +81,9 @@ class ScanResultsScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
                           color: AppColors.textSecondary.withValues(alpha: 0.2),
                           width: 1,
@@ -96,7 +95,9 @@ class ScanResultsScreen extends StatelessWidget {
                             padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
                               color: Colors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusSm,
+                              ),
                             ),
                             child: Icon(
                               AppIcons.warning,
@@ -130,8 +131,12 @@ class ScanResultsScreen extends StatelessWidget {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: _getSeverityColor(severity).withValues(alpha: 0.15),
-                                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                                    color: _getSeverityColor(
+                                      severity,
+                                    ).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusSm,
+                                    ),
                                   ),
                                   child: Text(
                                     '$severity Severity',
@@ -155,7 +160,9 @@ class ScanResultsScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
                           color: AppColors.textSecondary.withValues(alpha: 0.2),
                           width: 1,
@@ -164,37 +171,36 @@ class ScanResultsScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Symptoms',
-                            style: AppTextStyles.heading3,
-                          ),
+                          Text('Symptoms', style: AppTextStyles.heading3),
                           const SizedBox(height: AppSpacing.sm),
-                          ...symptoms.map((symptom) => Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 8),
-                                      child: Icon(
-                                        AppIcons.checkCircle,
-                                        size: 6,
+                          ...symptoms.map(
+                            (symptom) => Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.only(top: 8),
+                                    child: Icon(
+                                      AppIcons.checkCircle,
+                                      size: 6,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: Text(
+                                      symptom,
+                                      style: AppTextStyles.bodyMedium.copyWith(
                                         color: AppColors.textPrimary,
+                                        height: 1.5,
                                       ),
                                     ),
-                                    const SizedBox(width: AppSpacing.sm),
-                                    Expanded(
-                                      child: Text(
-                                        symptom,
-                                        style: AppTextStyles.bodyMedium.copyWith(
-                                          color: AppColors.textPrimary,
-                                          height: 1.5,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -205,9 +211,13 @@ class ScanResultsScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusMd,
+                        ),
                         border: Border.all(
-                          color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
+                          color: AppColors.primaryGreenModern.withValues(
+                            alpha: 0.3,
+                          ),
                           width: 1,
                         ),
                       ),
@@ -254,8 +264,9 @@ class ScanResultsScreen extends StatelessWidget {
                                 backgroundColor: AppColors.primaryGreenModern,
                                 foregroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(AppSpacing.radiusMd),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd,
+                                  ),
                                 ),
                                 elevation: 0,
                               ),
@@ -282,8 +293,9 @@ class ScanResultsScreen extends StatelessWidget {
                                   width: 1.5,
                                 ),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(AppSpacing.radiusMd),
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd,
+                                  ),
                                 ),
                               ),
                               child: Text(
@@ -321,7 +333,11 @@ class ScanResultsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTreatmentItem(String iconName, String title, String description) {
+  Widget _buildTreatmentItem(
+    String iconName,
+    String title,
+    String description,
+  ) {
     IconData icon;
     switch (iconName) {
       case 'fertilizer':
@@ -356,11 +372,7 @@ class ScanResultsScreen extends StatelessWidget {
               color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppColors.primaryGreenModern,
-            ),
+            child: Icon(icon, size: 20, color: AppColors.primaryGreenModern),
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(

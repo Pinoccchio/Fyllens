@@ -55,14 +55,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final now = DateTime.now();
     if (_selectedFilter == 'This Week') {
       return _scanHistory
-          .where((scan) =>
-              now.difference(scan['timestamp'] as DateTime).inDays <= 7)
+          .where(
+            (scan) => now.difference(scan['timestamp'] as DateTime).inDays <= 7,
+          )
           .toList();
     }
     if (_selectedFilter == 'This Month') {
       return _scanHistory
-          .where((scan) =>
-              now.difference(scan['timestamp'] as DateTime).inDays <= 30)
+          .where(
+            (scan) =>
+                now.difference(scan['timestamp'] as DateTime).inDays <= 30,
+          )
           .toList();
     }
     return _scanHistory;
@@ -82,10 +85,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Scan History',
-                    style: AppTextStyles.heading1,
-                  ),
+                  Text('Scan History', style: AppTextStyles.heading1),
                   const SizedBox(height: AppSpacing.md),
                   // Filter chips
                   SizedBox(
@@ -121,7 +121,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           Icon(
                             AppIcons.history,
                             size: 80,
-                            color: AppColors.textSecondary.withValues(alpha: 0.3),
+                            color: AppColors.textSecondary.withValues(
+                              alpha: 0.3,
+                            ),
                           ),
                           const SizedBox(height: AppSpacing.md),
                           Text(
@@ -134,7 +136,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.md,
+                      ),
                       itemCount: _filteredHistory.length,
                       itemBuilder: (context, index) {
                         final scan = _filteredHistory[index];
@@ -174,11 +178,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               MaterialPageRoute(
                 builder: (context) => ScanResultsScreen(
                   plantName: (scan['plantName'] as String).toLowerCase(),
-                  imageAssetPath: 'assets/images/${(scan['plantName'] as String).toLowerCase()}.jpg',
+                  imageAssetPath:
+                      'assets/images/${(scan['plantName'] as String).toLowerCase()}.jpg',
                   deficiencyName: scan['deficiency'] as String,
                   severity: scan['severity'] as String,
-                  symptoms: _getSymptomsForDeficiency(scan['deficiency'] as String),
-                  treatments: _getTreatmentsForDeficiency(scan['deficiency'] as String),
+                  symptoms: _getSymptomsForDeficiency(
+                    scan['deficiency'] as String,
+                  ),
+                  treatments: _getTreatmentsForDeficiency(
+                    scan['deficiency'] as String,
+                  ),
                 ),
               ),
             );

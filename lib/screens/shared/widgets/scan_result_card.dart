@@ -11,11 +11,7 @@ class ScanResultCard extends StatelessWidget {
   final ScanResult scanResult;
   final VoidCallback? onTap;
 
-  const ScanResultCard({
-    super.key,
-    required this.scanResult,
-    this.onTap,
-  });
+  const ScanResultCard({super.key, required this.scanResult, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -94,11 +90,7 @@ class ScanResultCard extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        AppIcons.warning,
-                        color: Colors.orange,
-                        size: 20,
-                      ),
+                      Icon(AppIcons.warning, color: Colors.orange, size: 20),
                       const SizedBox(width: AppSpacing.sm),
                       Expanded(
                         child: Text(
@@ -111,10 +103,7 @@ class ScanResultCard extends StatelessWidget {
                       ),
                       Text(
                         '${scanResult.confidencePercentage}%',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),

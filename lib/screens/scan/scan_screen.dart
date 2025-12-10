@@ -24,10 +24,7 @@ class ScanScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header
-                Text(
-                  'Scan Plant',
-                  style: AppTextStyles.heading1,
-                ),
+                Text('Scan Plant', style: AppTextStyles.heading1),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
                   'Select plant species to scan',
@@ -63,10 +60,7 @@ class ScanScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 // Section title
-                Text(
-                  'Select Plant',
-                  style: AppTextStyles.heading3,
-                ),
+                Text('Select Plant', style: AppTextStyles.heading3),
                 const SizedBox(height: AppSpacing.md),
                 // Plant list
                 CustomListTile(

@@ -34,17 +34,11 @@ class FloatingCircle extends StatelessWidget {
         animation: controller,
         builder: (context, child) {
           return Transform.translate(
-            offset: Offset(
-              0,
-              math.sin(controller.value * 2 * math.pi) * 10,
-            ),
+            offset: Offset(0, math.sin(controller.value * 2 * math.pi) * 10),
             child: Container(
               width: size,
               height: size,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: color,
-              ),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
           );
         },

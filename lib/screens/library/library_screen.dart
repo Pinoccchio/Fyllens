@@ -54,7 +54,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
     if (_selectedFilter == 'All') {
       return _plants;
     }
-    return _plants.where((plant) => plant['category'] == _selectedFilter).toList();
+    return _plants
+        .where((plant) => plant['category'] == _selectedFilter)
+        .toList();
   }
 
   @override
@@ -71,10 +73,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Plant Library',
-                    style: AppTextStyles.heading1,
-                  ),
+                  Text('Plant Library', style: AppTextStyles.heading1),
                   const SizedBox(height: AppSpacing.md),
                   // Search bar
                   Container(

@@ -55,13 +55,16 @@ class ScanResult {
   }
 
   /// Check if scan detected a deficiency
-  bool get hasDeficiency => deficiencyDetected != null && deficiencyDetected!.isNotEmpty;
+  bool get hasDeficiency =>
+      deficiencyDetected != null && deficiencyDetected!.isNotEmpty;
 
   /// Get confidence as percentage (0-100)
-  int? get confidencePercentage => confidence != null ? (confidence! * 100).round() : null;
+  int? get confidencePercentage =>
+      confidence != null ? (confidence! * 100).round() : null;
 
   @override
-  String toString() => 'ScanResult(id: $id, plantName: $plantName, deficiency: $deficiencyDetected)';
+  String toString() =>
+      'ScanResult(id: $id, plantName: $plantName, deficiency: $deficiencyDetected)';
 
   @override
   bool operator ==(Object other) {

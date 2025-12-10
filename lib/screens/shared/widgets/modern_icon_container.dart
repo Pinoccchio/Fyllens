@@ -58,11 +58,7 @@ class ModernIconContainer extends StatelessWidget {
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          size: iconSize,
-          color: iconColor,
-        ),
+        child: Icon(icon, size: iconSize, color: iconColor),
       ),
     );
 

@@ -45,7 +45,9 @@ void main() async {
     // Log partial URL for verification (don't expose full URL in logs)
     final url = SupabaseConfig.supabaseUrl;
     if (url.isNotEmpty && url.length > 30) {
-      debugPrint('   URL: ${url.substring(0, 30)}...${url.substring(url.length - 10)}');
+      debugPrint(
+        '   URL: ${url.substring(0, 30)}...${url.substring(url.length - 10)}',
+      );
     }
   } catch (e, stackTrace) {
     debugPrint('❌ CRITICAL ERROR: Supabase initialization FAILED');

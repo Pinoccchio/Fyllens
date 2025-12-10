@@ -1,0 +1,20 @@
+{
+  "crop": "CORN",
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "num_classes": 4,
+  "class_names": [
+    "Blight",
+    "Common_Rust",
+    "Gray_Leaf_Spot",
+    "Healthy"
+  ],
+  "input_shape": [
+    224,
+    224,
+    3
+  ]
+}

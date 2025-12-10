@@ -1,0 +1,18 @@
+CUCUMBER DISEASE CLASSIFICATION REPORT
+============================================================
+
+Test Accuracy: 0.8642 (86.42%)
+
+                   precision    recall  f1-score   support
+
+      Anthracnose     0.6154    0.5333    0.5714        15
+   Bacterial_Wilt     1.0000    0.8636    0.9268        22
+        Belly_Rot     0.9444    0.9444    0.9444        18
+     Downy_Mildew     0.9091    0.5556    0.6897        18
+Gummy_Stem_Blight     0.6552    1.0000    0.7917        19
+          Healthy     0.9231    0.9600    0.9412        50
+Pythium_Fruit_Rot     0.9500    0.9500    0.9500        20
+
+         accuracy                         0.8642       162
+        macro avg     0.8567    0.8296    0.8307       162
+     weighted avg     0.8778    0.8642    0.8610       162

@@ -29,7 +29,8 @@ class RegisterScreen extends StatefulWidget {
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProviderStateMixin {
+class _RegisterScreenState extends State<RegisterScreen>
+    with SingleTickerProviderStateMixin {
   /// Animation controller for entrance effects (duration: 600ms)
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation; // Fade in
@@ -56,12 +57,10 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
       CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
-    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+        );
 
     _animationController.forward();
   }
@@ -90,7 +89,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     debugPrint('\n📝 Form Data:');
     debugPrint('   Full Name: $fullName');
     debugPrint('   Email: $email');
-    debugPrint('   Password: ${"*" * password.length} (${password.length} characters)');
+    debugPrint(
+      '   Password: ${"*" * password.length} (${password.length} characters)',
+    );
 
     // Basic validation
     debugPrint('\n🔍 Running validation...');
@@ -105,13 +106,17 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     }
 
     if (fullName.length < 2) {
-      debugPrint('❌ Validation failed: Full name too short (${fullName.length} characters)');
+      debugPrint(
+        '❌ Validation failed: Full name too short (${fullName.length} characters)',
+      );
       _showError('Full name must be at least 2 characters');
       return;
     }
 
     if (password.length < 6) {
-      debugPrint('❌ Validation failed: Password too short (${password.length} characters)');
+      debugPrint(
+        '❌ Validation failed: Password too short (${password.length} characters)',
+      );
       _showError('Password must be at least 6 characters');
       return;
     }
@@ -161,7 +166,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         );
 
         if (!mounted) {
-          debugPrint('⚠️ Widget unmounted after profile creation, aborting flow');
+          debugPrint(
+            '⚠️ Widget unmounted after profile creation, aborting flow',
+          );
           return;
         }
 
@@ -202,7 +209,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         debugPrint('═══════════════════════════════════════════════════════\n');
       } else {
         debugPrint('❌ ERROR: User ID is null after successful signup');
-        debugPrint('   This should never happen - auth account exists but no userId');
+        debugPrint(
+          '   This should never happen - auth account exists but no userId',
+        );
         debugPrint('\n═══════════════════════════════════════════════════════');
         debugPrint('❌ REGISTRATION FLOW FAILED - NULL USER ID');
         debugPrint('═══════════════════════════════════════════════════════\n');
@@ -211,9 +220,12 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
     } else {
       // Show error message from provider
       debugPrint('❌ Authentication account creation FAILED');
-      final error = authProvider.errorMessage ?? 'Registration failed. Please try again.';
+      final error =
+          authProvider.errorMessage ?? 'Registration failed. Please try again.';
       debugPrint('   Error message: $error');
-      debugPrint('   Auth error type: ${authProvider.errorMessage?.runtimeType}');
+      debugPrint(
+        '   Auth error type: ${authProvider.errorMessage?.runtimeType}',
+      );
       debugPrint('\n═══════════════════════════════════════════════════════');
       debugPrint('❌ REGISTRATION FLOW FAILED - AUTH ERROR');
       debugPrint('═══════════════════════════════════════════════════════\n');
@@ -365,147 +377,173 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
   /// Registration form with email, password, and sign up button
   Widget _buildRegisterForm(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Create Account Heading
-            Text(
-              AppConstants.createAccount,
-              style: AppTextStyles.heading1,
-              textAlign: TextAlign.center,
-            ),
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Create Account Heading
+          Text(
+            AppConstants.createAccount,
+            style: AppTextStyles.heading1,
+            textAlign: TextAlign.center,
+          ),
 
-            const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.lg),
 
-            // Description
-            Text(
-              'Join ${AppConstants.appName} to start monitoring your plants!',
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textSecondary,
+          // Description
+          Text(
+            'Join ${AppConstants.appName} to start monitoring your plants!',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          // Full Name Field
+          TextFormField(
+            controller: _fullNameController,
+            keyboardType: TextInputType.name,
+            textCapitalization: TextCapitalization.words,
+            style: AppTextStyles.bodyMedium,
+            decoration: InputDecoration(
+              labelText: 'Full Name',
+              hintText: 'Enter your full name',
+              prefixIcon: Icon(
+                AppIcons.profile,
+                color: AppColors.primaryGreenModern,
               ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            // Full Name Field
-            TextFormField(
-              controller: _fullNameController,
-              keyboardType: TextInputType.name,
-              textCapitalization: TextCapitalization.words,
-              style: AppTextStyles.bodyMedium,
-              decoration: InputDecoration(
-                labelText: 'Full Name',
-                hintText: 'Enter your full name',
-                prefixIcon: Icon(AppIcons.profile, color: AppColors.primaryGreenModern),
-                filled: true,
-                fillColor: AppColors.backgroundSoft,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+              filled: true,
+              fillColor: AppColors.backgroundSoft,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
                 ),
               ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // Email Field (optional, no validation)
-            TextFormField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              style: AppTextStyles.bodyMedium,
-              decoration: InputDecoration(
-                labelText: 'Email',
-                hintText: 'Enter your email',
-                prefixIcon: Icon(AppIcons.email, color: AppColors.primaryGreenModern),
-                filled: true,
-                fillColor: AppColors.backgroundSoft,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern,
+                  width: 2,
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
 
-            // Password Field (optional, no validation)
-            TextFormField(
-              controller: _passwordController,
-              obscureText: _obscurePassword,
-              style: AppTextStyles.bodyMedium,
-              decoration: InputDecoration(
-                labelText: 'Password',
-                hintText: 'Enter your password',
-                prefixIcon: Icon(AppIcons.lock, color: AppColors.primaryGreenModern),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? AppIcons.visibility : AppIcons.visibilityOff,
-                    color: AppColors.primaryGreenModern,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
+          // Email Field (optional, no validation)
+          TextFormField(
+            controller: _emailController,
+            keyboardType: TextInputType.emailAddress,
+            style: AppTextStyles.bodyMedium,
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              prefixIcon: Icon(
+                AppIcons.email,
+                color: AppColors.primaryGreenModern,
+              ),
+              filled: true,
+              fillColor: AppColors.backgroundSoft,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
                 ),
-                filled: true,
-                fillColor: AppColors.backgroundSoft,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern.withValues(alpha: 0.1)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide(color: AppColors.primaryGreenModern, width: 2),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern,
+                  width: 2,
                 ),
               ),
             ),
+          ),
 
-            const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.md),
 
-            // Sign Up Button
-            _buildSignUpButton(),
+          // Password Field (optional, no validation)
+          TextFormField(
+            controller: _passwordController,
+            obscureText: _obscurePassword,
+            style: AppTextStyles.bodyMedium,
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              prefixIcon: Icon(
+                AppIcons.lock,
+                color: AppColors.primaryGreenModern,
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? AppIcons.visibility
+                      : AppIcons.visibilityOff,
+                  color: AppColors.primaryGreenModern,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _obscurePassword = !_obscurePassword;
+                  });
+                },
+              ),
+              filled: true,
+              fillColor: AppColors.backgroundSoft,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide.none,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: BorderSide(
+                  color: AppColors.primaryGreenModern,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xl),
 
-            // Sign In Link
-            _buildSignInLink(context),
-          ],
-        ),
-      );
+          // Sign Up Button
+          _buildSignUpButton(),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // Sign In Link
+          _buildSignInLink(context),
+        ],
+      ),
+    );
   }
 
   /// Build primary sign up button with loading state
@@ -526,7 +564,9 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
-          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(alpha: 0.6),
+          disabledBackgroundColor: AppColors.primaryGreenModern.withValues(
+            alpha: 0.6,
+          ),
         ),
         child: isLoading
             ? const Center(
@@ -551,9 +591,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
         context.go(AppRoutes.login);
       },
       style: TextButton.styleFrom(
-        padding: const EdgeInsets.symmetric(
-          vertical: AppSpacing.sm,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
         minimumSize: const Size(0, AppSpacing.touchTarget),
       ),
       child: RichText(
@@ -563,10 +601,7 @@ class _RegisterScreenState extends State<RegisterScreen> with SingleTickerProvid
             color: AppColors.textSecondary,
           ),
           children: [
-            TextSpan(
-              text: 'Sign in!',
-              style: AppTextStyles.linkMedium,
-            ),
+            TextSpan(text: 'Sign in!', style: AppTextStyles.linkMedium),
           ],
         ),
       ),

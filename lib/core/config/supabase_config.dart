@@ -53,11 +53,15 @@ class SupabaseConfig {
     }
 
     if (!url.contains('.supabase.co')) {
-      debugPrint('⚠️ WARNING: SUPABASE_URL doesn\'t contain .supabase.co (unusual)');
+      debugPrint(
+        '⚠️ WARNING: SUPABASE_URL doesn\'t contain .supabase.co (unusual)',
+      );
     }
 
     if (key.length < 100) {
-      debugPrint('⚠️ WARNING: SUPABASE_ANON_KEY seems too short (expected ~200+ chars)');
+      debugPrint(
+        '⚠️ WARNING: SUPABASE_ANON_KEY seems too short (expected ~200+ chars)',
+      );
     }
 
     debugPrint('✅ Supabase configuration valid');

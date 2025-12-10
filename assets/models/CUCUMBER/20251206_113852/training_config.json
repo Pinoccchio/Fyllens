@@ -1,0 +1,34 @@
+{
+  "crop": "CUCUMBER",
+  "crop_info": {
+    "description": "Moderate balance, 7 classes, 1,289 images",
+    "num_classes": 7,
+    "total_images": 1289,
+    "balanced": true,
+    "augmentation_multiplier": 1.5,
+    "use_class_weights": false,
+    "use_focal_loss": false,
+    "recommended_split": [
+      0.75,
+      0.125,
+      0.125
+    ],
+    "difficulty": "Moderate",
+    "notes": "Standard training"
+  },
+  "model_type": "mobilenetv2",
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "epochs": 50,
+  "learning_rate": 0.001,
+  "splits": {
+    "train": 0.75,
+    "val": 0.125,
+    "test": 0.125
+  },
+  "class_names": [],
+  "timestamp": "2025-12-06T11:38:52.592277"
+}

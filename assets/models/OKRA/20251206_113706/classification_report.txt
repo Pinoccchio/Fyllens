@@ -1,0 +1,13 @@
+OKRA DISEASE CLASSIFICATION REPORT
+============================================================
+
+Test Accuracy: 0.9696 (96.96%)
+
+              precision    recall  f1-score   support
+
+    Diseased     0.9735    0.9671    0.9703       152
+     Healthy     0.9655    0.9722    0.9689       144
+
+    accuracy                         0.9696       296
+   macro avg     0.9695    0.9697    0.9696       296
+weighted avg     0.9696    0.9696    0.9696       296

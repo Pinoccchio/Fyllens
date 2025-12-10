@@ -69,7 +69,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primaryGreenModern,
+            width: 2,
+          ),
         ),
       ),
     );
@@ -101,11 +104,21 @@ class AppTheme {
 
       // Text theme
       textTheme: TextTheme(
-        displayLarge: AppTextStyles.heading1.copyWith(color: AppColors.textOnPrimary),
-        displayMedium: AppTextStyles.heading2.copyWith(color: AppColors.textOnPrimary),
-        displaySmall: AppTextStyles.heading3.copyWith(color: AppColors.textOnPrimary),
-        bodyLarge: AppTextStyles.bodyLarge.copyWith(color: AppColors.textOnPrimary),
-        bodyMedium: AppTextStyles.bodyMedium.copyWith(color: AppColors.textOnPrimary),
+        displayLarge: AppTextStyles.heading1.copyWith(
+          color: AppColors.textOnPrimary,
+        ),
+        displayMedium: AppTextStyles.heading2.copyWith(
+          color: AppColors.textOnPrimary,
+        ),
+        displaySmall: AppTextStyles.heading3.copyWith(
+          color: AppColors.textOnPrimary,
+        ),
+        bodyLarge: AppTextStyles.bodyLarge.copyWith(
+          color: AppColors.textOnPrimary,
+        ),
+        bodyMedium: AppTextStyles.bodyMedium.copyWith(
+          color: AppColors.textOnPrimary,
+        ),
         labelLarge: AppTextStyles.buttonLarge,
       ),
 
@@ -136,7 +149,10 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppColors.primaryGreenModern, width: 2),
+          borderSide: const BorderSide(
+            color: AppColors.primaryGreenModern,
+            width: 2,
+          ),
         ),
       ),
     );

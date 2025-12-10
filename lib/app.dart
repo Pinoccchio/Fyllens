@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeProvider.themeMode, // Reactive to user preference
-
           // GoRouter handles all navigation with auth state awareness
           routerConfig: _createRouter(authProvider),
         );
@@ -73,12 +72,15 @@ class MyApp extends StatelessWidget {
         final isAuthenticated = authProvider.isAuthenticated;
         final isGoingToLogin = state.matchedLocation == AppRoutes.login;
         final isGoingToRegister = state.matchedLocation == AppRoutes.register;
-        final isGoingToForgotPassword = state.matchedLocation == AppRoutes.forgotPassword;
-        final isGoingToOnboarding = state.matchedLocation == AppRoutes.onboarding;
+        final isGoingToForgotPassword =
+            state.matchedLocation == AppRoutes.forgotPassword;
+        final isGoingToOnboarding =
+            state.matchedLocation == AppRoutes.onboarding;
         final isGoingToSplash = state.matchedLocation == AppRoutes.splash;
 
         // Define protected routes
-        final isGoingToProtectedRoute = state.matchedLocation == AppRoutes.home ||
+        final isGoingToProtectedRoute =
+            state.matchedLocation == AppRoutes.home ||
             state.matchedLocation == AppRoutes.editProfile;
 
         // If user is not authenticated and trying to access protected route

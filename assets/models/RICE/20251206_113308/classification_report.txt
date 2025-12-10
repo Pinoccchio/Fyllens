@@ -1,0 +1,17 @@
+RICE DISEASE CLASSIFICATION REPORT
+============================================================
+
+Test Accuracy: 0.8317 (83.17%)
+
+                       precision    recall  f1-score   support
+
+Bacterial_Leaf_Blight     0.9273    0.7286    0.8160        70
+           Brown_Spot     0.8909    0.6712    0.7656        73
+              Healthy     0.8333    0.8730    0.8527        63
+           Leaf_Blast     0.6477    0.8507    0.7355        67
+           Leaf_Scald     0.9194    0.9344    0.9268        61
+    Narrow_Brown_Spot     0.8590    0.9571    0.9054        70
+
+             accuracy                         0.8317       404
+            macro avg     0.8463    0.8359    0.8337       404
+         weighted avg     0.8467    0.8317    0.8315       404

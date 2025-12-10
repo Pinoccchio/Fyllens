@@ -84,10 +84,7 @@ class HomeScreen extends StatelessWidget {
           hintStyle: AppTextStyles.bodyMedium.copyWith(
             color: AppColors.textSecondary,
           ),
-          prefixIcon: Icon(
-            AppIcons.search,
-            color: AppColors.textSecondary,
-          ),
+          prefixIcon: Icon(AppIcons.search, color: AppColors.textSecondary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
@@ -123,11 +120,7 @@ class HomeScreen extends StatelessWidget {
                   color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  AppIcons.camera,
-                  color: Colors.white,
-                  size: 32,
-                ),
+                child: Icon(AppIcons.camera, color: Colors.white, size: 32),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -277,7 +270,8 @@ class HomeScreen extends StatelessWidget {
                     {
                       'icon': 'organic',
                       'title': 'Wood Ash Application',
-                      'description': 'Apply wood ash as organic potassium source',
+                      'description':
+                          'Apply wood ash as organic potassium source',
                     },
                   ],
                 ),
@@ -305,10 +299,7 @@ class HomeScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.borderLight,
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.borderLight, width: 1),
         ),
         child: Row(
           children: [
@@ -318,11 +309,7 @@ class HomeScreen extends StatelessWidget {
                 color: AppColors.accentMint.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                icon,
-                color: AppColors.primaryGreenModern,
-                size: 28,
-              ),
+              child: Icon(icon, color: AppColors.primaryGreenModern, size: 28),
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -353,10 +340,7 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(
-              AppIcons.chevronRight,
-              color: AppColors.textSecondary,
-            ),
+            Icon(AppIcons.chevronRight, color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -394,10 +378,7 @@ class HomeScreen extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.borderLight,
-          width: 1,
-        ),
+        border: Border.all(color: AppColors.borderLight, width: 1),
       ),
       child: Row(
         children: [
@@ -407,11 +388,7 @@ class HomeScreen extends StatelessWidget {
               color: AppColors.accentMint.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: AppColors.primaryGreenModern,
-              size: 28,
-            ),
+            child: Icon(icon, color: AppColors.primaryGreenModern, size: 28),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
