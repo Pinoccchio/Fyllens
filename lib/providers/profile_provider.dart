@@ -196,7 +196,8 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final path = '$userId/avatar.jpg';
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final path = '$userId/avatar_$timestamp.jpg';
       debugPrint('   Storage path: $path');
       debugPrint('   Bucket: avatars');
       debugPrint('   Calling StorageService.uploadImage()...');
@@ -206,6 +207,33 @@ class ProfileProvider with ChangeNotifier {
         bucket: 'avatars',
         path: path,
       );
+
+      // Clean up old avatar files to prevent storage bloat
+      try {
+        debugPrint('   🧹 Cleaning up old avatar files...');
+        final files = await _storageService.listFiles(
+          bucket: 'avatars',
+          path: userId,
+        );
+
+        // Delete old avatars (keep only the newly uploaded one)
+        for (final file in files) {
+          final fileName = file['name'] as String?;
+          if (fileName != null &&
+              fileName.startsWith('avatar_') &&
+              fileName != path.split('/').last) {
+            final oldPath = '$userId/$fileName';
+            await _storageService.deleteFile(
+              bucket: 'avatars',
+              path: oldPath,
+            );
+            debugPrint('   ✅ Deleted old avatar: $fileName');
+          }
+        }
+      } catch (e) {
+        debugPrint('   ⚠️ Could not clean up old avatars: $e');
+        // Non-critical error, continue anyway
+      }
 
       debugPrint(
         '✅ ProfileProvider.uploadProfilePicture(): Upload successful!',

@@ -1,11 +1,17 @@
+import 'dart:io';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/screens/shared/widgets/custom_list_tile.dart';
+import 'package:fyllens/screens/shared/widgets/profile_avatar.dart';
+import 'package:fyllens/screens/shared/widgets/image_picker_bottom_sheet.dart';
+import 'package:fyllens/screens/shared/widgets/image_preview_dialog.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 
@@ -23,92 +29,104 @@ class ProfileScreen extends StatelessWidget {
     final currentUser = authProvider.currentUser;
 
     // Extract user display information
-    final displayName = currentUser?.fullName ?? currentUser?.email?.split('@').first ?? 'User';
+    final displayName = currentUser?.fullName ?? currentUser?.email.split('@').first ?? 'User';
     final displayEmail = currentUser?.email ?? 'No email';
     final isLoading = authProvider.isLoading;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundSoft,
-      body: CustomScrollView(
-        slivers: [
-          // Profile header (no AppBar)
-          SliverToBoxAdapter(
-            child: Container(
-              height: 240,
-              decoration: const BoxDecoration(
-                color: AppColors.primaryGreenModern,
-              ),
-              child: SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      // Avatar
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          AppIcons.profile,
-                          size: 45,
-                          color: AppColors.primaryGreenModern,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      // Name with overflow protection
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                        child: Text(
-                          displayName,
-                          style: AppTextStyles.heading1.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                          ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      // Email with overflow protection
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                        child: Text(
-                          displayEmail,
-                          style: AppTextStyles.bodyMedium.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        title: Text(
+          'Profile',
+          style: AppTextStyles.heading1.copyWith(
+            color: AppColors.textPrimary,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+          ),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Green profile card (like scan card on home screen)
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGreenModern,
+                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
                     ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // Avatar with camera icon overlay and preview on tap
+                    GestureDetector(
+                      onTap: currentUser?.avatarUrl != null
+                          ? () => _showAvatarPreview(context, currentUser!.avatarUrl!)
+                          : null,
+                      child: ProfileAvatar(
+                        avatarUrl: currentUser?.avatarUrl,
+                        displayName: currentUser?.fullName,
+                        email: currentUser?.email,
+                        size: 70,
+                        showEditButton: true,
+                        onEditPressed: () => _handleEditAvatar(context),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    // Name and email
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            displayName,
+                            style: AppTextStyles.heading2.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            displayEmail,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: Colors.white.withValues(alpha: 0.95),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ),
+              const SizedBox(height: AppSpacing.xl),
 
-          // Scrollable content
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: AppSpacing.lg),
               // Account section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding: EdgeInsets.zero,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -144,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               // Preferences section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding: EdgeInsets.zero,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -198,8 +216,180 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
         ),
-      ],
-    ),
+      ),
+    );
+  }
+
+  /// Handle avatar edit - shows image picker and preview
+  Future<void> _handleEditAvatar(BuildContext context) async {
+    debugPrint('\n📸 ProfileScreen: Edit avatar requested');
+
+    final currentUser = context.read<AuthProvider>().currentUser;
+    if (currentUser == null) {
+      debugPrint('❌ ProfileScreen: No authenticated user');
+      return;
+    }
+
+    // Show image source picker bottom sheet
+    final imageSource = await ImagePickerBottomSheet.show(context);
+    if (imageSource == null) {
+      debugPrint('   User cancelled image source selection');
+      return;
+    }
+
+    debugPrint('   Image source selected: $imageSource');
+
+    // Pick image from selected source
+    final picker = ImagePicker();
+    XFile? pickedFile;
+
+    try {
+      pickedFile = await picker.pickImage(
+        source: imageSource,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+    } catch (e) {
+      debugPrint('❌ ProfileScreen: Image picker error: $e');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to pick image: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (pickedFile == null) {
+      debugPrint('   User cancelled image selection');
+      return;
+    }
+
+    debugPrint('   Image selected: ${pickedFile.path}');
+
+    if (!context.mounted) return;
+
+    // Show preview dialog with upload functionality
+    final success = await ImagePreviewDialog.show(
+      context: context,
+      imageFile: File(pickedFile.path),
+      userId: currentUser.id,
+    );
+
+    if (success == true) {
+      debugPrint('✅ ProfileScreen: Avatar updated successfully');
+      if (context.mounted) {
+        // Refresh auth provider to get updated user data
+        await context.read<AuthProvider>().refreshProfile();
+      }
+    }
+  }
+
+  /// Show avatar preview dialog - Minimal TikTok/Instagram style with blur background
+  void _showAvatarPreview(BuildContext context, String avatarUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black87,
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.transparent,
+        child: Stack(
+          children: [
+            // Blurred background image
+            Positioned.fill(
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Image.network(
+                  avatarUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+            ),
+
+            // Dark overlay
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.5),
+              ),
+            ),
+
+            // Circular preview (centered)
+            Center(
+              child: Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.white,
+                    width: 4,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                              : null,
+                          valueColor: const AlwaysStoppedAnimation<Color>(
+                            AppColors.primaryGreenModern,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 48,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // Close button at top-right
+            Positioned(
+              top: 20,
+              right: 20,
+              child: SafeArea(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.close, color: Colors.white, size: 26),
+                    iconSize: 26,
+                    padding: const EdgeInsets.all(8),
+                    onPressed: () => Navigator.pop(context),
+                    tooltip: 'Close',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
