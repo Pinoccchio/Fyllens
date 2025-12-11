@@ -20,6 +20,7 @@ class AppRoutes {
 
   // Scan Flow Routes
   static const String speciesSelection = '/scan/species-selection';
+  static const String scanCamera = '/scan/camera';
   static const String scanResult = '/scan/result';
 
   // Profile Routes

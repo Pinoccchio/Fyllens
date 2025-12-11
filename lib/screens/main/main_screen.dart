@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/screens/home/home_screen.dart';
 import 'package:fyllens/screens/library/library_screen.dart';
@@ -6,6 +7,7 @@ import 'package:fyllens/screens/scan/scan_screen.dart';
 import 'package:fyllens/screens/history/history_screen.dart';
 import 'package:fyllens/screens/profile/profile_screen.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
+import 'package:fyllens/providers/tab_provider.dart';
 
 /// Main screen with 5-tab bottom navigation
 ///
@@ -15,7 +17,10 @@ import 'package:fyllens/core/theme/app_icons.dart';
 ///
 /// Tabs: Home | Library | Scan | History | Profile
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  /// Initial tab to display (0=Home, 1=Library, 2=Scan, 3=History, 4=Profile)
+  final int initialTab;
+
+  const MainScreen({super.key, this.initialTab = 0});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -23,7 +28,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   /// Currently selected tab (0=Home, 1=Library, 2=Scan, 3=History, 4=Profile)
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   /// All app pages in tab order
   /// IndexedStack keeps all pages in memory so switching tabs doesn't lose state
@@ -35,17 +40,82 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+
+    // LOG: Check initialTab parameter
+    debugPrint('🏠 [MAIN SCREEN] initState() called');
+    debugPrint('   widget.initialTab: ${widget.initialTab}');
+
+    _currentIndex = widget.initialTab;
+
+    debugPrint('   _currentIndex set to: $_currentIndex');
+    debugPrint('✅ [MAIN SCREEN] initState() completed');
+  }
+
+  @override
+  void didUpdateWidget(MainScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // LOG: Check if initialTab changed
+    debugPrint('🔄 [MAIN SCREEN] didUpdateWidget() called');
+    debugPrint('   oldWidget.initialTab: ${oldWidget.initialTab}');
+    debugPrint('   widget.initialTab: ${widget.initialTab}');
+
+    // Update _currentIndex if initialTab parameter changed
+    if (oldWidget.initialTab != widget.initialTab) {
+      debugPrint('🎯 [MAIN SCREEN] initialTab changed! Updating _currentIndex...');
+      setState(() {
+        _currentIndex = widget.initialTab;
+      });
+      // Also sync with TabProvider
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<TabProvider>().setTab(_currentIndex);
+        }
+      });
+      debugPrint('✅ [MAIN SCREEN] _currentIndex updated to: $_currentIndex');
+    } else {
+      debugPrint('ℹ️  [MAIN SCREEN] initialTab unchanged, no update needed');
+    }
+  }
+
   /// Handle tab selection - updates UI to show selected page
   void _onTabTapped(int index) {
+    debugPrint('🔢 [MAIN SCREEN] Tab tapped: $index');
     setState(() {
       _currentIndex = index;
+      debugPrint('   _currentIndex updated to: $_currentIndex');
     });
+    // Also update TabProvider so other parts of app know current tab
+    context.read<TabProvider>().setTab(index);
+    debugPrint('✅ [MAIN SCREEN] Tab change complete');
   }
 
   @override
   Widget build(BuildContext context) {
+    // Watch TabProvider for programmatic tab changes from other screens
+    final tabProvider = context.watch<TabProvider>();
+
+    // Sync local state with provider if they differ
+    if (tabProvider.currentTab != _currentIndex) {
+      debugPrint('📡 [MAIN SCREEN] TabProvider changed: ${tabProvider.currentTab}');
+      debugPrint('   Syncing _currentIndex from $_currentIndex to ${tabProvider.currentTab}');
+      // Update _currentIndex without calling setState to avoid rebuild loop
+      // The build will use tabProvider.currentTab directly
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _currentIndex != tabProvider.currentTab) {
+          setState(() {
+            _currentIndex = tabProvider.currentTab;
+          });
+          debugPrint('✅ [MAIN SCREEN] _currentIndex synced to: $_currentIndex');
+        }
+      });
+    }
+
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: tabProvider.currentTab, children: _pages),
       bottomNavigationBar: _buildModernBottomNav(),
     );
   }

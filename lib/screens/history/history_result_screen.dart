@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
-import 'package:fyllens/core/constants/app_routes.dart';
-import 'package:fyllens/providers/scan_provider.dart';
-import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/screens/shared/widgets/image_viewer_dialog.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
 
-/// Scan results page showing deficiency detection and treatment
-/// Displayed after scanning a plant from camera
+/// History result screen - displays scan details from history
+/// Shown when user taps a scan from History tab
 ///
-/// Navigation: Camera → ScanResultsScreen
-/// Button: "Done" (back to Scan tab to select another plant)
-class ScanResultsScreen extends StatelessWidget {
+/// Navigation: History tab → HistoryResultScreen
+/// Buttons: "Done" (back to History) | "Rescan Plant" (to Scan tab via callback)
+class HistoryResultScreen extends StatelessWidget {
   final String plantName;
   final String? imageAssetPath;
   final String deficiencyName;
   final String severity;
   final List<String> symptoms;
   final List<Map<String, String>> treatments;
+  final VoidCallback? onRescanPressed;
   final List<String>? careTips;
   final List<String>? preventiveCare;
   final List<String>? growthOptimization;
 
-  const ScanResultsScreen({
+  const HistoryResultScreen({
     super.key,
     required this.plantName,
     this.imageAssetPath,
@@ -36,6 +32,7 @@ class ScanResultsScreen extends StatelessWidget {
     required this.severity,
     required this.symptoms,
     required this.treatments,
+    this.onRescanPressed,
     this.careTips,
     this.preventiveCare,
     this.growthOptimization,
@@ -66,7 +63,6 @@ class ScanResultsScreen extends StatelessWidget {
       isHealthy: isHealthy,
       severity: severity,
     );
-    final titleText = HealthStatusHelper.getHealthTitle(isHealthy);
     final descriptionText = HealthStatusHelper.getHealthDescription(
       isHealthy: isHealthy,
       plantName: plantName,
@@ -268,97 +264,97 @@ class ScanResultsScreen extends StatelessWidget {
                     if (!isHealthy) ...[
                       // Symptoms section
                       Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
+                          ),
+                          border: Border.all(
+                            color: AppColors.textSecondary.withValues(alpha: 0.2),
+                            width: 1,
+                          ),
                         ),
-                        border: Border.all(
-                          color: AppColors.textSecondary.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Symptoms', style: AppTextStyles.heading3),
-                          const SizedBox(height: AppSpacing.sm),
-                          ...symptoms.map(
-                            (symptom) => Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.only(top: 8),
-                                    child: Icon(
-                                      AppIcons.checkCircle,
-                                      size: 6,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm),
-                                  Expanded(
-                                    child: Text(
-                                      symptom,
-                                      style: AppTextStyles.bodyMedium.copyWith(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Symptoms', style: AppTextStyles.heading3),
+                            const SizedBox(height: AppSpacing.sm),
+                            ...symptoms.map(
+                              (symptom) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 8),
+                                      child: Icon(
+                                        AppIcons.checkCircle,
+                                        size: 6,
                                         color: AppColors.textPrimary,
-                                        height: 1.5,
                                       ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Expanded(
+                                      child: Text(
+                                        symptom,
+                                        style: AppTextStyles.bodyMedium.copyWith(
+                                          color: AppColors.textPrimary,
+                                          height: 1.5,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
+                      const SizedBox(height: AppSpacing.md),
 
-                    // Treatment Recommendations section
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
-                        border: Border.all(
-                          color: AppColors.primaryGreenModern.withValues(
-                            alpha: 0.3,
+                      // Treatment Recommendations section
+                      Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8F5E9),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusMd,
                           ),
-                          width: 1,
+                          border: Border.all(
+                            color: AppColors.primaryGreenModern.withValues(
+                              alpha: 0.3,
+                            ),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Treatment Recommendations',
+                              style: AppTextStyles.heading3,
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            ...treatments.asMap().entries.map((entry) {
+                              final treatment = entry.value;
+                              return Padding(
+                                padding: EdgeInsets.only(
+                                  bottom: entry.key < treatments.length - 1
+                                      ? AppSpacing.sm
+                                      : 0,
+                                ),
+                                child: _buildTreatmentItem(
+                                  treatment['icon'] ?? 'medication',
+                                  treatment['title'] ?? 'Treatment',
+                                  treatment['description'] ??
+                                      'No details available',
+                                ),
+                              );
+                            }),
+                          ],
                         ),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Treatment Recommendations',
-                            style: AppTextStyles.heading3,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          ...treatments.asMap().entries.map((entry) {
-                            final treatment = entry.value;
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                bottom: entry.key < treatments.length - 1
-                                    ? AppSpacing.sm
-                                    : 0,
-                              ),
-                              child: _buildTreatmentItem(
-                                treatment['icon'] ?? 'medication',
-                                treatment['title'] ?? 'Treatment',
-                                treatment['description'] ??
-                                    'No details available',
-                              ),
-                            );
-                          }),
-                        ],
-                      ),
-                    ),
                     ],
 
                     // Care tips sections for healthy plants
@@ -546,35 +542,63 @@ class ScanResultsScreen extends StatelessWidget {
                     ],
                     const SizedBox(height: AppSpacing.lg),
 
-                    // Action button - Camera flow
-                    // "Done" → clear scan and go back to Scan tab to select another plant
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Clear current scan result
-                          context.read<ScanProvider>().clearCurrentScan();
-
-                          // Navigate to home and switch to Scan tab via TabProvider
-                          context.go(AppRoutes.home);
-                          context.read<TabProvider>().setTab(2);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGreenModern,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
+                    // Action buttons - History flow
+                    // "Done" → back to History | "Rescan Plant" → to Scan tab
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Go back to History screen
+                                Navigator.pop(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryGreenModern,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd,
+                                  ),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                'Done',
+                                style: AppTextStyles.buttonMedium,
+                              ),
                             ),
                           ),
-                          elevation: 0,
                         ),
-                        child: Text(
-                          'Done',
-                          style: AppTextStyles.buttonMedium,
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: SizedBox(
+                            height: 48,
+                            child: OutlinedButton(
+                              onPressed: onRescanPressed,
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.primaryGreenModern,
+                                side: const BorderSide(
+                                  color: AppColors.primaryGreenModern,
+                                  width: 1.5,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusMd,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                'Rescan Plant',
+                                style: AppTextStyles.buttonMedium.copyWith(
+                                  color: AppColors.primaryGreenModern,
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                     const SizedBox(height: AppSpacing.md),
                   ],
@@ -669,21 +693,6 @@ class ScanResultsScreen extends StatelessWidget {
     );
   }
 
-  Color _getSeverityColor(String severity) {
-    switch (severity.toLowerCase()) {
-      case 'high':
-      case 'severe':
-        return Colors.red;
-      case 'moderate':
-        return Colors.orange;
-      case 'low':
-      case 'mild':
-        return Colors.amber;
-      default:
-        return Colors.orange;
-    }
-  }
-
   Widget _buildTipItem(String tip) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -712,4 +721,5 @@ class ScanResultsScreen extends StatelessWidget {
       ),
     );
   }
+
 }

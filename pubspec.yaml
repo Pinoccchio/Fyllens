@@ -46,6 +46,13 @@ dependencies:
 
   # Image handling
   image_picker: ^1.0.0
+  image: ^3.3.0
+
+  # ML inference
+  tflite_flutter: ^0.11.0
+
+  # Google Generative AI (Gemini)
+  google_generative_ai: ^0.4.6
 
   # Local storage
   shared_preferences: ^2.2.0
@@ -84,6 +91,19 @@ flutter:
   assets:
     - .env
     - assets/images/
+    # ML Models and configurations
+    - assets/models/RICE/20251206_113308/rice_model.tflite
+    - assets/models/RICE/20251206_113308/class_names.json
+    - assets/models/RICE/20251206_113308/model_config.json
+    - assets/models/CORN/20251206_113459/corn_model.tflite
+    - assets/models/CORN/20251206_113459/class_names.json
+    - assets/models/CORN/20251206_113459/model_config.json
+    - assets/models/OKRA/20251206_113706/okra_model.tflite
+    - assets/models/OKRA/20251206_113706/class_names.json
+    - assets/models/OKRA/20251206_113706/model_config.json
+    - assets/models/CUCUMBER/20251206_113852/cucumber_model.tflite
+    - assets/models/CUCUMBER/20251206_113852/class_names.json
+    - assets/models/CUCUMBER/20251206_113852/model_config.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

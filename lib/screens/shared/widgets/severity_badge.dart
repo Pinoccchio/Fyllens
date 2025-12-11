@@ -1,44 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
+import 'package:fyllens/core/utils/health_status_helper.dart';
 
-/// Severity badge widget for deficiency levels
-/// Shows colored badge with severity text (Mild, Moderate, Severe)
+/// Severity badge widget for plant health status
+/// Shows colored badge with severity text (Mild, Moderate, Severe, Healthy)
+/// Uses HealthStatusHelper for consistent color coding across the app
 class SeverityBadge extends StatelessWidget {
   final String severity;
+  final bool isHealthy;
 
-  const SeverityBadge({super.key, required this.severity});
-
-  Color _getBadgeColor() {
-    switch (severity.toLowerCase()) {
-      case 'mild':
-        return const Color(0xFFFFC107); // Amber/yellow
-      case 'moderate':
-        return const Color(0xFFFF9800); // Orange
-      case 'severe':
-        return const Color(0xFFF44336); // Red
-      default:
-        return AppColors.textSecondary;
-    }
-  }
+  const SeverityBadge({
+    super.key,
+    required this.severity,
+    this.isHealthy = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // Get color and text from HealthStatusHelper
+    final badgeColor = HealthStatusHelper.getHealthColor(
+      isHealthy: isHealthy,
+      severity: severity,
+    );
+    final badgeText = HealthStatusHelper.getHealthBadgeText(
+      isHealthy: isHealthy,
+      severity: severity,
+    );
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: _getBadgeColor().withValues(alpha: 0.15),
+        color: badgeColor.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Text(
-        severity,
+        badgeText,
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: _getBadgeColor(),
+          color: badgeColor,
         ),
       ),
     );

@@ -63,18 +63,23 @@ class _LibraryScreenState extends State<LibraryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundSoft,
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundSoft,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: false,
+        title: Text('Plant Library', style: AppTextStyles.heading1),
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
+            // Search and Filter Section
             Padding(
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Plant Library', style: AppTextStyles.heading1),
-                  const SizedBox(height: AppSpacing.md),
                   // Search bar
                   Container(
                     decoration: BoxDecoration(

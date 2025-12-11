@@ -79,10 +79,23 @@ class _SplashScreenState extends State<SplashScreen>
       // Get authentication provider (without listening to changes)
       final authProvider = context.read<AuthProvider>();
 
-      // Small delay to ensure AuthProvider has fully initialized
-      // AuthProvider.initialize() is called in main.dart before app starts,
-      // but we add a safety check here
-      await Future.delayed(const Duration(milliseconds: 100));
+      debugPrint('\n⏳ Splash Screen: Waiting for AuthProvider initialization...');
+
+      // Wait for AuthProvider to complete initialization
+      // This ensures we have accurate auth state before navigating
+      int attempts = 0;
+      while (!authProvider.isInitialized && attempts < 50) {
+        // Wait max 5 seconds (50 * 100ms)
+        await Future.delayed(const Duration(milliseconds: 100));
+        attempts++;
+        if (!mounted) return;
+      }
+
+      if (!authProvider.isInitialized) {
+        debugPrint('   ⚠️ AuthProvider initialization timed out');
+      } else {
+        debugPrint('   ✅ AuthProvider initialized (took ${attempts * 100}ms)');
+      }
 
       if (!mounted) return;
 
@@ -92,6 +105,7 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Debug logging
       debugPrint('\n🔍 Splash Screen: Checking auth state');
+      debugPrint('   - isInitialized: ${authProvider.isInitialized}');
       debugPrint('   - isAuthenticated: $isAuthenticated');
       debugPrint('   - currentUser: ${currentUser?.email ?? "null"}');
 

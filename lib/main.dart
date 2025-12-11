@@ -10,6 +10,7 @@ import 'package:fyllens/providers/profile_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/theme_provider.dart';
+import 'package:fyllens/providers/tab_provider.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -82,6 +83,9 @@ void main() async {
 
         // History provider
         ChangeNotifierProvider(create: (_) => HistoryProvider()),
+
+        // Tab navigation provider
+        ChangeNotifierProvider(create: (_) => TabProvider()),
       ],
       child: const MyApp(),
     ),

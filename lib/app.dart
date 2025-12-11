@@ -14,6 +14,11 @@ import 'package:fyllens/screens/auth/register_screen.dart';
 import 'package:fyllens/screens/auth/forgot_password_screen.dart';
 import 'package:fyllens/screens/main/main_screen.dart';
 import 'package:fyllens/screens/profile/edit_profile_screen.dart';
+import 'package:fyllens/screens/scan/camera_screen.dart';
+import 'package:fyllens/screens/scan/scan_results_screen.dart';
+
+// Import providers for scan data
+import 'package:fyllens/providers/scan_provider.dart';
 
 /// Root app widget
 ///
@@ -90,15 +95,15 @@ class MyApp extends StatelessWidget {
           return AppRoutes.login;
         }
 
-        // If user IS authenticated and trying to access login/register
-        if (isAuthenticated && (isGoingToLogin || isGoingToRegister)) {
+        // If user IS authenticated and trying to access login/register/onboarding
+        if (isAuthenticated && (isGoingToLogin || isGoingToRegister || isGoingToOnboarding)) {
           // Already logged in, redirect to home
           debugPrint('✅ Redirect: Already authenticated, redirecting to home');
           return AppRoutes.home;
         }
 
-        // Allow splash and onboarding regardless of auth state
-        if (isGoingToSplash || isGoingToOnboarding || isGoingToForgotPassword) {
+        // Allow splash and forgot password regardless of auth state
+        if (isGoingToSplash || isGoingToForgotPassword) {
           return null; // No redirect
         }
 
@@ -132,9 +137,25 @@ class MyApp extends StatelessWidget {
 
         // Main screen with 5-tab bottom navigation (home, library, scan, history, profile)
         // PROTECTED: Requires authentication (enforced by redirect logic)
+        // Supports optional 'tab' query parameter to open specific tab
+        // Example: /home?tab=2 opens Scan tab (0=Home, 1=Library, 2=Scan, 3=History, 4=Profile)
         GoRoute(
           path: AppRoutes.home,
-          builder: (context, state) => const MainScreen(),
+          builder: (context, state) {
+            // LOG: Route parameter parsing
+            debugPrint('🛣️  [APP ROUTER] /home route builder called');
+            debugPrint('   Full URI: ${state.uri}');
+            debugPrint('   Query parameters: ${state.uri.queryParameters}');
+
+            final tabParam = state.uri.queryParameters['tab'];
+            final initialTab = tabParam != null ? int.tryParse(tabParam) ?? 0 : 0;
+
+            debugPrint('   tab parameter: $tabParam');
+            debugPrint('   initialTab parsed: $initialTab');
+            debugPrint('✅ [APP ROUTER] Creating MainScreen with initialTab=$initialTab');
+
+            return MainScreen(initialTab: initialTab);
+          },
         ),
 
         // Profile sub-routes
@@ -142,6 +163,88 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.editProfile,
           builder: (context, state) => const EditProfileScreen(),
+        ),
+
+        // Camera screen for plant scanning
+        // PROTECTED: Requires authentication (enforced by redirect logic)
+        GoRoute(
+          path: '${AppRoutes.scanCamera}/:plantName',
+          builder: (context, state) {
+            final plantName = state.pathParameters['plantName'] ?? 'Unknown';
+            return CameraScreen(plantName: plantName);
+          },
+        ),
+
+        // Scan result screen showing ML analysis results
+        // PROTECTED: Requires authentication (enforced by redirect logic)
+        GoRoute(
+          path: AppRoutes.scanResult,
+          builder: (context, state) {
+            // Get scan result from provider
+            final scanProvider = Provider.of<ScanProvider>(context, listen: false);
+            final scanResult = scanProvider.currentScanResult;
+
+            // Handle case where no scan data is available
+            if (scanResult == null) {
+              return const Scaffold(
+                body: Center(
+                  child: Text('No scan data available'),
+                ),
+              );
+            }
+
+            // Use Gemini-enhanced severity or calculate from confidence
+            // IMPORTANT: Don't calculate severity for healthy plants
+            String severity = scanResult.severity ?? 'Unknown';
+            if (severity == 'Unknown' && !scanResult.isHealthy) {
+              // Only calculate severity for deficient plants
+              final confidence = scanResult.confidence;
+              if (confidence != null) {
+                if (confidence >= 0.8) {
+                  severity = 'Severe';
+                } else if (confidence >= 0.6) {
+                  severity = 'Moderate';
+                } else {
+                  severity = 'Mild';
+                }
+              }
+            }
+
+            // Use Gemini-enhanced symptoms or fallback to empty list
+            final symptoms = scanResult.symptoms ?? <String>[];
+
+            // Use Gemini-enhanced treatments or fallback to ML recommendations
+            final treatments = scanResult.geminiTreatments?.map((t) {
+              return {
+                'title': t['title']?.toString() ?? 'Treatment',
+                'description': t['description']?.toString() ?? 'No details available',
+                'icon': t['icon']?.toString() ?? 'fertilizer',
+              };
+            }).toList() ?? [
+              {
+                'title': 'ML Recommendation',
+                'description': scanResult.recommendations ?? 'No recommendations available',
+                'icon': 'fertilizer',
+              },
+            ];
+
+            // Extract care tips for healthy plants
+            final careTips = scanResult.isHealthy ? scanResult.careTips : null;
+            final preventiveCare = scanResult.isHealthy ? scanResult.preventiveCare : null;
+            final growthOptimization = scanResult.isHealthy ? scanResult.growthOptimization : null;
+
+            return ScanResultsScreen(
+              plantName: scanResult.plantName,
+              imageAssetPath: scanResult.imageUrl,
+              deficiencyName: scanResult.deficiencyDetected ?? 'Unknown Deficiency',
+              severity: severity,
+              symptoms: symptoms,
+              treatments: treatments,
+              careTips: careTips,
+              preventiveCare: preventiveCare,
+              growthOptimization: growthOptimization,
+            );
+          },
         ),
       ],
     );

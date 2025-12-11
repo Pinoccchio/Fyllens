@@ -13,6 +13,7 @@ class AuthProvider with ChangeNotifier {
   User? _currentUser;
   bool _isLoading = false;
   bool _isRefreshing = false;
+  bool _isInitialized = false;
   String? _errorMessage;
 
   // Getters
@@ -20,6 +21,7 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get isAuthenticated => _currentUser != null || _isRefreshing;
+  bool get isInitialized => _isInitialized;
 
   /// Initialize auth state
   /// Call this after provider is created
@@ -102,6 +104,9 @@ class AuthProvider with ChangeNotifier {
       debugPrint('   Error: $e');
       debugPrint('   Type: ${e.runtimeType}');
       debugPrint('   Stack trace: $stackTrace');
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
     }
   }
 
