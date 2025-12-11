@@ -2,24 +2,36 @@ import 'dart:convert';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-/// Service for Google Gemini AI integration
+/// Service for Google Gemini AI integration with caching and quota handling
 ///
 /// Generates enhanced plant deficiency information including:
 /// - Detailed symptoms descriptions
 /// - Treatment recommendations
 /// - Prevention tips
 /// - Severity assessment
+///
+/// Features:
+/// - Local response caching (30-day TTL)
+/// - Quota exceeded detection and graceful fallback
+/// - Exponential backoff retry logic
+/// - Offline support via cached responses
 class GeminiAIService {
   static final GeminiAIService _instance = GeminiAIService._internal();
   static GeminiAIService get instance => _instance;
 
   late final GenerativeModel _model;
+  late final SharedPreferences _prefs;
   bool _isInitialized = false;
+
+  // Cache configuration
+  static const String _cachePrefix = 'gemini_cache_';
+  static const Duration _cacheTTL = Duration(days: 30);
 
   GeminiAIService._internal();
 
-  /// Initialize Gemini AI model
+  /// Initialize Gemini AI model and cache system
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -33,6 +45,10 @@ class GeminiAIService {
       }
 
       print('   ✅ [GEMINI AI] API key loaded from environment');
+
+      // Initialize SharedPreferences for caching
+      _prefs = await SharedPreferences.getInstance();
+      print('   ✅ [GEMINI AI] Cache system initialized');
 
       // Initialize Gemini model
       // Using gemini-2.5-flash-lite for lower quota usage and faster responses
@@ -56,13 +72,68 @@ class GeminiAIService {
     }
   }
 
-  /// Generate enhanced plant deficiency information
+  /// Generate cache key for plant/deficiency combination
+  String _getCacheKey(String plantName, String deficiencyName) {
+    return '$_cachePrefix${plantName}_$deficiencyName'.toLowerCase().replaceAll(' ', '_');
+  }
+
+  /// Cache a Gemini API response
+  Future<void> _cacheResult(
+    String plantName,
+    String deficiencyName,
+    Map<String, dynamic> result,
+  ) async {
+    try {
+      final key = _getCacheKey(plantName, deficiencyName);
+      final cacheData = {
+        'result': result,
+        'timestamp': DateTime.now().toIso8601String(),
+      };
+      await _prefs.setString(key, jsonEncode(cacheData));
+      print('   💾 [GEMINI AI] Response cached for $plantName - $deficiencyName');
+    } catch (e) {
+      print('   ⚠️  [GEMINI AI] Failed to cache response: $e');
+    }
+  }
+
+  /// Retrieve cached Gemini API response
+  Future<Map<String, dynamic>?> _getCachedResult(
+    String plantName,
+    String deficiencyName,
+  ) async {
+    try {
+      final key = _getCacheKey(plantName, deficiencyName);
+      final cached = _prefs.getString(key);
+
+      if (cached == null) return null;
+
+      final cacheData = jsonDecode(cached) as Map<String, dynamic>;
+      final timestamp = DateTime.parse(cacheData['timestamp'] as String);
+
+      // Check if cache is still valid
+      if (DateTime.now().difference(timestamp) > _cacheTTL) {
+        await _prefs.remove(key);
+        print('   🗑️  [GEMINI AI] Cache expired for $plantName - $deficiencyName');
+        return null;
+      }
+
+      print('   ✅ [GEMINI AI] Cache hit for $plantName - $deficiencyName');
+      return cacheData['result'] as Map<String, dynamic>;
+    } catch (e) {
+      print('   ⚠️  [GEMINI AI] Failed to retrieve cached response: $e');
+      return null;
+    }
+  }
+
+  /// Generate enhanced plant deficiency information with caching and quota handling
   ///
   /// Parameters:
   /// - [plantName]: Name of the plant species
   /// - [deficiencyName]: Name of detected deficiency (or "Healthy")
   /// - [confidence]: ML model confidence score (0.0 - 1.0)
   /// - [isHealthy]: Whether the plant is healthy (changes prompt behavior)
+  /// - [retryCount]: Internal retry counter for exponential backoff (do not set manually)
+  /// - [maxRetries]: Maximum number of retry attempts (default: 3)
   ///
   /// Returns Map containing:
   /// For DEFICIENT plants:
@@ -75,11 +146,19 @@ class GeminiAIService {
   /// - careTips: List<String> - General care recommendations
   /// - preventiveCare: List<String> - How to keep plant healthy
   /// - growthOptimization: List<String> - Tips to maximize growth
+  ///
+  /// Features:
+  /// - Checks cache first (30-day TTL)
+  /// - Quota exceeded detection with fallback
+  /// - Exponential backoff retry (2s, 4s, 8s)
+  /// - Caches successful responses
   Future<Map<String, dynamic>> generateDeficiencyInfo({
     required String plantName,
     required String deficiencyName,
     required double confidence,
     bool isHealthy = false,
+    int retryCount = 0,
+    int maxRetries = 3,
   }) async {
     print('\n🌟 [GEMINI AI] Generating enhanced ${isHealthy ? 'care' : 'deficiency'} info...');
     print('   Plant: $plantName');
@@ -89,6 +168,13 @@ class GeminiAIService {
 
     if (!_isInitialized) {
       await initialize();
+    }
+
+    // Check cache first
+    final cached = await _getCachedResult(plantName, deficiencyName);
+    if (cached != null) {
+      print('   ⚡ [GEMINI AI] Returning cached response (instant)');
+      return cached;
     }
 
     try {
@@ -279,6 +365,9 @@ Response:''';
           print('      - Prevention: ${(result['prevention'] as List).length} items');
         }
 
+        // Cache the successful response
+        await _cacheResult(plantName, deficiencyName, result);
+
         return result;
       } catch (parseError) {
         print(
@@ -294,10 +383,52 @@ Response:''';
         );
       }
     } catch (e, stackTrace) {
-      print('   🚨 [GEMINI AI] Error generating deficiency info: $e');
-      print('   Stack Trace: $stackTrace');
+      final errorStr = e.toString().toLowerCase();
 
-      // Return fallback data instead of failing
+      // Check if this is a quota exceeded error
+      if (errorStr.contains('quota') ||
+          errorStr.contains('429') ||
+          errorStr.contains('exceeded') ||
+          errorStr.contains('rate limit')) {
+
+        print('   ⚠️  [GEMINI AI] Quota exceeded detected!');
+        print('   💡 [GEMINI AI] Using fallback data (quota-limited mode)');
+
+        // Return fallback with quota marker
+        return _getFallbackDeficiencyInfo(
+          plantName: plantName,
+          deficiencyName: deficiencyName,
+          confidence: confidence,
+          isHealthy: isHealthy,
+          isQuotaExceeded: true,
+        );
+      }
+
+      // For other transient errors, implement exponential backoff retry
+      if (retryCount < maxRetries) {
+        final delaySeconds = 2 << retryCount; // 2^(retryCount+1): 2s, 4s, 8s
+        print('   ⏳ [GEMINI AI] Temporary error, retrying in ${delaySeconds}s...');
+        print('      Attempt ${retryCount + 1}/$maxRetries');
+        print('      Error: $e');
+
+        await Future.delayed(Duration(seconds: delaySeconds));
+
+        return generateDeficiencyInfo(
+          plantName: plantName,
+          deficiencyName: deficiencyName,
+          confidence: confidence,
+          isHealthy: isHealthy,
+          retryCount: retryCount + 1,
+          maxRetries: maxRetries,
+        );
+      }
+
+      // All retries failed
+      print('   🚨 [GEMINI AI] All retry attempts failed');
+      print('   Error: $e');
+      print('   Stack Trace: $stackTrace');
+      print('   💡 [GEMINI AI] Using fallback data');
+
       return _getFallbackDeficiencyInfo(
         plantName: plantName,
         deficiencyName: deficiencyName,
@@ -314,18 +445,27 @@ Response:''';
     return 'Mild';
   }
 
-  /// Fallback deficiency information when API fails
+  /// Fallback deficiency information when API fails or quota exceeded
   Map<String, dynamic> _getFallbackDeficiencyInfo({
     required String plantName,
     required String deficiencyName,
     required double confidence,
     required bool isHealthy,
+    bool isQuotaExceeded = false,
   }) {
-    print('   ℹ️  [GEMINI AI] Using fallback ${isHealthy ? 'care' : 'deficiency'} information');
+    if (isQuotaExceeded) {
+      print('   ℹ️  [GEMINI AI] Using fallback (Quota Exceeded Mode)');
+      print('   📊 [GEMINI AI] Free tier limit: 20 requests/day reached');
+      print('   💡 [GEMINI AI] Tip: Enable billing or wait for quota reset');
+    } else {
+      print('   ℹ️  [GEMINI AI] Using fallback ${isHealthy ? 'care' : 'deficiency'} information');
+    }
+
+    final Map<String, dynamic> result;
 
     if (isHealthy) {
       // Fallback for healthy plants
-      return {
+      result = {
         'careTips': [
           'Maintain regular watering schedule for $plantName',
           'Ensure adequate sunlight exposure',
@@ -344,7 +484,7 @@ Response:''';
       };
     } else {
       // Fallback for deficient plants
-      return {
+      result = {
         'severity': _calculateSeverity(confidence),
         'symptoms': [
           'Visual signs of $deficiencyName in $plantName',
@@ -370,6 +510,14 @@ Response:''';
         ],
       };
     }
+
+    // Add quota marker if applicable
+    if (isQuotaExceeded) {
+      result['_isQuotaExceeded'] = true;
+      result['_quotaMessage'] = 'Daily AI limit reached. Showing default information.';
+    }
+
+    return result;
   }
 
   /// Dispose resources
