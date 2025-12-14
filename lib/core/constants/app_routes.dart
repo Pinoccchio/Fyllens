@@ -26,6 +26,9 @@ class AppRoutes {
   // Profile Routes
   static const String editProfile = '/profile/edit';
 
+  // Chat Routes
+  static const String chat = '/chat';
+
   // Settings
   static const String settings = '/settings';
 }

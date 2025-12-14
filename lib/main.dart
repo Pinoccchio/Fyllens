@@ -12,6 +12,7 @@ import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/theme_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/providers/library_provider.dart';
+import 'package:fyllens/providers/chat_provider.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -90,6 +91,9 @@ void main() async {
 
         // Library provider (simple, unified provider)
         ChangeNotifierProvider(create: (_) => LibraryProvider()),
+
+        // Chat provider for AI conversation
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: const MyApp(),
     ),

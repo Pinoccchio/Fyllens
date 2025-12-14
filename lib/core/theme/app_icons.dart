@@ -213,6 +213,12 @@ abstract class AppIcons {
   /// Chat/message icon
   static PhosphorIconData get chat => PhosphorIcons.chatCircle;
 
+  /// Send icon - for sending messages
+  static PhosphorIconData get send => PhosphorIcons.paperPlaneRight;
+
+  /// Sparkle/AI icon - for AI features
+  static PhosphorIconData get sparkle => PhosphorIcons.sparkle;
+
   /// Share icon
   static PhosphorIconData get share => PhosphorIcons.shareNetwork;
 

@@ -1,25 +1,25 @@
-W/WindowOnBackDispatcher(20086): Set 'android:enableOnBackInvokedCallback="true"' in the application    
-manifest.
-D/TextSelection(20086): onUseCache cache=false
-I/PowerHalMgrImpl(20086): hdl:184315, pid:20086 
-I/ScrollIdentify(20086): on fling
-D/TextSelection(20086): onUseCache cache=false
-I/flutter (20086): ≡ƒöä [RESCAN CALLBACK] Callback triggered
-I/flutter (20086):    Context mounted: true
-I/flutter (20086): ≡ƒî▒ [RESCAN CALLBACK] Pre-selecting plant: Rice
-I/flutter (20086): ≡ƒî▒ [SCAN PROVIDER] Pre-selecting plant: Rice
-I/flutter (20086): Γ£à [RESCAN CALLBACK] Plant pre-selected successfully
-I/flutter (20086): ≡ƒº╣ [RESCAN CALLBACK] Clearing current scan...
-I/flutter (20086): Γ£à [RESCAN CALLBACK] Scan cleared successfully
-I/flutter (20086): ≡ƒöÖ [RESCAN CALLBACK] Popping HistoryResultScreen...
-I/flutter (20086): Γ£à [RESCAN CALLBACK] Navigator.pop() executed
-I/flutter (20086): ≡ƒÄ» [RESCAN CALLBACK] Switching to Scan tab via TabProvider...
-I/flutter (20086): ≡ƒöä [TAB PROVIDER] setTab(2) called
-I/flutter (20086):    Previous tab: 3
-I/flutter (20086): Γ£à [TAB PROVIDER] Tab updated to: 2
-I/flutter (20086): Γ£à [RESCAN CALLBACK] Tab switch complete!
-I/flutter (20086): ≡ƒôí [MAIN SCREEN] TabProvider changed: 2
-I/flutter (20086):    Syncing _currentIndex from 3 to 2
-I/flutter (20086): Γ£à [MAIN SCREEN] _currentIndex synced to: 2
-D/TextSelection(20086): onUseCache cache=false
-I/ScrollIdentify(20086): on fling
+Launching lib\main.dart on Infinix X6853 in debug mode...
+lib/screens/chat/chat_screen.dart:164:36: Error: The method 'go' isn't defined for the class 'BuildContext'.
+ - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/flutter/packages/flutter/lib/src/widgets/framework.dart').
+Try correcting the name to the name of an existing method, or defining a method named 'go'.
+          onPressed: () => context.go(AppRoutes.home),
+                                   ^^
+lib/screens/chat/chat_screen.dart:164:39: Error: The getter 'AppRoutes' isn't defined for the class '_ChatScreenState'.
+ - '_ChatScreenState' is from 'package:fyllens/screens/chat/chat_screen.dart' ('lib/screens/chat/chat_screen.dart').
+Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRoutes'.
+          onPressed: () => context.go(AppRoutes.home),
+                                      ^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.

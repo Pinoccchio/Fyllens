@@ -870,6 +870,296 @@ Response:''';
     };
   }
 
+  /// Ask a general agricultural question to Gemini AI
+  ///
+  /// This method is used for FAQ-style questions and conversational queries
+  /// about plant care, deficiencies, treatments, etc.
+  ///
+  /// Parameters:
+  /// - [question]: The question or prompt to ask Gemini
+  ///
+  /// Returns:
+  /// - A plain text answer from Gemini AI
+  ///
+  /// Features:
+  /// - Uses same caching system as deficiency info (30-day TTL)
+  /// - Quota handling with graceful fallback
+  /// - Optimized for concise, actionable agricultural advice
+  Future<String> askGeneralQuestion(String question) async {
+    print('\n💬 [GEMINI AI] Asking general question to Gemini...');
+    print('   Question: $question');
+
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    // Create simple cache key for general questions
+    final cacheKey = '$_cachePrefix${'general_${question.hashCode}'}'.toLowerCase();
+
+    // Check cache first
+    try {
+      final cached = _prefs.getString(cacheKey);
+      if (cached != null) {
+        final cacheData = jsonDecode(cached) as Map<String, dynamic>;
+        final timestamp = DateTime.parse(cacheData['timestamp'] as String);
+
+        // Check if cache is still valid
+        if (DateTime.now().difference(timestamp) <= _cacheTTL) {
+          print('   ✅ [GEMINI AI] Cache hit for general question');
+          return cacheData['answer'] as String;
+        } else {
+          await _prefs.remove(cacheKey);
+          print('   🗑️  [GEMINI AI] Cache expired for general question');
+        }
+      }
+    } catch (e) {
+      print('   ⚠️  [GEMINI AI] Cache read error: $e');
+    }
+
+    try {
+      // Create prompt for general agricultural questions
+      final prompt = '''
+You are an expert agricultural scientist and plant pathologist.
+
+Answer the following question with practical, actionable advice:
+
+$question
+
+Guidelines:
+1. Be specific and concise (2-3 paragraphs maximum)
+2. Provide actionable steps when applicable
+3. Use professional but accessible language
+4. Focus on practical farming advice
+5. If mentioning products/chemicals, include application rates
+6. Prioritize organic and sustainable methods when relevant
+
+Response:''';
+
+      print('   📝 [GEMINI AI] Sending question to Gemini API...');
+
+      final content = [Content.text(prompt)];
+      final response = await _model.generateContent(content);
+
+      print('   ✅ [GEMINI AI] Received response from Gemini API');
+
+      if (response.text == null || response.text!.isEmpty) {
+        throw Exception('Empty response from Gemini API');
+      }
+
+      final answer = response.text!.trim();
+
+      // Cache the response
+      try {
+        final cacheData = {
+          'answer': answer,
+          'timestamp': DateTime.now().toIso8601String(),
+        };
+        await _prefs.setString(cacheKey, jsonEncode(cacheData));
+        print('   💾 [GEMINI AI] Response cached for general question');
+      } catch (e) {
+        print('   ⚠️  [GEMINI AI] Failed to cache response: $e');
+      }
+
+      return answer;
+    } catch (e) {
+      final errorStr = e.toString().toLowerCase();
+
+      // Check if this is a quota exceeded error
+      if (errorStr.contains('quota') ||
+          errorStr.contains('429') ||
+          errorStr.contains('exceeded') ||
+          errorStr.contains('rate limit')) {
+        print('   ⚠️  [GEMINI AI] Quota exceeded for general question!');
+        print('   💡 [GEMINI AI] Using fallback response');
+
+        return '''I apologize, but I've reached my daily AI request limit.
+
+However, I can provide some general advice:
+
+For plant health questions, ensure your plants receive:
+- Adequate water (1-2 inches per week for most crops)
+- Full sunlight (6-8 hours daily)
+- Balanced NPK fertilizer every 2-4 weeks
+- Regular monitoring for pests and diseases
+
+For specific deficiency or disease questions, please:
+1. Use the Scan feature to analyze your plant
+2. Consult your local agricultural extension office
+3. Visit the Library tab for detailed plant care guides
+
+The AI will be available again tomorrow!''';
+      }
+
+      // Other errors - provide generic fallback
+      print('   🚨 [GEMINI AI] Error asking general question: $e');
+      print('   💡 [GEMINI AI] Using fallback response');
+
+      return '''I encountered an error processing your question. Here's some general guidance:
+
+For plant care questions:
+- Maintain consistent watering and fertilization schedules
+- Monitor plants regularly for signs of stress or disease
+- Use the Scan feature to diagnose specific plant issues
+- Check the Library tab for detailed plant information
+
+For specific agricultural advice, please:
+1. Consult your local agricultural extension office
+2. Contact plant pathology experts in your region
+3. Try asking the question again later
+
+I apologize for the inconvenience!''';
+    }
+  }
+
+  /// Start a conversational chat session with history
+  ///
+  /// Creates a ChatSession that maintains conversation context.
+  /// Used for messenger-style chat where AI remembers previous messages.
+  ///
+  /// Parameters:
+  /// - [history]: List of previous messages (Content objects with role and text)
+  ///
+  /// Returns:
+  /// - ChatSession that can send/receive messages with context
+  ///
+  /// Example:
+  /// ```dart
+  /// final history = await loadConversationHistory(conversationId);
+  /// final chat = await startConversation(history: history);
+  /// final response = await chat.sendMessage(Content.text('Your question'));
+  /// ```
+  Future<ChatSession> startConversation({
+    List<Content> history = const [],
+  }) async {
+    print('\n💬 [GEMINI AI CHAT] Starting conversational chat session...');
+    print('   History messages: ${history.length}');
+
+    if (!_isInitialized) {
+      await initialize();
+    }
+
+    // Truncate history if too long (keep last 40 messages to stay within token limits)
+    final truncatedHistory = _truncateHistory(history, maxMessages: 40);
+    if (truncatedHistory.length < history.length) {
+      print('   ✂️  [GEMINI AI CHAT] Truncated history from ${history.length} to ${truncatedHistory.length} messages');
+    }
+
+    // Create chat session with history
+    final chatSession = _model.startChat(
+      history: truncatedHistory,
+      generationConfig: GenerationConfig(
+        temperature: 0.8, // Slightly higher for natural conversation
+        topK: 40,
+        topP: 0.95,
+        maxOutputTokens: 512, // Shorter responses for chat
+      ),
+    );
+
+    print('   ✅ [GEMINI AI CHAT] Chat session started successfully');
+    return chatSession;
+  }
+
+  /// Send a message in an existing chat session
+  ///
+  /// Sends user message and gets AI response with full conversation context.
+  ///
+  /// Parameters:
+  /// - [chatSession]: The active chat session
+  /// - [message]: User's message text
+  ///
+  /// Returns:
+  /// - AI's response text
+  ///
+  /// Throws:
+  /// - Exception if quota exceeded or API error
+  Future<String> sendChatMessage({
+    required ChatSession chatSession,
+    required String message,
+  }) async {
+    print('\n💬 [GEMINI AI CHAT] Sending message...');
+    print('   Message: ${message.length > 100 ? '${message.substring(0, 100)}...' : message}');
+
+    try {
+      final response = await chatSession.sendMessage(Content.text(message));
+
+      if (response.text == null || response.text!.isEmpty) {
+        throw Exception('Empty response from Gemini AI');
+      }
+
+      print('   ✅ [GEMINI AI CHAT] Received response');
+      print('   Response length: ${response.text!.length} characters');
+
+      return response.text!.trim();
+    } catch (e) {
+      final errorStr = e.toString().toLowerCase();
+
+      // Check for quota exceeded
+      if (errorStr.contains('quota') ||
+          errorStr.contains('429') ||
+          errorStr.contains('exceeded') ||
+          errorStr.contains('rate limit')) {
+        print('   ⚠️  [GEMINI AI CHAT] Quota exceeded!');
+        throw Exception('QUOTA_EXCEEDED');
+      }
+
+      print('   🚨 [GEMINI AI CHAT] Error sending message: $e');
+      rethrow;
+    }
+  }
+
+  /// Load conversation history from database
+  ///
+  /// Converts AIMessage objects to Gemini Content format for chat context.
+  ///
+  /// Parameters:
+  /// - [messages]: List of AIMessage objects from database
+  ///
+  /// Returns:
+  /// - List of Content objects for Gemini chat history
+  List<Content> buildChatHistory(List<dynamic> messages) {
+    print('\n📚 [GEMINI AI CHAT] Building chat history...');
+    print('   Total messages: ${messages.length}');
+
+    final history = <Content>[];
+
+    for (final msg in messages) {
+      try {
+        final senderType = msg['sender_type'] as String;
+        final messageText = msg['message_text'] as String;
+
+        // Map sender_type to Gemini role
+        final role = senderType == 'user' ? 'user' : 'model';
+
+        history.add(Content(role, [TextPart(messageText)]));
+      } catch (e) {
+        print('   ⚠️  [GEMINI AI CHAT] Error parsing message: $e');
+      }
+    }
+
+    print('   ✅ [GEMINI AI CHAT] Chat history built: ${history.length} messages');
+    return history;
+  }
+
+  /// Truncate conversation history to stay within token limits
+  ///
+  /// Keeps only the most recent N messages to avoid exceeding
+  /// Gemini's context window (~8k tokens).
+  ///
+  /// Parameters:
+  /// - [history]: Full conversation history
+  /// - [maxMessages]: Maximum number of messages to keep (default: 40)
+  ///
+  /// Returns:
+  /// - Truncated history (most recent messages)
+  List<Content> _truncateHistory(List<Content> history, {int maxMessages = 40}) {
+    if (history.length <= maxMessages) {
+      return history;
+    }
+
+    // Keep most recent messages
+    return history.sublist(history.length - maxMessages);
+  }
+
   /// Dispose resources
   void dispose() {
     print('🗑️  [GEMINI AI] Disposing Gemini AI service');
