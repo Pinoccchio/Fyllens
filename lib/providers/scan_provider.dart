@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:fyllens/models/scan_result.dart';
+import 'package:fyllens/models/deficiency.dart';
 import 'package:fyllens/services/database_service.dart';
 import 'package:fyllens/services/ml_service.dart';
 import 'package:fyllens/services/storage_service.dart';
 import 'package:fyllens/services/gemini_ai_service.dart';
+import 'package:fyllens/services/supabase_service.dart';
 
 /// Scan provider - manages plant scan operations
 class ScanProvider with ChangeNotifier {
@@ -13,14 +15,17 @@ class ScanProvider with ChangeNotifier {
   final MLService _mlService = MLService.instance;
   final StorageService _storageService = StorageService.instance;
   final GeminiAIService _geminiService = GeminiAIService.instance;
+  final _supabase = SupabaseService.instance.client;
 
   bool _isScanning = false;
   ScanResult? _currentScanResult;
   String? _errorMessage;
+  String? _preselectedPlant;
 
   bool get isScanning => _isScanning;
   ScanResult? get currentScanResult => _currentScanResult;
   String? get errorMessage => _errorMessage;
+  String? get preselectedPlant => _preselectedPlant;
 
   Future<bool> performScan({
     required File imageFile,
@@ -51,6 +56,33 @@ class ScanProvider with ChangeNotifier {
       print('      - Deficiency: ${mlResult['deficiency']}');
       print('      - Confidence: ${mlResult['confidence']}');
       print('      - Is Healthy: ${mlResult['isHealthy']}');
+
+      // Lookup deficiency information from library database
+      print('   📚 [SCAN PROVIDER] Step 1.5: Looking up deficiency info from database...');
+      Deficiency? deficiencyFromDB;
+
+      try {
+        final deficiencyResponse = await _supabase
+            .from('deficiencies')
+            .select()
+            .ilike('name', mlResult['deficiency'] ?? 'Unknown')
+            .maybeSingle();
+
+        if (deficiencyResponse != null) {
+          deficiencyFromDB = Deficiency.fromJson(deficiencyResponse);
+          print('   ✅ [SCAN PROVIDER] Found deficiency in database!');
+          print('      - Name: ${deficiencyFromDB.name}');
+          print('      - Scientific Name: ${deficiencyFromDB.scientificName}');
+          print('      - Pathogen Type: ${deficiencyFromDB.pathogenType}');
+          print('      - Has ${deficiencyFromDB.symptoms.length} symptoms');
+          print('      - Has ${deficiencyFromDB.preventionMethods?.length ?? 0} prevention methods');
+        } else {
+          print('   ⚠️  [SCAN PROVIDER] Deficiency not found in database, will use ML+Gemini data only');
+        }
+      } catch (e) {
+        print('   ⚠️  [SCAN PROVIDER] Error looking up deficiency: $e');
+        print('      - Will use ML+Gemini data only');
+      }
 
       // Upload image to storage
       final path = '$userId/${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -182,6 +214,20 @@ class ScanProvider with ChangeNotifier {
 
   void clearError() {
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  /// Pre-select a plant for scanning (used when navigating from plant detail screen)
+  void preselectPlant(String plantName) {
+    print('🌱 [SCAN PROVIDER] Pre-selecting plant: $plantName');
+    _preselectedPlant = plantName;
+    notifyListeners();
+  }
+
+  /// Clear preselection after it has been applied
+  void clearPreselection() {
+    print('🧹 [SCAN PROVIDER] Clearing plant preselection');
+    _preselectedPlant = null;
     notifyListeners();
   }
 

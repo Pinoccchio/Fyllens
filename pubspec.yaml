@@ -69,6 +69,9 @@ dependencies:
   # Google Fonts integration
   google_fonts: ^6.1.0
 
+  # Logging
+  logger: ^2.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -91,6 +94,11 @@ flutter:
   assets:
     - .env
     - assets/images/
+    - assets/images/library/
+    - assets/images/library/corn/
+    - assets/images/library/cucumber/
+    - assets/images/library/okra/
+    - assets/images/library/rice/
     # ML Models and configurations
     - assets/models/RICE/20251206_113308/rice_model.tflite
     - assets/models/RICE/20251206_113308/class_names.json

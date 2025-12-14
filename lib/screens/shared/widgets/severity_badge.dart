@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
 

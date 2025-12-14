@@ -1,263 +1,398 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
+import 'package:fyllens/providers/library_provider.dart';
+import 'package:fyllens/providers/scan_provider.dart';
+import 'package:fyllens/providers/tab_provider.dart';
+import 'package:fyllens/presentation/shared/widgets/plant_image_carousel.dart';
 
-/// Plant detail page showing comprehensive plant information
-/// Displays overview, deficiencies, and growing conditions
-class PlantDetailScreen extends StatelessWidget {
-  final String plantName;
-  final String scientificName;
-  final String? imageAssetPath;
+/// Plant detail page showing comprehensive plant information from Supabase
+class PlantDetailScreen extends StatefulWidget {
+  final String plantId;
 
   const PlantDetailScreen({
     super.key,
-    required this.plantName,
-    required this.scientificName,
-    this.imageAssetPath,
+    required this.plantId,
   });
+
+  @override
+  State<PlantDetailScreen> createState() => _PlantDetailScreenState();
+}
+
+class _PlantDetailScreenState extends State<PlantDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load plant data when screen initializes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<LibraryProvider>().loadPlantDetail(widget.plantId);
+    });
+  }
+
+  @override
+  void dispose() {
+    // Clear plant detail when leaving screen
+    context.read<LibraryProvider>().clearPlantDetail();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundSoft,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Header with back button and plant name
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.sm,
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    icon: Icon(AppIcons.arrowBack),
-                    onPressed: () => Navigator.pop(context),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+      body: Consumer<LibraryProvider>(
+        builder: (context, provider, child) {
+          // Loading state
+          if (provider.isLoadingDetail) {
+            return _buildLoadingState();
+          }
+
+          // Error state
+          if (provider.hasDetailError) {
+            return _buildErrorState(provider.detailError!);
+          }
+
+          // No data state
+          if (!provider.hasPlantData) {
+            return _buildNoDataState();
+          }
+
+          final plant = provider.currentPlant!;
+          final deficiencies = provider.currentDeficiencies;
+
+          return SafeArea(
+            child: Column(
+              children: [
+                // Header with back button and plant name
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
-                  Expanded(
-                    child: Column(
-                      children: [
-                        Text(
-                          plantName,
-                          style: AppTextStyles.heading2,
-                          textAlign: TextAlign.center,
-                        ),
-                        Text(
-                          scientificName,
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 40), // Balance for back button
-                ],
-              ),
-            ),
-
-            // Scrollable content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Plant image
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 200,
-                        child: imageAssetPath != null
-                            ? Image.asset(
-                                imageAssetPath!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildPlaceholder(),
-                              )
-                            : _buildPlaceholder(),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(AppIcons.arrowBack),
+                        onPressed: () => Navigator.pop(context),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Overview section
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
-                        border: Border.all(
-                          color: AppColors.textSecondary.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Overview', style: AppTextStyles.heading3),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            _getPlantOverview(plantName),
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: AppColors.textPrimary,
-                              height: 1.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-
-                    // Common Nutrient Deficiencies
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
-                        border: Border.all(
-                          color: AppColors.textSecondary.withValues(alpha: 0.2),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Common Nutrient Deficiencies',
-                            style: AppTextStyles.heading3,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          _buildDeficiencyItem(
-                            'Nitrogen Deficiency',
-                            'Common',
-                            const Color(0xFFFFB84D),
-                          ),
-                          const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem(
-                            'Phosphorus Deficiency',
-                            'Moderate',
-                            const Color(0xFFFFEB99),
-                          ),
-                          const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem(
-                            'Potassium Deficiency',
-                            'Common',
-                            const Color(0xFFFFB84D),
-                          ),
-                          const Divider(height: AppSpacing.md),
-                          _buildDeficiencyItem(
-                            'Iron Deficiency',
-                            'Rare',
-                            const Color(0xFFB3D9FF),
-                            isLast: true,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-
-                    // Ideal Growing Conditions
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
-                        borderRadius: BorderRadius.circular(
-                          AppSpacing.radiusMd,
-                        ),
-                        border: Border.all(
-                          color: AppColors.primaryGreenModern.withValues(
-                            alpha: 0.3,
-                          ),
-                          width: 1,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Ideal Growing Conditions',
-                            style: AppTextStyles.heading3,
-                          ),
-                          const SizedBox(height: AppSpacing.md),
-                          ..._getGrowingConditions(plantName),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Scan This Plant button
-                    SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // TODO: Navigate to scan page with this plant selected
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGreenModern,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusMd,
-                            ),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                      Expanded(
+                        child: Column(
                           children: [
-                            Icon(AppIcons.camera, size: 20),
-                            const SizedBox(width: AppSpacing.sm),
                             Text(
-                              'Scan This Plant',
-                              style: AppTextStyles.buttonMedium,
+                              plant.name,
+                              style: AppTextStyles.heading2,
+                              textAlign: TextAlign.center,
                             ),
+                            Text(
+                              plant.scientificName ?? plant.species,
+                              style: AppTextStyles.bodySmall.copyWith(
+                                color: AppColors.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (plant.family != null) ...[
+                              const SizedBox(height: 2),
+                              Text(
+                                plant.family!,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 11,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ],
                         ),
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
+                      const SizedBox(width: 40), // Balance for back button
+                    ],
+                  ),
                 ),
-              ),
+
+                // Scrollable content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Plant image carousel
+                        if (plant.images != null && plant.images!.isNotEmpty)
+                          PlantImageCarousel(
+                            imagePaths: plant.images!,
+                            height: 250,
+                          )
+                        else if (plant.imageUrl != null)
+                          _buildSingleImage(plant.imageUrl!)
+                        else
+                          _buildPlaceholder(),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // Overview section
+                        _buildCard(
+                          title: 'Overview',
+                          content: plant.description,
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+
+                        // Common Deficiencies section
+                        if (deficiencies.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                              border: Border.all(
+                                color: AppColors.textSecondary
+                                    .withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Common Deficiencies & Diseases',
+                                  style: AppTextStyles.heading3,
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                ...deficiencies.asMap().entries.map((entry) {
+                                  final index = entry.key;
+                                  final deficiency = entry.value;
+                                  final isLast = index == deficiencies.length - 1;
+
+                                  return Column(
+                                    children: [
+                                      _buildDeficiencyItem(
+                                        deficiency.name,
+                                        deficiency.pathogenType ?? 'Unknown',
+                                      ),
+                                      if (!isLast)
+                                        const Divider(height: AppSpacing.md),
+                                    ],
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: AppSpacing.md),
+
+                        // Ideal Growing Conditions section
+                        if (plant.optimalConditions != null)
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F5E9),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                              border: Border.all(
+                                color: AppColors.primaryGreenModern.withValues(
+                                  alpha: 0.3,
+                                ),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Ideal Growing Conditions',
+                                  style: AppTextStyles.heading3,
+                                ),
+                                const SizedBox(height: AppSpacing.sm),
+                                Text(
+                                  plant.optimalConditions!,
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: AppColors.textPrimary,
+                                    height: 1.6,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        const SizedBox(height: AppSpacing.md),
+
+                        // Growth Stages Timeline section
+                        if (plant.growthStages != null &&
+                            plant.growthStages!.isNotEmpty)
+                          Container(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F0FF),
+                              borderRadius: BorderRadius.circular(
+                                AppSpacing.radiusMd,
+                              ),
+                              border: Border.all(
+                                color: const Color(0xFF9C27B0).withValues(
+                                  alpha: 0.3,
+                                ),
+                                width: 1,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(
+                                      Icons.timeline,
+                                      color: const Color(0xFF9C27B0),
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: AppSpacing.sm),
+                                    Text(
+                                      'Growth Stages Timeline',
+                                      style: AppTextStyles.heading3,
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: AppSpacing.md),
+                                ...plant.growthStages!.asMap().entries.map(
+                                  (entry) {
+                                    final index = entry.key;
+                                    final stage = entry.value;
+                                    return _buildTimelineItem(
+                                      index + 1,
+                                      stage,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (plant.growthStages != null &&
+                            plant.growthStages!.isNotEmpty)
+                          const SizedBox(height: AppSpacing.md),
+
+                        // Healthy Description section
+                        if (plant.healthyDescription != null)
+                          _buildCard(
+                            title: 'Healthy Plant Care',
+                            content: plant.healthyDescription!,
+                            backgroundColor: const Color(0xFFF1F8F4),
+                          ),
+
+                        const SizedBox(height: AppSpacing.lg),
+
+                        // Scan This Plant button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              // Pre-select this plant in scan screen
+                              print('🌱 [PLANT DETAIL] Pre-selecting plant: ${plant.name}');
+                              context.read<ScanProvider>().preselectPlant(plant.name);
+
+                              // Navigate back to home and switch to Scan tab
+                              Navigator.pop(context);
+                              context.read<TabProvider>().setTab(2); // Scan tab
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryGreenModern,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  AppSpacing.radiusMd,
+                                ),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(AppIcons.camera, size: 20),
+                                const SizedBox(width: AppSpacing.sm),
+                                Text(
+                                  'Scan This Plant',
+                                  style: AppTextStyles.buttonMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildPlaceholder() {
-    return Container(
-      color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-      child: Center(
-        child: Icon(
-          AppIcons.flower,
-          size: 64,
-          color: AppColors.primaryGreenModern,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDeficiencyItem(
-    String name,
-    String severity,
-    Color color, {
-    bool isLast = false,
+  Widget _buildCard({
+    required String title,
+    required String content,
+    Color backgroundColor = Colors.white,
   }) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: AppColors.textSecondary.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: AppTextStyles.heading3),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            content,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+              height: 1.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDeficiencyItem(String name, String type) {
+    // Determine color based on type
+    Color badgeColor;
+    Color textColor;
+
+    switch (type.toLowerCase()) {
+      case 'fungal':
+        badgeColor = const Color(0xFFFFB84D);
+        textColor = const Color(0xFFE65100);
+        break;
+      case 'bacterial':
+        badgeColor = const Color(0xFFFF8A80);
+        textColor = const Color(0xFFD32F2F);
+        break;
+      case 'viral':
+        badgeColor = const Color(0xFFB39DDB);
+        textColor = const Color(0xFF5E35B1);
+        break;
+      case 'nutrient':
+        badgeColor = const Color(0xFFFFEB99);
+        textColor = Colors.black87;
+        break;
+      default:
+        badgeColor = const Color(0xFFB3D9FF);
+        textColor = const Color(0xFF1976D2);
+    }
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -272,17 +407,13 @@ class PlantDetailScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: color,
+            color: badgeColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
           ),
           child: Text(
-            severity,
+            type,
             style: AppTextStyles.bodySmall.copyWith(
-              color: severity == 'Moderate'
-                  ? Colors.black87
-                  : severity == 'Rare'
-                  ? const Color(0xFF1976D2)
-                  : const Color(0xFFE65100),
+              color: textColor,
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -292,34 +423,52 @@ class PlantDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildConditionItem(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSingleImage(String imageUrl) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: SizedBox(
+        width: double.infinity,
+        height: 250,
+        child: Image.asset(
+          imageUrl,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder() {
+    return Container(
+      width: double.infinity,
+      height: 250,
+      decoration: BoxDecoration(
+        color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Center(
+        child: Icon(
+          AppIcons.flower,
+          size: 64,
+          color: AppColors.primaryGreenModern,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20, color: AppColors.primaryGreenModern),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textPrimary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+          CircularProgressIndicator(
+            color: AppColors.primaryGreenModern,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'Loading plant details...',
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textSecondary,
             ),
           ),
         ],
@@ -327,105 +476,103 @@ class PlantDetailScreen extends StatelessWidget {
     );
   }
 
-  String _getPlantOverview(String plant) {
-    switch (plant.toLowerCase()) {
-      case 'rice':
-        return 'Rice is a staple crop grown worldwide, particularly in Asia. It requires specific nutrient management for optimal growth and yield. Understanding its nutrient requirements is crucial for successful cultivation.';
-      case 'corn':
-        return 'Corn is a versatile cereal grain widely cultivated for food, livestock feed, and industrial products. It has high nutrient demands and requires careful management for optimal productivity.';
-      case 'okra':
-        return 'Okra is a warm-season vegetable known for its edible green pods. It is relatively easy to grow but requires balanced nutrition and proper care to produce abundant harvests.';
-      case 'cucumber':
-        return 'Cucumber is a popular vegetable crop grown for fresh consumption and pickling. It requires consistent moisture and balanced nutrition for healthy growth and fruit production.';
-      default:
-        return 'This plant requires specific care and nutrient management for optimal growth and productivity.';
-    }
+  Widget _buildErrorState(String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 64,
+              color: AppColors.error,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Error Loading Plant',
+              style: AppTextStyles.heading3,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              error,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ElevatedButton(
+              onPressed: () {
+                context.read<LibraryProvider>().retryDetail(widget.plantId);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGreenModern,
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
-  List<Widget> _getGrowingConditions(String plant) {
-    switch (plant.toLowerCase()) {
-      case 'rice':
-        return [
-          _buildConditionItem(
-            AppIcons.sun,
-            'Sunlight',
-            'Full sun (6-8 hours daily)',
+  Widget _buildNoDataState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.inbox_outlined,
+            size: 64,
+            color: AppColors.textSecondary,
           ),
-          _buildConditionItem(
-            AppIcons.waterDrop,
-            'Water',
-            'Flooded conditions preferred',
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            'No plant data found',
+            style: AppTextStyles.heading3,
           ),
-          _buildConditionItem(
-            AppIcons.seedling,
-            'Soil pH',
-            '5.5 to 6.5 (slightly acidic)',
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTimelineItem(int number, String stage) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: const BoxDecoration(
+              color: Color(0xFF9C27B0),
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                '$number',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
           ),
-        ];
-      case 'corn':
-        return [
-          _buildConditionItem(
-            AppIcons.sun,
-            'Sunlight',
-            'Full sun (8+ hours daily)',
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Text(
+              stage,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.5,
+              ),
+            ),
           ),
-          _buildConditionItem(
-            AppIcons.waterDrop,
-            'Water',
-            'Regular watering, 1-2 inches weekly',
-          ),
-          _buildConditionItem(
-            AppIcons.seedling,
-            'Soil pH',
-            '6.0 to 7.0 (neutral to slightly acidic)',
-          ),
-        ];
-      case 'okra':
-        return [
-          _buildConditionItem(
-            AppIcons.sun,
-            'Sunlight',
-            'Full sun (6-8 hours daily)',
-          ),
-          _buildConditionItem(
-            AppIcons.waterDrop,
-            'Water',
-            'Moderate, consistent moisture',
-          ),
-          _buildConditionItem(
-            AppIcons.seedling,
-            'Soil pH',
-            '6.5 to 7.0 (slightly acidic to neutral)',
-          ),
-        ];
-      case 'cucumber':
-        return [
-          _buildConditionItem(
-            AppIcons.sun,
-            'Sunlight',
-            'Full sun (6-8 hours daily)',
-          ),
-          _buildConditionItem(
-            AppIcons.waterDrop,
-            'Water',
-            'Consistent moisture, avoid waterlogging',
-          ),
-          _buildConditionItem(
-            AppIcons.seedling,
-            'Soil pH',
-            '6.0 to 7.0 (slightly acidic to neutral)',
-          ),
-        ];
-      default:
-        return [
-          _buildConditionItem(AppIcons.sun, 'Sunlight', 'Full sun recommended'),
-          _buildConditionItem(AppIcons.waterDrop, 'Water', 'Regular watering'),
-          _buildConditionItem(
-            AppIcons.seedling,
-            'Soil pH',
-            '6.5 to 7.0 (neutral)',
-          ),
-        ];
-    }
+        ],
+      ),
+    );
   }
 }

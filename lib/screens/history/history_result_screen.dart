@@ -23,6 +23,7 @@ class HistoryResultScreen extends StatelessWidget {
   final List<String>? careTips;
   final List<String>? preventiveCare;
   final List<String>? growthOptimization;
+  final List<String>? preventionTips; // For deficient plants
 
   const HistoryResultScreen({
     super.key,
@@ -36,6 +37,7 @@ class HistoryResultScreen extends StatelessWidget {
     this.careTips,
     this.preventiveCare,
     this.growthOptimization,
+    this.preventionTips,
   });
 
   @override
@@ -355,6 +357,51 @@ class HistoryResultScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+
+                      // Prevention Tips section for deficient plants
+                      if (!isHealthy && preventionTips != null && preventionTips!.isNotEmpty) ...[
+                        const SizedBox(height: AppSpacing.md),
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFF9E6),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusMd,
+                            ),
+                            border: Border.all(
+                              color: const Color(0xFFFFB74D).withValues(
+                                alpha: 0.5,
+                              ),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    PhosphorIcons.shieldCheck,
+                                    color: const Color(0xFFFF9800),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Text(
+                                    'How to Prevent This',
+                                    style: AppTextStyles.heading3.copyWith(
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: AppSpacing.md),
+                              ...preventionTips!.map(
+                                (tip) => _buildTipItem(tip),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ],
 
                     // Care tips sections for healthy plants

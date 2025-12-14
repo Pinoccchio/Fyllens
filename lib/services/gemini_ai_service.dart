@@ -464,51 +464,15 @@ Response:''';
     final Map<String, dynamic> result;
 
     if (isHealthy) {
-      // Fallback for healthy plants
-      result = {
-        'careTips': [
-          'Maintain regular watering schedule for $plantName',
-          'Ensure adequate sunlight exposure',
-          'Apply balanced fertilizer as needed',
-        ],
-        'preventiveCare': [
-          'Monitor for early signs of stress or deficiency',
-          'Maintain proper soil conditions and drainage',
-          'Practice good plant hygiene and sanitation',
-        ],
-        'growthOptimization': [
-          'Optimize nutrient levels for better growth',
-          'Consider pruning for improved air circulation',
-          'Monitor and adjust care based on plant response',
-        ],
-      };
+      // Plant-specific fallback for healthy plants
+      result = _getPlantSpecificHealthyFallback(plantName);
     } else {
-      // Fallback for deficient plants
-      result = {
-        'severity': _calculateSeverity(confidence),
-        'symptoms': [
-          'Visual signs of $deficiencyName in $plantName',
-          'Discoloration or spotting on plant tissue',
-          'Changes in growth patterns or leaf appearance',
-        ],
-        'treatments': [
-          {
-            'title': 'Immediate Treatment',
-            'description': 'Apply appropriate remedies for $deficiencyName',
-            'icon': 'fertilizer',
-          },
-          {
-            'title': 'Long-term Management',
-            'description': 'Improve soil conditions and plant care practices',
-            'icon': 'organic',
-          },
-        ],
-        'prevention': [
-          'Regular monitoring and early detection',
-          'Proper nutrition and soil management',
-          'Good cultural practices and sanitation',
-        ],
-      };
+      // Deficiency-specific fallback for deficient plants
+      result = _getDeficiencySpecificFallback(
+        plantName,
+        deficiencyName,
+        confidence,
+      );
     }
 
     // Add quota marker if applicable
@@ -518,6 +482,392 @@ Response:''';
     }
 
     return result;
+  }
+
+  /// Get plant-specific care tips for healthy plants
+  Map<String, dynamic> _getPlantSpecificHealthyFallback(String plantName) {
+    final plant = plantName.toLowerCase();
+
+    if (plant.contains('rice')) {
+      return {
+        'careTips': [
+          'Maintain 2-5 inches of standing water in the field during vegetative growth',
+          'Apply nitrogen fertilizer in 3 splits: at transplanting, active tillering, and panicle initiation stages',
+          'Ensure 6-8 hours of direct sunlight daily for optimal photosynthesis',
+          'Monitor water pH and keep it between 5.5-6.5 for best nutrient uptake',
+          'Check for pest activity weekly, especially stem borers and leaf folders',
+        ],
+        'preventiveCare': [
+          'Practice crop rotation with legumes to naturally improve soil nitrogen',
+          'Remove crop residues after harvest to reduce disease carryover',
+          'Maintain proper plant spacing (20x20 cm) for air circulation',
+          'Apply silicon fertilizers to strengthen stems and improve lodging resistance',
+          'Scout for early signs of nutrient deficiency or disease every 3-4 days',
+        ],
+        'growthOptimization': [
+          'Use certified disease-resistant rice varieties suited to your region',
+          'Apply phosphorus and potassium at land preparation stage',
+          'Implement alternate wetting and drying (AWD) irrigation to save water and promote root growth',
+          'Apply zinc sulfate if soil is deficient to prevent stunted growth',
+          'Maintain 2-3 healthy tillers per plant by removing weak or diseased tillers',
+          'Top-dress with potassium during grain filling for better yield quality',
+        ],
+      };
+    } else if (plant.contains('corn')) {
+      return {
+        'careTips': [
+          'Water deeply 1-2 times per week, providing 1-1.5 inches of water each time',
+          'Side-dress with nitrogen fertilizer when plants reach knee-high (V6 stage)',
+          'Ensure plants receive at least 8 hours of full sunlight daily',
+          'Maintain soil pH between 6.0-6.8 for optimal nutrient availability',
+          'Monitor for corn borers, armyworms, and aphids weekly during growing season',
+        ],
+        'preventiveCare': [
+          'Practice 2-3 year crop rotation to prevent soil-borne diseases',
+          'Plant in blocks rather than single rows to ensure better pollination',
+          'Remove and destroy diseased plants immediately to prevent spread',
+          'Apply mulch around plants to conserve moisture and suppress weeds',
+          'Scout for signs of nitrogen, phosphorus, or potassium deficiency every week',
+        ],
+        'growthOptimization': [
+          'Use hybrid varieties resistant to common local diseases',
+          'Apply starter fertilizer (low nitrogen, high phosphorus) at planting',
+          'Thin seedlings to 8-12 inches apart for optimal spacing',
+          'Apply additional potassium during silking and grain fill stages',
+          'Control weeds early - corn is most competitive after V6 stage',
+          'Monitor soil moisture during tasseling and silking (critical stages)',
+        ],
+      };
+    } else if (plant.contains('okra')) {
+      return {
+        'careTips': [
+          'Water consistently, providing 1 inch of water per week through drip or soaker hose',
+          'Apply balanced NPK fertilizer (10-10-10) every 3-4 weeks during production',
+          'Ensure 6-8 hours of full sun daily for maximum pod production',
+          'Maintain soil pH between 6.5-7.0 for healthy growth',
+          'Harvest pods when 2-4 inches long (every 2-3 days) to encourage continuous production',
+        ],
+        'preventiveCare': [
+          'Mulch around plants with 2-3 inches of organic matter to retain moisture',
+          'Inspect plants weekly for aphids, spider mites, and stink bugs',
+          'Remove any yellowing or diseased leaves promptly',
+          'Avoid overhead watering to reduce fungal disease risk',
+          'Practice crop rotation - do not plant okra in same spot for 2-3 years',
+        ],
+        'growthOptimization': [
+          'Use disease-resistant varieties like "Clemson Spineless" or "Annie Oakley"',
+          'Space plants 12-18 inches apart in rows 3-4 feet apart',
+          'Side-dress with compost or aged manure mid-season for sustained nutrients',
+          'Prune lower leaves once pods begin forming to improve air circulation',
+          'Apply foliar spray of seaweed extract for micronutrient boost',
+          'Keep soil consistently moist but not waterlogged - okra is drought-tolerant but produces better with regular water',
+        ],
+      };
+    } else if (plant.contains('cucumber')) {
+      return {
+        'careTips': [
+          'Water deeply 1-2 times per week, providing 1-2 inches of water at soil level',
+          'Apply balanced fertilizer every 2-3 weeks during fruiting season',
+          'Provide 6-8 hours of direct sunlight with some afternoon shade in hot climates',
+          'Maintain soil pH between 6.0-6.8 for optimal nutrient uptake',
+          'Check plants daily for pests like cucumber beetles and aphids',
+        ],
+        'preventiveCare': [
+          'Use trellis or cage support to keep fruits off ground and improve air circulation',
+          'Mulch with straw or wood chips to maintain moisture and prevent soil splash',
+          'Remove overripe or diseased fruits immediately to prevent disease spread',
+          'Practice 3-year crop rotation to avoid soil-borne diseases',
+          'Inspect undersides of leaves weekly for powdery mildew or downy mildew',
+        ],
+        'growthOptimization': [
+          'Choose disease-resistant varieties like "Marketmore 76" or "Diva"',
+          'Plant in raised beds or mounds with excellent drainage',
+          'Apply calcium-rich amendments to prevent blossom end rot',
+          'Pinch off first flowers to encourage stronger root and vine development',
+          'Side-dress with compost when vines begin to run',
+          'Harvest cucumbers when 6-8 inches long for best quality and continued production',
+        ],
+      };
+    }
+
+    // Generic fallback for unknown plants
+    return {
+      'careTips': [
+        'Maintain regular watering schedule appropriate for $plantName',
+        'Provide adequate sunlight based on plant requirements (usually 6-8 hours)',
+        'Apply balanced NPK fertilizer every 2-4 weeks during active growth',
+        'Monitor soil moisture - keep consistently moist but avoid waterlogging',
+        'Inspect plants weekly for pests, diseases, and nutrient deficiency signs',
+      ],
+      'preventiveCare': [
+        'Practice crop rotation to prevent soil depletion and disease buildup',
+        'Maintain proper plant spacing for good air circulation',
+        'Remove diseased plant material promptly to prevent spread',
+        'Use mulch to conserve soil moisture and suppress weeds',
+        'Keep garden tools clean and sanitized between uses',
+      ],
+      'growthOptimization': [
+        'Use certified seeds or disease-resistant varieties when available',
+        'Test soil pH and adjust to optimal range for $plantName',
+        'Apply organic matter or compost to improve soil structure',
+        'Implement integrated pest management (IPM) strategies',
+        'Monitor plant growth stages and adjust care accordingly',
+        'Maintain detailed records of fertilization and pest/disease incidents',
+      ],
+    };
+  }
+
+  /// Get deficiency-specific treatment information
+  Map<String, dynamic> _getDeficiencySpecificFallback(
+    String plantName,
+    String deficiencyName,
+    double confidence,
+  ) {
+    final deficiency = deficiencyName.toLowerCase();
+
+    // Nitrogen Deficiency
+    if (deficiency.contains('nitrogen')) {
+      return {
+        'severity': _calculateSeverity(confidence),
+        'symptoms': [
+          'Yellowing (chlorosis) of older leaves, starting from leaf tips and moving inward',
+          'Stunted plant growth with reduced overall vigor and height',
+          'Pale green to yellow coloration across the entire plant',
+          'Reduced tillering in rice or fewer side shoots in other crops',
+          'Lower leaves may brown and fall off prematurely',
+        ],
+        'treatments': [
+          {
+            'title': 'Quick Nitrogen Boost',
+            'description': 'Apply urea (46-0-0) at 20-30 kg/ha or ammonium sulfate at 40-50 kg/ha. For small gardens, use 1 tablespoon per plant. Water immediately after application.',
+            'icon': 'fertilizer',
+          },
+          {
+            'title': 'Foliar Spray (Fast Acting)',
+            'description': 'Mix 2% urea solution (20g urea per liter water) and spray on leaves early morning or late evening. Repeat every 7-10 days until symptoms improve.',
+            'icon': 'spray',
+          },
+          {
+            'title': 'Organic Amendment',
+            'description': 'Incorporate well-composted manure (2-3 tons/ha) or apply fish emulsion (diluted 1:10 with water) weekly. Blood meal is also effective for organic growers.',
+            'icon': 'organic',
+          },
+        ],
+        'prevention': [
+          'Split nitrogen application into 2-3 doses throughout growing season instead of single application',
+          'Incorporate green manure crops or cover crops (legumes) to naturally fix nitrogen',
+          'Use slow-release nitrogen fertilizers to minimize leaching losses',
+          'Avoid over-irrigation which causes nitrogen to leach beyond root zone',
+          'Test soil nitrogen levels before planting and adjust application rates',
+          'Apply organic matter regularly to improve soil nitrogen retention',
+        ],
+      };
+    }
+
+    // Bacterial Leaf Blight
+    if (deficiency.contains('bacterial') && deficiency.contains('blight')) {
+      return {
+        'severity': _calculateSeverity(confidence),
+        'symptoms': [
+          'Water-soaked lesions on leaves that turn yellow to white with wavy margins',
+          'Bacterial ooze (milky or opaque droplets) visible on lesions in early morning',
+          'Lesions may coalesce and cause entire leaves to wilt and die',
+          'Systemic infection can cause wilting of entire plant (kresek phase in rice)',
+          'Symptoms worsen during warm, humid weather with heavy dew or rain',
+        ],
+        'treatments': [
+          {
+            'title': 'Copper-Based Bactericide',
+            'description': 'Apply copper hydroxide or copper oxychloride spray at 2-3 g/L. Spray every 7-10 days, especially after rain. Best used as preventive measure.',
+            'icon': 'spray',
+          },
+          {
+            'title': 'Remove Infected Material',
+            'description': 'Cut and destroy severely infected leaves and plants. Burn or bury deeply - do NOT compost. Disinfect tools with 10% bleach solution between cuts.',
+            'icon': 'cut',
+          },
+          {
+            'title': 'Improve Drainage',
+            'description': 'Reduce standing water in fields and improve drainage to lower humidity around plants. Allow fields to dry between irrigations if possible.',
+            'icon': 'water_drop',
+          },
+          {
+            'title': 'Boost Plant Resistance',
+            'description': 'Apply potassium fertilizers to strengthen cell walls. Avoid excessive nitrogen which promotes lush growth susceptible to infection.',
+            'icon': 'shield',
+          },
+        ],
+        'prevention': [
+          'Use certified disease-free seeds and resistant rice varieties',
+          'Practice balanced fertilization - avoid excessive nitrogen',
+          'Maintain proper plant spacing (20x20 cm for rice) for air circulation',
+          'Remove crop residues after harvest and practice field sanitation',
+          'Avoid working in wet fields to prevent spreading bacteria',
+          'Implement crop rotation where possible',
+          'Apply prophylactic copper sprays during monsoon season',
+        ],
+      };
+    }
+
+    // Rice Blast
+    if (deficiency.contains('blast')) {
+      return {
+        'severity': 'Severe',
+        'symptoms': [
+          'Diamond or spindle-shaped lesions with gray-white centers and brown margins on leaves',
+          'Lesions start small (1-2mm) and expand rapidly under favorable conditions',
+          'Neck rot causing panicles to break and droop (panicle blast)',
+          'White to gray fungal growth visible on lesions during high humidity',
+          'Severely infected leaves may die completely, reducing photosynthesis',
+        ],
+        'treatments': [
+          {
+            'title': 'Systemic Fungicide Application',
+            'description': 'Apply tricyclazole 75% WP at 0.6g/L or azoxystrobin at labeled rate. Spray at early signs and repeat every 10-14 days. Mix with sticker for better adhesion.',
+            'icon': 'spray',
+          },
+          {
+            'title': 'Remove Severely Infected Plants',
+            'description': 'Cut and destroy plants with neck rot or >50% leaf infection. Remove from field immediately - do not leave in field or compost pile.',
+            'icon': 'cut',
+          },
+          {
+            'title': 'Adjust Water Management',
+            'description': 'Drain fields temporarily to reduce humidity if blast is severe. Use intermittent irrigation instead of continuous flooding.',
+            'icon': 'water_drop',
+          },
+          {
+            'title': 'Silicon Supplementation',
+            'description': 'Apply silicon fertilizer (calcium silicate) at 200-400 kg/ha to strengthen plant cell walls and improve disease resistance.',
+            'icon': 'fertilizer',
+          },
+        ],
+        'prevention': [
+          'Use blast-resistant rice varieties adapted to your region',
+          'Avoid excessive nitrogen application which promotes lush, susceptible growth',
+          'Apply nitrogen in splits rather than single large dose',
+          'Maintain proper spacing and avoid dense planting',
+          'Remove volunteer rice plants and weed hosts from field margins',
+          'Treat seeds with fungicide before planting',
+          'Apply prophylactic fungicide before rainy season if blast is historically problematic',
+          'Practice field sanitation - plow under residues after harvest',
+        ],
+      };
+    }
+
+    // Brown Spot
+    if (deficiency.contains('brown') && deficiency.contains('spot')) {
+      return {
+        'severity': _calculateSeverity(confidence),
+        'symptoms': [
+          'Small circular to oval brown spots with yellow halos on leaves',
+          'Spots may have dark brown margins and lighter centers',
+          'Lesions can appear on leaf sheaths, panicles, and grains',
+          'Severely infected leaves turn brown and dry up',
+          'Disease more severe in nutrient-deficient fields',
+        ],
+        'treatments': [
+          {
+            'title': 'Fungicide Spray',
+            'description': 'Apply mancozeb 75% WP at 2g/L or chlorothalonil at recommended rate. Spray at 7-10 day intervals until symptoms stop spreading.',
+            'icon': 'spray',
+          },
+          {
+            'title': 'Improve Soil Fertility',
+            'description': 'Brown spot thrives in nutrient-poor soil. Apply balanced NPK fertilizer and correct any silicon, zinc, or potassium deficiencies immediately.',
+            'icon': 'fertilizer',
+          },
+          {
+            'title': 'Foliar Nutrition',
+            'description': 'Apply foliar spray containing zinc (0.5% ZnSO4), potassium, and micronutrients to boost plant immunity and recover from stress.',
+            'icon': 'leaf',
+          },
+        ],
+        'prevention': [
+          'Maintain balanced soil fertility - brown spot is more severe in poor soil',
+          'Use resistant varieties when available',
+          'Treat seeds with fungicide (thiram or carbendazim) before planting',
+          'Avoid water stress - maintain adequate soil moisture',
+          'Practice crop rotation and proper field sanitation',
+          'Apply silicon and zinc fertilizers to strengthen plant defenses',
+        ],
+      };
+    }
+
+    // Potassium Deficiency
+    if (deficiency.contains('potassium')) {
+      return {
+        'severity': _calculateSeverity(confidence),
+        'symptoms': [
+          'Yellowing and browning of leaf margins and tips (scorching)',
+          'Older leaves affected first, progressing to younger leaves',
+          'Weak stems prone to lodging (falling over)',
+          'Poor root development and reduced drought tolerance',
+          'Reduced fruit or grain quality and size',
+        ],
+        'treatments': [
+          {
+            'title': 'Potassium Fertilizer Application',
+            'description': 'Apply muriate of potash (KCl 60% K2O) at 30-40 kg/ha or potassium sulfate for sulfur-sensitive crops. Water in thoroughly after application.',
+            'icon': 'fertilizer',
+          },
+          {
+            'title': 'Foliar Potassium Spray',
+            'description': 'Spray 1-2% potassium sulfate or potassium nitrate solution on leaves for quick uptake. Repeat weekly for 3-4 weeks.',
+            'icon': 'spray',
+          },
+          {
+            'title': 'Organic Potassium Sources',
+            'description': 'Apply wood ash (5% K), kelp meal, or greensand. Compost and aged manure also provide slow-release potassium.',
+            'icon': 'organic',
+          },
+        ],
+        'prevention': [
+          'Test soil potassium levels annually and maintain optimal levels',
+          'Apply potassium in split doses during vegetative and reproductive stages',
+          'Avoid excessive calcium or magnesium which can reduce potassium uptake',
+          'Improve soil organic matter to increase potassium retention',
+          'Use balanced NPK fertilizers rather than high-nitrogen formulations alone',
+        ],
+      };
+    }
+
+    // Generic fallback for unknown deficiencies
+    return {
+      'severity': _calculateSeverity(confidence),
+      'symptoms': [
+        'Visual symptoms of $deficiencyName observed on $plantName',
+        'Changes in leaf color, texture, or shape indicating stress',
+        'Abnormal growth patterns or reduced plant vigor',
+        'Possible discoloration, lesions, or spotting on plant tissue',
+        'Symptoms may vary in severity depending on environmental conditions',
+      ],
+      'treatments': [
+        {
+          'title': 'Consult Agricultural Expert',
+          'description': 'Contact your local agricultural extension office or plant pathologist for specific diagnosis and treatment for $deficiencyName in $plantName.',
+          'icon': 'help',
+        },
+        {
+          'title': 'Maintain Plant Health',
+          'description': 'Ensure proper watering, balanced nutrition, and good field sanitation while seeking professional advice for specific treatment.',
+          'icon': 'care',
+        },
+        {
+          'title': 'Isolate Affected Plants',
+          'description': 'If disease is suspected, isolate affected plants to prevent potential spread. Remove severely affected plants if necessary.',
+          'icon': 'warning',
+        },
+      ],
+      'prevention': [
+        'Regular monitoring and early detection of plant health issues',
+        'Maintain balanced soil nutrition with proper pH levels (6.0-7.0)',
+        'Practice good field hygiene and sanitation',
+        'Use certified disease-free seeds and resistant varieties',
+        'Implement integrated pest and disease management practices',
+        'Maintain detailed crop health records for pattern identification',
+      ],
+    };
   }
 
   /// Dispose resources

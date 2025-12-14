@@ -233,6 +233,9 @@ class MyApp extends StatelessWidget {
             final preventiveCare = scanResult.isHealthy ? scanResult.preventiveCare : null;
             final growthOptimization = scanResult.isHealthy ? scanResult.growthOptimization : null;
 
+            // Extract prevention tips for deficient plants
+            final preventionTips = !scanResult.isHealthy ? scanResult.preventionTips : null;
+
             return ScanResultsScreen(
               plantName: scanResult.plantName,
               imageAssetPath: scanResult.imageUrl,
@@ -243,6 +246,7 @@ class MyApp extends StatelessWidget {
               careTips: careTips,
               preventiveCare: preventiveCare,
               growthOptimization: growthOptimization,
+              preventionTips: preventionTips,
             );
           },
         ),

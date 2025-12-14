@@ -11,6 +11,7 @@ import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/theme_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
+import 'package:fyllens/providers/library_provider.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -86,6 +87,9 @@ void main() async {
 
         // Tab navigation provider
         ChangeNotifierProvider(create: (_) => TabProvider()),
+
+        // Library provider (simple, unified provider)
+        ChangeNotifierProvider(create: (_) => LibraryProvider()),
       ],
       child: const MyApp(),
     ),

@@ -377,10 +377,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   careTips: scan.isHealthy ? scan.careTips : null,
                   preventiveCare: scan.isHealthy ? scan.preventiveCare : null,
                   growthOptimization: scan.isHealthy ? scan.growthOptimization : null,
+                  preventionTips: !scan.isHealthy ? scan.preventionTips : null,
                   onRescanPressed: () {
                     // LOG 1: Callback started
                     debugPrint('🔄 [RESCAN CALLBACK] Callback triggered');
                     debugPrint('   Context mounted: ${context.mounted}');
+
+                    // LOG 1.5: Pre-select the plant before clearing/navigating
+                    debugPrint('🌱 [RESCAN CALLBACK] Pre-selecting plant: ${scan.plantName}');
+                    context.read<ScanProvider>().preselectPlant(scan.plantName);
+                    debugPrint('✅ [RESCAN CALLBACK] Plant pre-selected successfully');
 
                     // LOG 2: Clear current scan
                     debugPrint('🧹 [RESCAN CALLBACK] Clearing current scan...');

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/screens/shared/widgets/custom_list_tile.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
+import 'package:fyllens/providers/scan_provider.dart';
 import 'package:go_router/go_router.dart';
 
 /// Scan page - Camera interface for plant analysis
@@ -44,10 +46,43 @@ class _ScanScreenState extends State<ScanScreen> with SingleTickerProviderStateM
         curve: Curves.easeInOut,
       ),
     );
+
+    // Add persistent listener for preselection changes
+    // This works with IndexedStack which keeps widgets alive between tab switches
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final scanProvider = context.read<ScanProvider>();
+      scanProvider.addListener(_onScanProviderChanged);
+
+      // Initial check for preselection
+      _checkPreselection();
+    });
+  }
+
+  /// Listener callback for ScanProvider changes
+  void _onScanProviderChanged() {
+    _checkPreselection();
+  }
+
+  /// Check and apply plant preselection
+  void _checkPreselection() {
+    if (!mounted) return;
+
+    final preselected = context.read<ScanProvider>().preselectedPlant;
+    if (preselected != null && _selectedPlant != preselected) {
+      print('📍 [SCAN SCREEN] Found preselected plant: $preselected');
+      setState(() {
+        _selectedPlant = preselected;
+      });
+      context.read<ScanProvider>().clearPreselection();
+      print('✅ [SCAN SCREEN] Plant auto-selected and preselection cleared');
+    }
   }
 
   @override
   void dispose() {
+    // Remove listener before disposing to prevent memory leaks
+    final scanProvider = context.read<ScanProvider>();
+    scanProvider.removeListener(_onScanProviderChanged);
     _animationController.dispose();
     super.dispose();
   }
