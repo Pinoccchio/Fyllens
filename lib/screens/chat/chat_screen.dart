@@ -334,6 +334,10 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
 
+    // Get current user data for avatar display
+    final authProvider = context.watch<AuthProvider>();
+    final currentUser = authProvider.currentUser;
+
     return ListView.builder(
       controller: _scrollController,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -345,6 +349,9 @@ class _ChatScreenState extends State<ChatScreen> {
           isConsecutive: index > 0 &&
               chatProvider.messages[index - 1].senderType ==
                   message.senderType,
+          // Pass user profile data for avatar display (only for user messages)
+          avatarUrl: message.isUser ? currentUser?.avatarUrl : null,
+          displayName: message.isUser ? currentUser?.fullName : null,
         );
       },
     );

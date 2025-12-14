@@ -10,16 +10,20 @@ import 'package:intl/intl.dart';
 ///
 /// Displays a single chat message in a bubble UI.
 /// Styles differ based on sender (user vs AI):
-/// - User messages: Right-aligned, gray background
-/// - AI messages: Left-aligned, green background
+/// - User messages: Right-aligned, gray background, shows profile picture
+/// - AI messages: Left-aligned, green background, shows leaf icon
 class MessageBubble extends StatelessWidget {
   final AIMessage message;
   final bool isConsecutive;
+  final String? avatarUrl;
+  final String? displayName;
 
   const MessageBubble({
     super.key,
     required this.message,
     this.isConsecutive = false,
+    this.avatarUrl,
+    this.displayName,
   });
 
   @override
@@ -106,7 +110,7 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  /// Build avatar
+  /// Build avatar - displays profile picture for user, icon for AI
   Widget _buildAvatar(bool isUser) {
     return Container(
       width: 32,
@@ -116,15 +120,96 @@ class MessageBubble extends StatelessWidget {
             ? AppColors.primaryGreenModern
             : AppColors.primaryGreenModern.withOpacity(0.1),
         shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Icon(
-          isUser ? AppIcons.profile : AppIcons.leafFilled,
-          size: 18,
-          color: isUser ? Colors.white : AppColors.primaryGreenModern,
+        border: Border.all(
+          color: AppColors.primaryGreenModern.withOpacity(0.2),
+          width: 1,
         ),
       ),
+      child: ClipOval(
+        child: isUser && avatarUrl != null && avatarUrl!.isNotEmpty
+            ? Image.network(
+                avatarUrl!,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 1.5,
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          AppColors.primaryGreenModern,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  // Log error and fall back to initials or icon
+                  debugPrint('🔴 [CHAT AVATAR ERROR] Failed to load user avatar');
+                  debugPrint('   URL: $avatarUrl');
+                  debugPrint('   Error: $error');
+                  return _buildFallbackAvatar(isUser);
+                },
+              )
+            : _buildFallbackAvatar(isUser),
+      ),
     );
+  }
+
+  /// Build fallback avatar - icon for AI, initials for user
+  Widget _buildFallbackAvatar(bool isUser) {
+    if (!isUser) {
+      // AI: Show leaf icon
+      return Center(
+        child: Icon(
+          AppIcons.leafFilled,
+          size: 18,
+          color: AppColors.primaryGreenModern,
+        ),
+      );
+    }
+
+    // User: Show initials if displayName available, otherwise profile icon
+    if (displayName != null && displayName!.isNotEmpty) {
+      final initials = _getInitials(displayName!);
+      return Container(
+        color: AppColors.primaryGreenModern,
+        child: Center(
+          child: Text(
+            initials,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default: Profile icon
+    return Center(
+      child: Icon(
+        AppIcons.profile,
+        size: 18,
+        color: Colors.white,
+      ),
+    );
+  }
+
+  /// Get user initials from display name
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return name[0].toUpperCase();
   }
 
   /// Format timestamp

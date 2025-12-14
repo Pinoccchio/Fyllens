@@ -57,8 +57,22 @@ class ProfileAvatar extends StatelessWidget {
                         ),
                       );
                     },
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildInitialsAvatar(),
+                    errorBuilder: (context, error, stackTrace) {
+                      // DIAGNOSTIC LOGGING - Phase 1: Identify why Image.network() fails
+                      debugPrint('🔴 [AVATAR ERROR] Failed to load profile picture');
+                      debugPrint('   URL: $avatarUrl');
+                      debugPrint('   Error type: ${error.runtimeType}');
+                      debugPrint('   Error details: $error');
+                      if (stackTrace != null) {
+                        debugPrint('   Stack trace (first 3 lines):');
+                        final lines = stackTrace.toString().split('\n').take(3);
+                        for (var line in lines) {
+                          debugPrint('   $line');
+                        }
+                      }
+                      debugPrint('   Falling back to initials avatar');
+                      return _buildInitialsAvatar();
+                    },
                   )
                 : _buildInitialsAvatar(),
           ),

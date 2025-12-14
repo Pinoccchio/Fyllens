@@ -10,6 +10,7 @@ import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
+import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/screens/history/history_result_screen.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
@@ -384,9 +385,26 @@ class _HomeScreenState extends State<HomeScreen> {
                   scan.isHealthy ? scan.growthOptimization : null,
               preventionTips: !scan.isHealthy ? scan.preventionTips : null,
               onRescanPressed: () {
-                // Pop result screen and navigate to scan tab
+                debugPrint('🔄 [HOME RESCAN] Callback triggered');
+
+                // Pre-select the plant before navigating
+                debugPrint('🌱 [HOME RESCAN] Pre-selecting plant: ${scan.plantName}');
+                context.read<ScanProvider>().preselectPlant(scan.plantName);
+                debugPrint('✅ [HOME RESCAN] Plant pre-selected successfully');
+
+                // Clear current scan
+                debugPrint('🧹 [HOME RESCAN] Clearing current scan...');
+                context.read<ScanProvider>().clearCurrentScan();
+                debugPrint('✅ [HOME RESCAN] Scan cleared successfully');
+
+                // Pop result screen
+                debugPrint('🔙 [HOME RESCAN] Popping HistoryResultScreen...');
                 Navigator.pop(context);
+
+                // Switch to Scan tab
+                debugPrint('🎯 [HOME RESCAN] Switching to Scan tab...');
                 context.read<TabProvider>().setTab(2);
+                debugPrint('✅ [HOME RESCAN] Tab switch complete!');
               },
             ),
           ),

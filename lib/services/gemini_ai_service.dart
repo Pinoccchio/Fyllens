@@ -1038,10 +1038,42 @@ I apologize for the inconvenience!''';
       await initialize();
     }
 
+    // System prompt for Fyllens AI - Interactive Diagnostic Helper
+    const systemPrompt = '''You are Fyllens AI, an interactive plant health assistant that helps users diagnose and solve plant problems through conversation.
+
+Your approach:
+- Start by asking diagnostic questions: What plant? What symptoms? How long? Growing conditions?
+- Guide users through symptom identification step-by-step
+- Explain the "why" behind problems to help users learn
+- Provide treatment options with clear pros/cons
+- Follow up to ensure solutions are working
+
+Focus areas: Plant diseases, nutrient deficiencies (N, P, K, Fe, Mg, Ca, S), pests, environmental stress, watering issues.
+
+When users describe visual symptoms, recommend using Fyllens' scan feature for instant AI-powered identification.
+
+Be warm, patient, and educational. Think of yourself as a knowledgeable gardening friend. Keep individual responses under 180 words but maintain engaging multi-turn conversations.''';
+
+    // Prepend system prompt to history if history is empty or doesn't start with system message
+    List<Content> historyWithSystem = [];
+
+    if (history.isEmpty) {
+      // New conversation - add system prompt as first exchange
+      historyWithSystem = [
+        Content('user', [TextPart(systemPrompt)]),
+        Content('model', [TextPart('Hello! I\'m Fyllens AI, your plant care assistant. I\'m here to help you diagnose and solve any plant health issues you might be experiencing. What can I help you with today?')]),
+      ];
+      print('   🌱 [GEMINI AI CHAT] Added system prompt for new conversation');
+    } else {
+      // Existing conversation - use existing history
+      historyWithSystem = List.from(history);
+      print('   🔄 [GEMINI AI CHAT] Using existing conversation history');
+    }
+
     // Truncate history if too long (keep last 40 messages to stay within token limits)
-    final truncatedHistory = _truncateHistory(history, maxMessages: 40);
-    if (truncatedHistory.length < history.length) {
-      print('   ✂️  [GEMINI AI CHAT] Truncated history from ${history.length} to ${truncatedHistory.length} messages');
+    final truncatedHistory = _truncateHistory(historyWithSystem, maxMessages: 40);
+    if (truncatedHistory.length < historyWithSystem.length) {
+      print('   ✂️  [GEMINI AI CHAT] Truncated history from ${historyWithSystem.length} to ${truncatedHistory.length} messages');
     }
 
     // Create chat session with history
@@ -1051,7 +1083,7 @@ I apologize for the inconvenience!''';
         temperature: 0.8, // Slightly higher for natural conversation
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 512, // Shorter responses for chat
+        maxOutputTokens: 1024, // Sufficient for detailed plant care advice
       ),
     );
 

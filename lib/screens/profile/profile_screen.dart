@@ -180,25 +180,14 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     CustomListTile(
-                      icon: AppIcons.notifications,
-                      title: 'Notifications',
-                      onTap: () {
-                        // TODO: Navigate to notification settings
-                      },
-                    ),
-                    CustomListTile(
                       icon: AppIcons.info,
-                      title: 'About Fyllena',
-                      onTap: () {
-                        // TODO: Show about dialog
-                      },
+                      title: 'About Fyllens',
+                      onTap: () => _showAboutDialog(context),
                     ),
                     CustomListTile(
                       icon: AppIcons.info,
                       title: 'Help & Support',
-                      onTap: () {
-                        // TODO: Navigate to help
-                      },
+                      onTap: () => _showHelpSupportDialog(context),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     // Logout button with confirmation dialog
@@ -283,7 +272,32 @@ class ProfileScreen extends StatelessWidget {
       debugPrint('✅ ProfileScreen: Avatar updated successfully');
       if (context.mounted) {
         // Refresh auth provider to get updated user data
-        await context.read<AuthProvider>().refreshProfile();
+        final authProvider = context.read<AuthProvider>();
+        await authProvider.refreshProfile();
+
+        // Check if refresh had errors
+        if (authProvider.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Avatar uploaded but failed to refresh: ${authProvider.errorMessage}'),
+              backgroundColor: Colors.orange,
+              action: SnackBarAction(
+                label: 'Retry',
+                textColor: Colors.white,
+                onPressed: () => authProvider.refreshProfile(),
+              ),
+            ),
+          );
+        } else {
+          // Success - show confirmation
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Profile picture updated successfully!'),
+              backgroundColor: AppColors.primaryGreenModern,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     }
   }
@@ -493,5 +507,379 @@ class ProfileScreen extends StatelessWidget {
         ),
       );
     }
+  }
+
+  /// Show About Fyllens dialog with app info and team credits
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        contentPadding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        content: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with gradient
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGreenModern,
+                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppSpacing.radiusMd),
+                    topRight: Radius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    // App icon
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        AppIcons.leafFilled,
+                        size: 48,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    // App name
+                    Text(
+                      'Fyllens',
+                      style: AppTextStyles.heading1.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    // Version badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm,
+                        vertical: AppSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'v1.0.0',
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Description
+                    Text(
+                      'Advanced plant health detection powered by AI and machine learning. Identify nutrient deficiencies and diseases in Rice, Corn, Okra, and Cucumber plants.',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        color: AppColors.textPrimary,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    // Team credits section
+                    Text(
+                      'Development Team',
+                      style: AppTextStyles.heading3.copyWith(
+                        color: AppColors.textPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildTeamMember('JAN MIKO A. GUEVARRA', 'Backend Developer'),
+                    _buildTeamMember('JAN CARLO SURIG', 'User Interface'),
+                    _buildTeamMember('RHEA GRACE BALATERO', 'User Interface (Assistant)'),
+                    _buildTeamMember('JOHN MARK LIMSAM', 'Dataset Training'),
+                    _buildTeamMember('MARLAN DIVA', 'Dataset Training'),
+                    _buildTeamMember('JOAQUIM OLACO', 'Tester'),
+                    const SizedBox(height: AppSpacing.md),
+                    // Footer
+                    Center(
+                      child: Text(
+                        'BSU Computer Science Students',
+                        style: AppTextStyles.caption.copyWith(
+                          color: AppColors.textSecondary,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Close button
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg,
+                  0,
+                  AppSpacing.lg,
+                  AppSpacing.lg,
+                ),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGreenModern,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                    ),
+                    child: Text(
+                      'Close',
+                      style: AppTextStyles.buttonMedium,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build team member row
+  Widget _buildTeamMember(String name, String role) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: AppColors.primaryGreenModern,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+                children: [
+                  TextSpan(
+                    text: name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  TextSpan(
+                    text: ' - $role',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Show Help & Support dialog with FAQ
+  void _showHelpSupportDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        child: Container(
+          constraints: const BoxConstraints(maxHeight: 600),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGreenModern,
+                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(AppSpacing.radiusMd),
+                    topRight: Radius.circular(AppSpacing.radiusMd),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      AppIcons.info,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Text(
+                      'Help & Support',
+                      style: AppTextStyles.heading2.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // FAQ content
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Frequently Asked Questions',
+                        style: AppTextStyles.heading3.copyWith(
+                          color: AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      _buildFAQItem(
+                        'How do I scan a plant?',
+                        'Navigate to the Scan tab, select your plant species (Rice, Corn, Okra, or Cucumber), then tap the camera button. Ensure good lighting and focus on affected leaves for best results.',
+                      ),
+                      _buildFAQItem(
+                        'What plants are supported?',
+                        'Currently, Fyllens supports Rice, Corn, Okra, and Cucumber. We are working on adding more crop types in future updates.',
+                      ),
+                      _buildFAQItem(
+                        'How accurate are the results?',
+                        'Our machine learning model provides a confidence score (0-100%) with each detection. Higher confidence scores indicate more reliable results. For best accuracy, ensure clear, well-lit photos.',
+                      ),
+                      _buildFAQItem(
+                        'What if my plant isn\'t detected correctly?',
+                        'Try rescanning with better lighting or a different angle. Focus on the most affected parts of the plant. You can also use the Fyllens AI chat for additional plant care advice.',
+                      ),
+                      _buildFAQItem(
+                        'Can I view my scan history?',
+                        'Yes! Navigate to the History tab to view all your past scans, including detected deficiencies, treatments, and recommendations.',
+                      ),
+                      _buildFAQItem(
+                        'How does the AI chat work?',
+                        'Fyllens AI is powered by Google Gemini and can answer questions about plant care, nutrient deficiencies, and diseases. Access it from the Chat tab or Home screen.',
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              // Close button
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGreenModern,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.md,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      ),
+                    ),
+                    child: Text(
+                      'Close',
+                      style: AppTextStyles.buttonMedium,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Build FAQ item
+  Widget _buildFAQItem(String question, String answer) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGreenModern.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: AppColors.primaryGreenModern.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                AppIcons.checkCircle,
+                size: 20,
+                color: AppColors.primaryGreenModern,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                  question,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Padding(
+            padding: const EdgeInsets.only(left: 28),
+            child: Text(
+              answer,
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
