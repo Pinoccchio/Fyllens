@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/app.dart';
-import 'package:fyllens/providers/theme_provider.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/history_provider.dart';
@@ -15,7 +14,6 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
-          ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => AuthProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => ProfileProvider()),
           ChangeNotifierProvider(create: (_) => ScanProvider()),

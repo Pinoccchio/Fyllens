@@ -34,9 +34,9 @@ class ProfileScreen extends StatelessWidget {
     final isLoading = authProvider.isLoading;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -137,23 +137,9 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: AppSpacing.md),
                     CustomListTile(
                       icon: AppIcons.profile,
-                      title: 'Edit Profile',
+                      title: 'Edit Full Name',
                       onTap: () {
-                        // TODO: Navigate to edit profile
-                      },
-                    ),
-                    CustomListTile(
-                      icon: AppIcons.profile,
-                      title: 'Change Username',
-                      onTap: () {
-                        // TODO: Navigate to change username
-                      },
-                    ),
-                    CustomListTile(
-                      icon: AppIcons.lock,
-                      title: 'Change Password',
-                      onTap: () {
-                        // TODO: Navigate to change password
+                        context.push(AppRoutes.editProfile);
                       },
                     ),
                   ],
@@ -172,14 +158,6 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     CustomListTile(
-                      icon: AppIcons.settings,
-                      title: 'Theme',
-                      trailing: 'Default',
-                      onTap: () {
-                        // TODO: Show theme selector
-                      },
-                    ),
-                    CustomListTile(
                       icon: AppIcons.info,
                       title: 'About Fyllens',
                       onTap: () => _showAboutDialog(context),
@@ -195,8 +173,8 @@ class ProfileScreen extends StatelessWidget {
                       icon: AppIcons.signOut,
                       title: 'Logout',
                       onTap: isLoading ? null : () => _showLogoutConfirmation(context, authProvider),
-                      iconColor: Colors.red[700],
-                      iconBackgroundColor: Colors.red[50],
+                      iconColor: Theme.of(context).colorScheme.error,
+                      iconBackgroundColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
                     ),
                   ],
                 ),
@@ -280,10 +258,10 @@ class ProfileScreen extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Avatar uploaded but failed to refresh: ${authProvider.errorMessage}'),
-              backgroundColor: Colors.orange,
+              backgroundColor: Theme.of(context).colorScheme.error,
               action: SnackBarAction(
                 label: 'Retry',
-                textColor: Colors.white,
+                textColor: AppColors.textOnPrimary,
                 onPressed: () => authProvider.refreshProfile(),
               ),
             ),
@@ -446,12 +424,12 @@ class ProfileScreen extends StatelessWidget {
               Navigator.pop(dialogContext, true);
             },
             style: TextButton.styleFrom(
-              foregroundColor: Colors.red[700],
+              foregroundColor: Theme.of(context).colorScheme.error,
             ),
             child: Text(
               'Logout',
               style: AppTextStyles.buttonMedium.copyWith(
-                color: Colors.red[700],
+                color: Theme.of(context).colorScheme.error,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -498,7 +476,7 @@ class ProfileScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.errorMessage ?? 'Logout failed. Please try again.'),
-          backgroundColor: Colors.red[700],
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -545,17 +523,18 @@ class ProfileScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // App icon
+                    // App logo
                     Container(
+                      width: 80,
+                      height: 80,
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
+                        color: Colors.white.withValues(alpha: 0.95),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(
-                        AppIcons.leafFilled,
-                        size: 48,
-                        color: Colors.white,
+                      child: Image.asset(
+                        'assets/images/fyllens_logo.png',
+                        fit: BoxFit.contain,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
@@ -615,16 +594,16 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     _buildTeamMember('JAN MIKO A. GUEVARRA', 'Backend Developer'),
-                    _buildTeamMember('JAN CARLO SURIG', 'User Interface'),
-                    _buildTeamMember('RHEA GRACE BALATERO', 'User Interface (Assistant)'),
-                    _buildTeamMember('JOHN MARK LIMSAM', 'Dataset Training'),
-                    _buildTeamMember('MARLAN DIVA', 'Dataset Training'),
-                    _buildTeamMember('JOAQUIM OLACO', 'Tester'),
+                    _buildTeamMember('JAN CARLO SURIG', 'Frontend Developer'),
+                    _buildTeamMember('RHEA GRACE BALATERO', 'ML Training'),
+                    _buildTeamMember('JOHN MARK LIMSAM', 'ML Training'),
+                    _buildTeamMember('MARLAN DIVA', 'ML Training'),
+                    _buildTeamMember('JOAQUIM OLACO', 'QA & Testing'),
                     const SizedBox(height: AppSpacing.md),
                     // Footer
                     Center(
                       child: Text(
-                        'BSU Computer Science Students',
+                        'CSP Computer Science Students',
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textSecondary,
                           fontStyle: FontStyle.italic,

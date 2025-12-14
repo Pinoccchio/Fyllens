@@ -336,15 +336,29 @@ class _RegisterScreenState extends State<RegisterScreen>
   Widget _buildLogoSection() {
     return Column(
       children: [
-        // Animated app icon with gradient glow
-        ModernIconContainer(
-          icon: AppIcons.leafFilled,
-          iconSize: 60,
-          iconColor: AppColors.primaryGreenModern,
-          primaryColor: AppColors.primaryGreenModern,
-          secondaryColor: AppColors.accentMint,
-          containerSize: 160,
-          animationController: _animationController,
+        // Fyllens logo with animation
+        FadeTransition(
+          opacity: _animationController,
+          child: Container(
+            width: 160,
+            height: 160,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primaryGreenModern.withValues(alpha: 0.2),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Image.asset(
+              'assets/images/fyllens_logo.png',
+              fit: BoxFit.contain,
+            ),
+          ),
         ),
 
         const SizedBox(height: AppSpacing.md),

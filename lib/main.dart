@@ -9,7 +9,6 @@ import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/profile_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/history_provider.dart';
-import 'package:fyllens/providers/theme_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/providers/library_provider.dart';
 import 'package:fyllens/providers/chat_provider.dart';
@@ -71,9 +70,6 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
-        // Theme provider
-        ChangeNotifierProvider(create: (_) => ThemeProvider()..initialize()),
-
         // Auth provider
         ChangeNotifierProvider(create: (_) => AuthProvider()..initialize()),
 

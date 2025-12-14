@@ -127,10 +127,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget _buildModernBottomNav() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).bottomNavigationBarTheme.backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -199,7 +199,7 @@ class _MainScreenState extends State<MainScreen> {
                 isSelected ? activeIcon : icon,
                 color: isSelected
                     ? AppColors.primaryGreenModern
-                    : Colors.grey.shade400,
+                    : AppColors.textSecondary,
                 size: 26,
               ),
               const SizedBox(height: 4),
@@ -210,7 +210,7 @@ class _MainScreenState extends State<MainScreen> {
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
                       ? AppColors.primaryGreenModern
-                      : Colors.grey.shade600,
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -261,7 +261,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               child: Icon(
                 AppIcons.camera,
-                color: isSelected ? Colors.white : AppColors.primaryGreenModern,
+                color: isSelected ? AppColors.textOnPrimary : AppColors.primaryGreenModern,
                 size: 26,
               ),
             ),
@@ -274,7 +274,7 @@ class _MainScreenState extends State<MainScreen> {
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                 color: isSelected
                     ? AppColors.primaryGreenModern
-                    : Colors.grey.shade600,
+                    : AppColors.textSecondary,
               ),
             ),
           ],

@@ -62,7 +62,7 @@ class MessageBubble extends StatelessWidget {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: AppColors.textPrimary.withOpacity(0.05),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -162,15 +162,15 @@ class MessageBubble extends StatelessWidget {
     );
   }
 
-  /// Build fallback avatar - icon for AI, initials for user
+  /// Build fallback avatar - logo for AI, initials for user
   Widget _buildFallbackAvatar(bool isUser) {
     if (!isUser) {
-      // AI: Show leaf icon
-      return Center(
-        child: Icon(
-          AppIcons.leafFilled,
-          size: 18,
-          color: AppColors.primaryGreenModern,
+      // AI: Show Fyllens logo
+      return Padding(
+        padding: const EdgeInsets.all(4),
+        child: Image.asset(
+          'assets/images/fyllens_logo.png',
+          fit: BoxFit.contain,
         ),
       );
     }

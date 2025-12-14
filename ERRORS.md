@@ -1,14 +1,23 @@
-Launching lib\main.dart on Infinix X6853 in debug mode...
-lib/screens/chat/chat_screen.dart:164:36: Error: The method 'go' isn't defined for the class 'BuildContext'.
- - 'BuildContext' is from 'package:flutter/src/widgets/framework.dart' ('/C:/flutter/packages/flutter/lib/src/widgets/framework.dart').
-Try correcting the name to the name of an existing method, or defining a method named 'go'.
-          onPressed: () => context.go(AppRoutes.home),
-                                   ^^
-lib/screens/chat/chat_screen.dart:164:39: Error: The getter 'AppRoutes' isn't defined for the class '_ChatScreenState'.
- - '_ChatScreenState' is from 'package:fyllens/screens/chat/chat_screen.dart' ('lib/screens/chat/chat_screen.dart').
-Try correcting the name to the name of an existing getter, or defining a getter or field named 'AppRoutes'.
-          onPressed: () => context.go(AppRoutes.home),
-                                      ^^^^^^^^^
+lib/services/ml_service.dart:222:32: Error: The operator '>>' isn't defined for the class 'Pixel'.
+ - 'Pixel' is from 'package:image/src/image/pixel.dart' ('../../../../../../AppData/Local/Pub/Cache/hosted/pub.dev/image-4.6.0/lib/src/image/pixel.dart').
+Try correcting the operator to an existing operator, or defining a '>>' operator.
+              final r = (pixel >> 16) & 0xFF;
+                               ^^
+lib/services/ml_service.dart:223:32: Error: The operator '>>' isn't defined for the class 'Pixel'.
+ - 'Pixel' is from 'package:image/src/image/pixel.dart' ('../../../../../../AppData/Local/Pub/Cache/hosted/pub.dev/image-4.6.0/lib/src/image/pixel.dart').
+Try correcting the operator to an existing operator, or defining a '>>' operator.
+              final g = (pixel >> 8) & 0xFF;
+                               ^^
+lib/services/ml_service.dart:224:31: Error: The operator '&' isn't defined for the class 'Pixel'.
+ - 'Pixel' is from 'package:image/src/image/pixel.dart' ('../../../../../../AppData/Local/Pub/Cache/hosted/pub.dev/image-4.6.0/lib/src/image/pixel.dart').
+Try correcting the operator to an existing operator, or defining a '&' operator.
+              final b = pixel & 0xFF;
+                              ^
+lib/services/ml_service.dart:237:14: Error: A value of type 'List<List<List<List<dynamic>>>>' can't be returned from an async function with return type 'Future<List<List<List<List<double>>>>>'.
+ - 'List' is from 'dart:core'.
+ - 'Future' is from 'dart:async'.
+      return input;
+             ^
 Target kernel_snapshot_program failed: Exception
 
 

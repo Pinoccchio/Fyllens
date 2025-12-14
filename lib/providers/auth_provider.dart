@@ -42,6 +42,8 @@ class AuthProvider with ChangeNotifier {
           );
           if (profileData != null) {
             debugPrint('   ✅ Profile data loaded from database');
+            debugPrint('   Email: ${profileData['email']}');
+            debugPrint('   Full Name: ${profileData['full_name'] ?? 'null'}');
             debugPrint('   Avatar URL: ${profileData['avatar_url'] ?? 'null'}');
             _currentUser = User.fromJson(profileData);
           } else {
@@ -79,9 +81,9 @@ class AuthProvider with ChangeNotifier {
             if (profileData != null) {
               _currentUser = User.fromJson(profileData);
               debugPrint('   ✅ Profile loaded from database');
-              debugPrint(
-                '   Avatar URL: ${profileData['avatar_url'] ?? 'null'}',
-              );
+              debugPrint('   Email: ${profileData['email']}');
+              debugPrint('   Full Name: ${profileData['full_name'] ?? 'null'}');
+              debugPrint('   Avatar URL: ${profileData['avatar_url'] ?? 'null'}');
             } else {
               debugPrint('   ⚠️ No profile data found, using auth metadata');
               _currentUser = User.fromAuthUser(user);
@@ -193,9 +195,9 @@ class AuthProvider with ChangeNotifier {
           );
           if (profileData != null) {
             _currentUser = User.fromJson(profileData);
-            debugPrint(
-              '   ✅ Profile loaded from database (avatarUrl: ${profileData['avatar_url'] ?? 'null'})',
-            );
+            debugPrint('   ✅ Profile loaded from database');
+            debugPrint('   Full Name: ${profileData['full_name'] ?? 'null'}');
+            debugPrint('   Avatar URL: ${profileData['avatar_url'] ?? 'null'}');
           } else {
             debugPrint('   ⚠️ No profile data found, using auth metadata');
             _currentUser = User.fromAuthUser(response.user!);
@@ -269,9 +271,9 @@ class AuthProvider with ChangeNotifier {
           );
           if (profileData != null) {
             _currentUser = User.fromJson(profileData);
-            debugPrint(
-              '   ✅ Profile loaded from database (avatarUrl: ${profileData['avatar_url'] ?? 'null'})',
-            );
+            debugPrint('   ✅ Profile loaded from database');
+            debugPrint('   Full Name: ${profileData['full_name'] ?? 'null'}');
+            debugPrint('   Avatar URL: ${profileData['avatar_url'] ?? 'null'}');
           } else {
             debugPrint('   ⚠️ No profile data found, using auth metadata');
             _currentUser = User.fromAuthUser(response.user!);

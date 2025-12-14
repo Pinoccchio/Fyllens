@@ -186,12 +186,12 @@ class ScanResultsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusMd,
                         ),
                         border: Border.all(
-                          color: AppColors.textSecondary.withValues(alpha: 0.2),
+                          color: AppColors.borderLight,
                           width: 1,
                         ),
                       ),
@@ -271,12 +271,12 @@ class ScanResultsScreen extends StatelessWidget {
                       Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusMd,
                         ),
                         border: Border.all(
-                          color: AppColors.textSecondary.withValues(alpha: 0.2),
+                          color: AppColors.borderLight,
                           width: 1,
                         ),
                       ),
@@ -322,7 +322,7 @@ class ScanResultsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8F5E9),
+                        color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusMd,
                         ),
@@ -367,12 +367,12 @@ class ScanResultsScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(AppSpacing.md),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF9E6),
+                          color: AppColors.warning.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusMd,
                           ),
                           border: Border.all(
-                            color: const Color(0xFFFFB74D).withValues(
+                            color: AppColors.warning.withValues(
                               alpha: 0.5,
                             ),
                             width: 1,
@@ -385,7 +385,7 @@ class ScanResultsScreen extends StatelessWidget {
                               children: [
                                 Icon(
                                   PhosphorIcons.shieldCheck,
-                                  color: const Color(0xFFFF9800),
+                                  color: AppColors.warning,
                                   size: 24,
                                 ),
                                 const SizedBox(width: AppSpacing.sm),
@@ -459,12 +459,12 @@ class ScanResultsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusMd,
                             ),
                             border: Border.all(
-                              color: AppColors.textSecondary.withValues(alpha: 0.2),
+                              color: AppColors.borderLight,
                               width: 1,
                             ),
                           ),
@@ -502,12 +502,12 @@ class ScanResultsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.surfaceLight,
                             borderRadius: BorderRadius.circular(
                               AppSpacing.radiusMd,
                             ),
                             border: Border.all(
-                              color: AppColors.textSecondary.withValues(alpha: 0.2),
+                              color: AppColors.borderLight,
                               width: 1,
                             ),
                           ),

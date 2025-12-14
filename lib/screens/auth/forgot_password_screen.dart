@@ -14,11 +14,13 @@ class ForgotPasswordScreen extends StatelessWidget {
         title: const Text('Forgot Password'),
         backgroundColor: AppColors.primaryGreen,
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: Center(
-          child: Text(
-            'Coming Soon - Password Reset',
-            style: TextStyle(color: Colors.grey),
+          child: Builder(
+            builder: (context) => Text(
+              'Coming Soon - Password Reset',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
         ),
       ),

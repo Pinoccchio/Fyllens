@@ -43,7 +43,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
       ),
       child: Row(
         children: [
-          // AI avatar
+          // AI avatar with Fyllens logo
           Container(
             width: 32,
             height: 32,
@@ -51,11 +51,11 @@ class _TypingIndicatorState extends State<TypingIndicator>
               color: AppColors.primaryGreenModern.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Center(
-              child: Icon(
-                AppIcons.leafFilled,
-                size: 18,
-                color: AppColors.primaryGreenModern,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Image.asset(
+                'assets/images/fyllens_logo.png',
+                fit: BoxFit.contain,
               ),
             ),
           ),

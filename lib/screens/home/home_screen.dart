@@ -61,9 +61,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final recentScans = historyProvider.scans.take(3).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -173,7 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<TabProvider>().setTab(2);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               foregroundColor: AppColors.primaryGreenModern,
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.lg,
@@ -312,13 +312,13 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(
             AppIcons.history,
             size: 64,
-            color: AppColors.textSecondary.withValues(alpha: 0.3),
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
             'No scan history yet',
             style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),

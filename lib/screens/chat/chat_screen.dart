@@ -114,7 +114,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -136,7 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: const Text('Clear'),
           ),
         ],
@@ -217,7 +217,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Icon(
                       AppIcons.error,
                       size: 64,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(

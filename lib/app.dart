@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_theme.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
-import 'package:fyllens/providers/theme_provider.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 
 // Import pages
@@ -23,8 +22,8 @@ import 'package:fyllens/providers/scan_provider.dart';
 
 /// Root app widget
 ///
-/// Sets up the MaterialApp with GoRouter for navigation and ThemeProvider
-/// for light/dark mode switching. This is the entry point for the entire app.
+/// Sets up the MaterialApp with GoRouter for navigation.
+/// This is the entry point for the entire app.
 ///
 /// Navigation flow:
 /// - Splash → Onboarding (first time) or Login (returning user)
@@ -43,20 +42,15 @@ class MyApp extends StatelessWidget {
     // Get AuthProvider to connect to GoRouter
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return MaterialApp.router(
-          title: 'Fyllens',
-          debugShowCheckedModeBanner: false,
+    return MaterialApp.router(
+      title: 'Fyllens',
+      debugShowCheckedModeBanner: false,
 
-          // Theme setup - supports light and dark modes
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeProvider.themeMode, // Reactive to user preference
-          // GoRouter handles all navigation with auth state awareness
-          routerConfig: _createRouter(authProvider),
-        );
-      },
+      // Theme setup - light mode only
+      theme: AppTheme.lightTheme,
+
+      // GoRouter handles all navigation with auth state awareness
+      routerConfig: _createRouter(authProvider),
     );
   }
 

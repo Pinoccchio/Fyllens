@@ -185,15 +185,29 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Modern animated icon with glow effect
-                  ModernIconContainer(
-                    icon: AppIcons.leafFilled,
-                    iconSize: 80,
-                    iconColor: AppColors.primaryGreenModern,
-                    primaryColor: Colors.white,
-                    secondaryColor: AppColors.accentMint,
-                    containerSize: 200,
-                    animationController: _iconController,
+                  // Fyllens logo with animation
+                  FadeTransition(
+                    opacity: _iconController,
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.95),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
+                            blurRadius: 30,
+                            spreadRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Image.asset(
+                        'assets/images/fyllens_logo.png',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
                   ),
 
                   const SizedBox(height: 40),

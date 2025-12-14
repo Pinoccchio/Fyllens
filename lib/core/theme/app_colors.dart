@@ -76,3 +76,4 @@ class AppColors {
   static const Color shadowLight = Color(0x0F000000); // 6% black
   static const Color shadowMedium = Color(0x1F000000); // 12% black
 }
+

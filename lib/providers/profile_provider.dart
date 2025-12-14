@@ -136,11 +136,18 @@ class ProfileProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final updateData = {
-        'full_name': fullName,
-        'avatar_url': avatarUrl,
+      // Build update data - only include fields that are explicitly provided
+      // This prevents overwriting existing data with null values
+      final updateData = <String, dynamic>{
         'updated_at': DateTime.now().toIso8601String(),
       };
+
+      if (fullName != null) {
+        updateData['full_name'] = fullName;
+      }
+      if (avatarUrl != null) {
+        updateData['avatar_url'] = avatarUrl;
+      }
 
       debugPrint('   Update data prepared:');
       debugPrint('   ${updateData.toString()}');

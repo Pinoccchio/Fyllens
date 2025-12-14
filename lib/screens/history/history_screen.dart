@@ -92,6 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
         title: const Text('Delete Scan'),
         content: Text(
           'Are you sure you want to delete this scan for ${scan.plantName}?',

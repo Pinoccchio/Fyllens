@@ -174,6 +174,7 @@ class _CameraScreenState extends State<CameraScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
         title: Text(title),
         content: Text(message),
         actions: [

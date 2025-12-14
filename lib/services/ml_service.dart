@@ -218,20 +218,20 @@ class MLService {
             224,
             (x) {
               final pixel = resized.getPixel(x, y);
-              // Extract RGB from packed integer (ARGB format)
-              final r = (pixel >> 16) & 0xFF;
-              final g = (pixel >> 8) & 0xFF;
-              final b = pixel & 0xFF;
+              // Extract RGB from Pixel object (image v4.6.0 API)
+              final r = pixel.r.toInt();
+              final g = pixel.g.toInt();
+              final b = pixel.b.toInt();
               // Normalize to [0, 1] range
-              return [
+              return <double>[
                 r / 255.0,
                 g / 255.0,
                 b / 255.0,
               ];
             },
-          ),
-        ),
-      );
+          ).toList(),
+        ).toList(),
+      ).toList();
 
       print('         ✅ Preprocessing complete');
       return input;
