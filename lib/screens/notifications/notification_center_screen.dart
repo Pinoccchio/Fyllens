@@ -7,6 +7,7 @@ import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/providers/notification_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
+import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/models/notification.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/services/database_service.dart';
@@ -524,7 +525,12 @@ class NotificationCenterScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 provider.clearError();
-                // Retry loading
+                // Retry loading notifications
+                final authProvider = context.read<AuthProvider>();
+                final userId = authProvider.currentUser?.id;
+                if (userId != null) {
+                  provider.loadNotifications(userId);
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGreenModern,

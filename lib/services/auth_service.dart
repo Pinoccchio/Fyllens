@@ -48,9 +48,22 @@ class AuthService {
     await _supabaseService.auth.signOut();
   }
 
-  /// Reset password
-  Future<void> resetPassword({required String email}) async {
-    await _supabaseService.auth.resetPasswordForEmail(email);
+  /// Reset password - sends reset email with custom redirect URL
+  Future<void> resetPassword({
+    required String email,
+    String? redirectTo,
+  }) async {
+    await _supabaseService.auth.resetPasswordForEmail(
+      email,
+      redirectTo: redirectTo,
+    );
+  }
+
+  /// Update user password (used after password reset)
+  Future<UserResponse> updatePassword({required String newPassword}) async {
+    return await _supabaseService.auth.updateUser(
+      UserAttributes(password: newPassword),
+    );
   }
 
   /// Listen to auth state changes

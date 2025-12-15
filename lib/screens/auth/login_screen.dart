@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
@@ -10,6 +11,7 @@ import 'package:fyllens/screens/shared/widgets/floating_circles.dart';
 import 'package:fyllens/screens/shared/widgets/modern_icon_container.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/auth_provider.dart';
+import 'package:fyllens/core/utils/auth_validators.dart';
 
 /// Login screen with email and password fields
 ///
@@ -29,8 +31,13 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _fadeAnimation; // Opacity 0 → 1
   late Animation<Offset> _slideAnimation; // Slide up on load
 
+  /// GlobalKey for ScaffoldMessenger to avoid context issues during navigation
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+  /// Form key for validation
+  final _formKey = GlobalKey<FormState>();
+
   /// Form input controllers
-  /// Fields are optional in this prototype - no validation enforced yet
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -74,15 +81,14 @@ class _LoginScreenState extends State<LoginScreen>
 
   /// Login button handler - Authenticates user with email and password
   Future<void> _handleLogin() async {
-    // Get email and password from controllers
+    // Validate form fields first (inline validation)
+    if (!_formKey.currentState!.validate()) {
+      return; // Stop if validation fails - error messages shown inline
+    }
+
+    // Get email and password from controllers (already validated)
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
-
-    // Basic validation
-    if (email.isEmpty || password.isEmpty) {
-      _showError('Please enter both email and password');
-      return;
-    }
 
     // Get AuthProvider
     final authProvider = context.read<AuthProvider>();
@@ -97,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen>
       // No manual navigation needed - let the router redirect handle it
       debugPrint('✅ Login successful - GoRouter will redirect to home');
     } else {
-      // Show error message from provider
+      // Show backend error message from provider (e.g., invalid credentials, network error)
       final error =
           authProvider.errorMessage ?? 'Login failed. Please try again.';
       _showError(error);
@@ -106,7 +112,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   /// Show error message using SnackBar
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Use GlobalKey instead of context to avoid deactivated widget issues
+    // No need for mounted check since we're using direct reference
+    _scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red[700],
@@ -119,11 +127,81 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
+  /// Show exit confirmation dialog
+  Future<bool> _showExitConfirmation() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        title: Text(
+          'Exit Application',
+          style: AppTextStyles.heading2.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'No',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreenModern,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+            ),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false; // Return false if dialog is dismissed
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundSoft,
-      body: FloatingCirclesBackground(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        debugPrint('🔙 [LOGIN SCREEN] Back button pressed');
+        debugPrint('   didPop: $didPop');
+
+        if (!didPop) {
+          debugPrint('   Showing exit confirmation dialog...');
+          // Show exit confirmation dialog
+          final shouldExit = await _showExitConfirmation();
+          debugPrint('   User choice: ${shouldExit ? "Exit" : "Stay"}');
+
+          if (shouldExit) {
+            debugPrint('   Exiting app...');
+            // Exit the app
+            SystemNavigator.pop();
+          } else {
+            debugPrint('   Staying in app');
+          }
+        }
+      },
+      child: ScaffoldMessenger(
+        key: _scaffoldMessengerKey,
+        child: Scaffold(
+          backgroundColor: AppColors.backgroundSoft,
+          body: FloatingCirclesBackground(
         circles: [
           FloatingCircleData(
             top: 0.1,
@@ -184,6 +262,8 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
         ),
+      ),
+    ),
       ),
     );
   }
@@ -246,22 +326,24 @@ class _LoginScreenState extends State<LoginScreen>
 
   /// Login form with email, password, and sign in button
   Widget _buildLoginForm(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Form(
+      key: _formKey,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Sign In Heading
           Text(
             AppConstants.signIn,
@@ -282,11 +364,13 @@ class _LoginScreenState extends State<LoginScreen>
 
           const SizedBox(height: AppSpacing.xl),
 
-          // Email Field (optional, no validation)
+          // Email Field with inline validation
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
             style: AppTextStyles.bodyMedium,
+            validator: (value) => AuthValidators.validateEmail(value),
             decoration: InputDecoration(
               labelText: 'Email',
               hintText: 'Enter your email',
@@ -318,11 +402,14 @@ class _LoginScreenState extends State<LoginScreen>
 
           const SizedBox(height: AppSpacing.md),
 
-          // Password field with show/hide toggle
+          // Password field with show/hide toggle and inline validation
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
+            textInputAction: TextInputAction.done,
             style: AppTextStyles.bodyMedium,
+            validator: (value) => AuthValidators.validatePassword(value),
+            onFieldSubmitted: (_) => _handleLogin(),
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
@@ -365,7 +452,32 @@ class _LoginScreenState extends State<LoginScreen>
             ),
           ),
 
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Forgot Password Link
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () {
+                context.go(AppRoutes.forgotPassword);
+              },
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xs,
+                  horizontal: AppSpacing.sm,
+                ),
+              ),
+              child: Text(
+                'Forgot Password?',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.primaryGreenModern,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.md),
 
           // Login Button
           _buildLoginButton(),
@@ -375,6 +487,7 @@ class _LoginScreenState extends State<LoginScreen>
           // Sign Up Link
           _buildSignUpLink(),
         ],
+        ),
       ),
     );
   }

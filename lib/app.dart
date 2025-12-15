@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:app_links/app_links.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:fyllens/core/theme/app_theme.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/providers/auth_provider.dart';
@@ -11,6 +14,7 @@ import 'package:fyllens/screens/onboarding/onboarding_screen.dart';
 import 'package:fyllens/screens/auth/login_screen.dart';
 import 'package:fyllens/screens/auth/register_screen.dart';
 import 'package:fyllens/screens/auth/forgot_password_screen.dart';
+import 'package:fyllens/screens/auth/reset_password_screen.dart';
 import 'package:fyllens/screens/main/main_screen.dart';
 import 'package:fyllens/screens/profile/edit_profile_screen.dart';
 import 'package:fyllens/screens/scan/camera_screen.dart';
@@ -35,14 +39,148 @@ import 'package:fyllens/providers/scan_provider.dart';
 /// - GoRouter listens to AuthProvider via refreshListenable
 /// - Protected routes (/home, /profile, /scan, /history) redirect to /login if not authenticated
 /// - Public routes (/, /onboarding, /login, /register) accessible to all
-class MyApp extends StatelessWidget {
+///
+/// Deep linking:
+/// - Handles password reset deep links via AppLinks
+/// - URL scheme: io.supabase.fyllens://reset-password
+/// - Establishes session and navigates to reset password screen
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // Get AuthProvider to connect to GoRouter
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+  late final AppLinks _appLinks;
+  late final GoRouter _router;
+  bool _hasProcessedInitialLink = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Get AuthProvider to connect to GoRouter
+    final authProvider = context.read<AuthProvider>();
+
+    // Create router
+    _router = _createRouter(authProvider);
+
+    // Initialize deep link handling
+    _initDeepLinks();
+  }
+
+  /// Initialize deep link handling for password reset
+  ///
+  /// Listens for incoming deep links and handles them appropriately:
+  /// - Cold start: App is closed, user clicks email link
+  /// - Hot start: App is running, user clicks email link
+  ///
+  /// URL scheme: io.supabase.fyllens://reset-password
+  ///
+  /// Note: On hot reload, this will skip processing the initial link to prevent
+  /// showing "Link Expired" error. The app will follow normal routing instead.
+  Future<void> _initDeepLinks() async {
+    _appLinks = AppLinks();
+
+    // Handle app launch from deep link (cold start)
+    // Skip if already processed (e.g., on hot reload)
+    try {
+      final initialLink = await _appLinks.getInitialLink();
+      if (initialLink != null && !_hasProcessedInitialLink) {
+        if (kDebugMode) {
+          debugPrint('🔗 [DEEP LINK] Initial link received (cold start): $initialLink');
+        }
+        _handleDeepLink(initialLink);
+        _hasProcessedInitialLink = true;
+      } else if (initialLink != null && _hasProcessedInitialLink) {
+        if (kDebugMode) {
+          debugPrint('🔄 [DEEP LINK] Initial link already processed, skipping (hot reload detected)');
+          debugPrint('   App will follow normal routing flow');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('❌ [DEEP LINK] Error getting initial link: $e');
+      }
+    }
+
+    // Handle deep links when app is running (hot start)
+    _appLinks.uriLinkStream.listen(
+      (Uri uri) {
+        if (kDebugMode) {
+          debugPrint('🔗 [DEEP LINK] Link received (hot start): $uri');
+        }
+        _handleDeepLink(uri);
+      },
+      onError: (err) {
+        if (kDebugMode) {
+          debugPrint('❌ [DEEP LINK] Stream error: $err');
+        }
+      },
+    );
+  }
+
+  /// Handle incoming deep link
+  ///
+  /// Validates the link scheme and host, establishes session with Supabase,
+  /// and navigates to the reset password screen.
+  void _handleDeepLink(Uri uri) async {
+    if (kDebugMode) {
+      debugPrint('🔗 [DEEP LINK] Processing deep link...');
+      debugPrint('   Scheme: ${uri.scheme}');
+      debugPrint('   Host: ${uri.host}');
+      debugPrint('   Path: ${uri.path}');
+      debugPrint('   Query: ${uri.query}');
+    }
+
+    // Check if this is a password reset link
+    if (uri.scheme == 'io.supabase.fyllens' && uri.host == 'reset-password') {
+      try {
+        if (kDebugMode) {
+          debugPrint('🔐 [DEEP LINK] Password reset link detected');
+          debugPrint('   Attempting to establish session...');
+        }
+
+        // Try to establish session from URL
+        final response = await Supabase.instance.client.auth.getSessionFromUrl(uri);
+
+        if (kDebugMode) {
+          debugPrint('✅ [DEEP LINK] Session established successfully');
+          debugPrint('   Access Token: ${response.session.accessToken.isNotEmpty ? "Present" : "Missing"}');
+        }
+
+        // Navigate to reset password screen
+        if (mounted) {
+          _router.go(AppRoutes.resetPassword);
+
+          if (kDebugMode) {
+            debugPrint('✅ [DEEP LINK] Navigated to reset password screen');
+          }
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('❌ [DEEP LINK] Error establishing session: $e');
+        }
+
+        // Fallback: Try to extract code from query params and pass to screen
+        final code = uri.queryParameters['code'];
+        if (code != null && mounted) {
+          if (kDebugMode) {
+            debugPrint('🔄 [DEEP LINK] Fallback: Using code parameter');
+          }
+          _router.go('${AppRoutes.resetPassword}?code=$code');
+        }
+      }
+    } else {
+      if (kDebugMode) {
+        debugPrint('⚠️  [DEEP LINK] Unknown deep link scheme/host, ignoring');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Fyllens',
       debugShowCheckedModeBanner: false,
@@ -51,7 +189,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
 
       // GoRouter handles all navigation with auth state awareness
-      routerConfig: _createRouter(authProvider),
+      routerConfig: _router,
     );
   }
 
@@ -75,9 +213,19 @@ class MyApp extends StatelessWidget {
         final isGoingToRegister = state.matchedLocation == AppRoutes.register;
         final isGoingToForgotPassword =
             state.matchedLocation == AppRoutes.forgotPassword;
+        final isGoingToResetPassword =
+            state.matchedLocation == AppRoutes.resetPassword;
         final isGoingToOnboarding =
             state.matchedLocation == AppRoutes.onboarding;
         final isGoingToSplash = state.matchedLocation == AppRoutes.splash;
+
+        // Define auth-related routes (public routes that don't need auth)
+        final isGoingToAuthRoute = isGoingToLogin ||
+            isGoingToRegister ||
+            isGoingToForgotPassword ||
+            isGoingToResetPassword ||
+            isGoingToOnboarding ||
+            isGoingToSplash;
 
         // Define protected routes
         final isGoingToProtectedRoute =
@@ -86,11 +234,18 @@ class MyApp extends StatelessWidget {
             state.matchedLocation == AppRoutes.chat ||
             state.matchedLocation == AppRoutes.notifications;
 
+        // If not authenticated and not going to auth-related route, redirect to splash
+        // This ensures logout → splash → onboarding flow
+        if (!isAuthenticated && !isGoingToAuthRoute) {
+          debugPrint('🔄 Redirect: Not authenticated, redirecting to splash');
+          return AppRoutes.splash;
+        }
+
         // If user is not authenticated and trying to access protected route
         if (!isAuthenticated && isGoingToProtectedRoute) {
-          // Redirect to login
-          debugPrint('🔒 Redirect: Not authenticated, redirecting to login');
-          return AppRoutes.login;
+          // Redirect to splash (splash will then route to onboarding)
+          debugPrint('🔒 Redirect: Not authenticated, redirecting to splash');
+          return AppRoutes.splash;
         }
 
         // If user IS authenticated and trying to access login/register/onboarding
@@ -100,8 +255,8 @@ class MyApp extends StatelessWidget {
           return AppRoutes.home;
         }
 
-        // Allow splash and forgot password regardless of auth state
-        if (isGoingToSplash || isGoingToForgotPassword) {
+        // Allow splash, forgot password, and reset password regardless of auth state
+        if (isGoingToSplash || isGoingToForgotPassword || isGoingToResetPassword) {
           return null; // No redirect
         }
 
@@ -131,6 +286,14 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.forgotPassword,
           builder: (context, state) => const ForgotPasswordScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.resetPassword,
+          builder: (context, state) {
+            // Get optional reset code from query parameters (fallback mechanism)
+            final resetCode = state.uri.queryParameters['code'];
+            return ResetPasswordScreen(resetCode: resetCode);
+          },
         ),
 
         // Main screen with 5-tab bottom navigation (home, library, scan, history, profile)

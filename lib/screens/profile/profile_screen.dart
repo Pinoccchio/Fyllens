@@ -14,6 +14,7 @@ import 'package:fyllens/screens/shared/widgets/image_picker_bottom_sheet.dart';
 import 'package:fyllens/screens/shared/widgets/image_preview_dialog.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/auth_provider.dart';
+import 'package:fyllens/providers/profile_provider.dart';
 
 /// Profile page - User account and settings
 ///
@@ -27,6 +28,10 @@ class ProfileScreen extends StatelessWidget {
     // Get current authenticated user from AuthProvider
     final authProvider = context.watch<AuthProvider>();
     final currentUser = authProvider.currentUser;
+
+    // Get profile provider for upload state
+    final profileProvider = context.watch<ProfileProvider>();
+    final isUploadingAvatar = profileProvider.isUploading;
 
     // Extract user display information
     final displayName = currentUser?.fullName ?? currentUser?.email.split('@').first ?? 'User';
@@ -50,9 +55,12 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
+        child: RefreshIndicator(
+          onRefresh: () => _refreshProfile(context),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Green profile card (like scan card on home screen)
@@ -90,6 +98,7 @@ class ProfileScreen extends StatelessWidget {
                         size: 70,
                         showEditButton: true,
                         onEditPressed: () => _handleEditAvatar(context),
+                        isUploading: isUploadingAvatar,
                       ),
                     ),
                     const SizedBox(width: AppSpacing.md),
@@ -183,8 +192,15 @@ class ProfileScreen extends StatelessWidget {
             ],
           ),
         ),
+        ),
       ),
     );
+  }
+
+  /// Refresh profile data from server
+  static Future<void> _refreshProfile(BuildContext context) async {
+    final authProvider = context.read<AuthProvider>();
+    await authProvider.refreshProfile();
   }
 
   /// Handle avatar edit - shows image picker and preview
@@ -246,37 +262,52 @@ class ProfileScreen extends StatelessWidget {
       userId: currentUser.id,
     );
 
+    if (!context.mounted) return;
+
     if (success == true) {
       debugPrint('✅ ProfileScreen: Avatar updated successfully');
-      if (context.mounted) {
-        // Refresh auth provider to get updated user data
-        final authProvider = context.read<AuthProvider>();
-        await authProvider.refreshProfile();
 
-        // Check if refresh had errors
-        if (authProvider.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Avatar uploaded but failed to refresh: ${authProvider.errorMessage}'),
-              backgroundColor: Theme.of(context).colorScheme.error,
-              action: SnackBarAction(
-                label: 'Retry',
-                textColor: AppColors.textOnPrimary,
-                onPressed: () => authProvider.refreshProfile(),
-              ),
+      // Refresh auth provider to get updated user data
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.refreshProfile();
+
+      if (!context.mounted) return;
+
+      // Check if refresh had errors
+      if (authProvider.errorMessage != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Avatar uploaded but failed to refresh: ${authProvider.errorMessage}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'Retry',
+              textColor: AppColors.textOnPrimary,
+              onPressed: () => authProvider.refreshProfile(),
             ),
-          );
-        } else {
-          // Success - show confirmation
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Profile picture updated successfully!'),
-              backgroundColor: AppColors.primaryGreenModern,
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
+          ),
+        );
+      } else {
+        // Success - show confirmation
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Profile picture updated successfully!'),
+            backgroundColor: AppColors.primaryGreenModern,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       }
+    } else if (success == false) {
+      debugPrint('❌ ProfileScreen: Avatar update failed');
+
+      // Show error message from profile provider
+      final profileProvider = context.read<ProfileProvider>();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(profileProvider.errorMessage ?? 'Failed to update profile picture'),
+          backgroundColor: AppColors.error,
+          duration: const Duration(seconds: 3),
+        ),
+      );
     }
   }
 
@@ -463,13 +494,8 @@ class ProfileScreen extends StatelessWidget {
       debugPrint('✅ ProfileScreen: Logout successful');
       debugPrint('   Auth state changed - notifyListeners() called');
       debugPrint('   GoRouter.refreshListenable will detect change');
-
-      // Explicit navigation as fallback (GoRouter redirect should handle this automatically)
-      // This ensures logout works even if redirect logic has issues
-      debugPrint('   Navigating to login screen...');
-      context.go(AppRoutes.login);
-
-      debugPrint('✅ ProfileScreen: Navigation to login completed');
+      debugPrint('   GoRouter will automatically redirect to splash');
+      // No manual navigation needed - GoRouter's redirect logic handles it
     } else {
       debugPrint('❌ ProfileScreen: Logout failed');
       // Show error message to user

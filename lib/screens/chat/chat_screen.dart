@@ -70,6 +70,11 @@ class _ChatScreenState extends State<ChatScreen> {
     debugPrint('💬 [CHAT] Initializing chat for user: $userId');
     await chatProvider.initialize(userId);
 
+    // Check for initialization errors
+    if (mounted && chatProvider.errorMessage != null) {
+      _showError('Failed to initialize chat: ${chatProvider.errorMessage}');
+    }
+
     // Scroll to bottom after messages load
     if (mounted) {
       _scrollToBottom();
@@ -88,6 +93,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
     // Send message
     await chatProvider.sendMessage(messageText);
+
+    // Check for errors after sending
+    if (chatProvider.errorMessage != null) {
+      _showError(chatProvider.errorMessage!);
+    }
+
+    // Check for quota exceeded
+    if (chatProvider.quotaExceeded) {
+      _showError('Daily message quota exceeded. Please try again tomorrow.');
+    }
 
     // Scroll to bottom to show new messages
     _scrollToBottom();

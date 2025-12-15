@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
+import 'package:fyllens/core/theme/app_text_styles.dart';
+import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/screens/home/home_screen.dart';
 import 'package:fyllens/screens/library/library_screen.dart';
 import 'package:fyllens/screens/scan/scan_screen.dart';
@@ -93,6 +96,53 @@ class _MainScreenState extends State<MainScreen> {
     debugPrint('✅ [MAIN SCREEN] Tab change complete');
   }
 
+  /// Show exit confirmation dialog
+  Future<bool> _showExitConfirmation() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        title: Text(
+          'Exit Application',
+          style: AppTextStyles.heading2.copyWith(
+            color: AppColors.textPrimary,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to exit the app?',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'No',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGreenModern,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+              ),
+            ),
+            child: const Text('Yes'),
+          ),
+        ],
+      ),
+    ) ?? false; // Return false if dialog is dismissed
+  }
+
   @override
   Widget build(BuildContext context) {
     // Watch TabProvider for programmatic tab changes from other screens
@@ -114,9 +164,22 @@ class _MainScreenState extends State<MainScreen> {
       });
     }
 
-    return Scaffold(
-      body: IndexedStack(index: tabProvider.currentTab, children: _pages),
-      bottomNavigationBar: _buildModernBottomNav(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) async {
+        if (!didPop) {
+          // Show exit confirmation dialog
+          final shouldExit = await _showExitConfirmation();
+          if (shouldExit) {
+            // Exit the app
+            SystemNavigator.pop();
+          }
+        }
+      },
+      child: Scaffold(
+        body: IndexedStack(index: tabProvider.currentTab, children: _pages),
+        bottomNavigationBar: _buildModernBottomNav(),
+      ),
     );
   }
 

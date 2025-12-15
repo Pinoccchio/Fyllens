@@ -114,8 +114,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
     );
 
     if (confirm == true && mounted) {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: Card(
+            child: Padding(
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Deleting scan...'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
       final historyProvider = context.read<HistoryProvider>();
       final success = await historyProvider.deleteScan(scan.id);
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

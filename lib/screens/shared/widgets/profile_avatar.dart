@@ -10,6 +10,7 @@ class ProfileAvatar extends StatelessWidget {
   final double size;
   final VoidCallback? onEditPressed;
   final bool showEditButton;
+  final bool isUploading;
 
   const ProfileAvatar({
     super.key,
@@ -19,6 +20,7 @@ class ProfileAvatar extends StatelessWidget {
     this.size = 120,
     this.onEditPressed,
     this.showEditButton = true,
+    this.isUploading = false,
   });
 
   @override
@@ -107,6 +109,27 @@ class ProfileAvatar extends StatelessWidget {
                   Icons.camera_alt,
                   color: Colors.white,
                   size: size * 0.15,
+                ),
+              ),
+            ),
+          ),
+
+        // Uploading overlay - Show dark overlay with spinner
+        if (isUploading)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: SizedBox(
+                  width: size * 0.3,
+                  height: size * 0.3,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 3,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
                 ),
               ),
             ),

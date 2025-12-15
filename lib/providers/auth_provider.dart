@@ -341,7 +341,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Reset password
+  /// Reset password - sends reset email with deep link
   Future<bool> resetPassword({required String email}) async {
     debugPrint('\n🔑 AuthProvider.resetPassword(): Starting password reset...');
     debugPrint('   Email: $email');
@@ -352,14 +352,47 @@ class AuthProvider with ChangeNotifier {
 
     try {
       debugPrint('   Calling AuthService.resetPassword()...');
-      await _authService.resetPassword(email: email);
+      // Use custom redirect URL for deep linking
+      await _authService.resetPassword(
+        email: email,
+        redirectTo: 'io.supabase.fyllens://reset-password',
+      );
       debugPrint('✅ AuthProvider.resetPassword(): Password reset email sent!');
       debugPrint('   User should check their email: $email');
+      debugPrint('   Redirect URL: io.supabase.fyllens://reset-password');
       _isLoading = false;
       notifyListeners();
       return true;
     } catch (e, stackTrace) {
       debugPrint('❌ AuthProvider.resetPassword(): Password reset FAILED');
+      debugPrint('   Error: $e');
+      debugPrint('   Type: ${e.runtimeType}');
+      debugPrint('   Stack trace: $stackTrace');
+      _errorMessage = _extractErrorMessage(e);
+      debugPrint('   Extracted error message: $_errorMessage');
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  /// Update user password (called from reset password screen)
+  Future<bool> updatePassword({required String newPassword}) async {
+    debugPrint('\n🔐 AuthProvider.updatePassword(): Updating password...');
+
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      debugPrint('   Calling AuthService.updatePassword()...');
+      await _authService.updatePassword(newPassword: newPassword);
+      debugPrint('✅ AuthProvider.updatePassword(): Password updated successfully!');
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e, stackTrace) {
+      debugPrint('❌ AuthProvider.updatePassword(): Password update FAILED');
       debugPrint('   Error: $e');
       debugPrint('   Type: ${e.runtimeType}');
       debugPrint('   Stack trace: $stackTrace');

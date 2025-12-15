@@ -11,6 +11,7 @@ import 'package:fyllens/screens/shared/widgets/modern_icon_container.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/profile_provider.dart';
+import 'package:fyllens/core/utils/auth_validators.dart';
 
 /// Registration screen with email and password fields
 ///
@@ -36,8 +37,13 @@ class _RegisterScreenState extends State<RegisterScreen>
   late Animation<double> _fadeAnimation; // Fade in
   late Animation<Offset> _slideAnimation; // Slide up
 
+  /// GlobalKey for ScaffoldMessenger to avoid context issues during navigation
+  final _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+
+  /// Form key for validation
+  final _formKey = GlobalKey<FormState>();
+
   /// Form input controllers
-  /// Optional fields in this prototype - no validation yet
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -80,7 +86,15 @@ class _RegisterScreenState extends State<RegisterScreen>
     debugPrint('🚀 REGISTRATION FLOW STARTED');
     debugPrint('═══════════════════════════════════════════════════════');
 
-    // Get form values
+    // Validate form fields first (inline validation)
+    debugPrint('\n🔍 Running form validation...');
+    if (!_formKey.currentState!.validate()) {
+      debugPrint('❌ Validation failed - errors shown inline');
+      return; // Stop if validation fails - error messages shown inline
+    }
+    debugPrint('✅ Validation passed');
+
+    // Get form values (already validated)
     final fullName = _fullNameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
@@ -92,36 +106,6 @@ class _RegisterScreenState extends State<RegisterScreen>
     debugPrint(
       '   Password: ${"*" * password.length} (${password.length} characters)',
     );
-
-    // Basic validation
-    debugPrint('\n🔍 Running validation...');
-
-    if (fullName.isEmpty || email.isEmpty || password.isEmpty) {
-      debugPrint('❌ Validation failed: Empty fields detected');
-      debugPrint('   Full name empty: ${fullName.isEmpty}');
-      debugPrint('   Email empty: ${email.isEmpty}');
-      debugPrint('   Password empty: ${password.isEmpty}');
-      _showError('Please fill in all fields');
-      return;
-    }
-
-    if (fullName.length < 2) {
-      debugPrint(
-        '❌ Validation failed: Full name too short (${fullName.length} characters)',
-      );
-      _showError('Full name must be at least 2 characters');
-      return;
-    }
-
-    if (password.length < 6) {
-      debugPrint(
-        '❌ Validation failed: Password too short (${password.length} characters)',
-      );
-      _showError('Password must be at least 6 characters');
-      return;
-    }
-
-    debugPrint('✅ Validation passed');
 
     // Get providers
     debugPrint('\n🔌 Getting providers...');
@@ -191,19 +175,14 @@ class _RegisterScreenState extends State<RegisterScreen>
         debugPrint('\n🎉 Registration completed successfully!');
         _showSuccess('Account created successfully! Please log in.');
 
-        // Navigate to login screen
-        // Wait for both message display AND auth state sync with GoRouter
-        debugPrint('   Waiting 1.1 seconds before navigation...');
-        await Future.delayed(const Duration(milliseconds: 1100));
+        // Let GoRouter handle navigation automatically after signOut()
+        // GoRouter's refreshListenable will detect auth state change and redirect to splash/login
+        // Increase delay slightly to ensure success message is visible
+        debugPrint('   Waiting 1.5 seconds for success message display...');
+        await Future.delayed(const Duration(milliseconds: 1500));
 
-        if (!mounted) {
-          debugPrint('⚠️ Widget unmounted before navigation');
-          return;
-        }
-
-        debugPrint('🔀 Navigating to login screen...');
-        context.go(AppRoutes.login);
-
+        debugPrint('✅ Success message displayed');
+        debugPrint('   GoRouter will automatically redirect to login');
         debugPrint('\n═══════════════════════════════════════════════════════');
         debugPrint('✅ REGISTRATION FLOW COMPLETED SUCCESSFULLY');
         debugPrint('═══════════════════════════════════════════════════════\n');
@@ -235,7 +214,9 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   /// Show error message using SnackBar
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Use GlobalKey instead of context to avoid deactivated widget issues
+    // No need for mounted check since we're using direct reference
+    _scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.red[700],
@@ -250,7 +231,9 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   /// Show success message using SnackBar
   void _showSuccess(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    // Use GlobalKey instead of context to avoid deactivated widget issues
+    // No need for mounted check since we're using direct reference
+    _scaffoldMessengerKey.currentState?.showSnackBar(
       SnackBar(
         content: Text(message),
         backgroundColor: Colors.green[700],
@@ -265,9 +248,19 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundSoft,
-      body: FloatingCirclesBackground(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, Object? result) {
+        if (!didPop) {
+          // Handle back button - go to login instead of exiting
+          context.go(AppRoutes.login);
+        }
+      },
+      child: ScaffoldMessenger(
+        key: _scaffoldMessengerKey,
+        child: Scaffold(
+          backgroundColor: AppColors.backgroundSoft,
+          body: FloatingCirclesBackground(
         circles: [
           FloatingCircleData(
             top: 0.1,
@@ -328,6 +321,8 @@ class _RegisterScreenState extends State<RegisterScreen>
             ),
           ),
         ),
+      ),
+    ),
       ),
     );
   }
@@ -390,22 +385,24 @@ class _RegisterScreenState extends State<RegisterScreen>
 
   /// Registration form with email, password, and sign up button
   Widget _buildRegisterForm(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Form(
+      key: _formKey,
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceLight,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryGreenModern.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Create Account Heading
           Text(
             AppConstants.createAccount,
@@ -426,12 +423,14 @@ class _RegisterScreenState extends State<RegisterScreen>
 
           const SizedBox(height: AppSpacing.xl),
 
-          // Full Name Field
+          // Full Name Field with inline validation
           TextFormField(
             controller: _fullNameController,
             keyboardType: TextInputType.name,
             textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
             style: AppTextStyles.bodyMedium,
+            validator: (value) => AuthValidators.validateFullName(value),
             decoration: InputDecoration(
               labelText: 'Full Name',
               hintText: 'Enter your full name',
@@ -463,11 +462,13 @@ class _RegisterScreenState extends State<RegisterScreen>
 
           const SizedBox(height: AppSpacing.md),
 
-          // Email Field (optional, no validation)
+          // Email Field with inline validation
           TextFormField(
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
             style: AppTextStyles.bodyMedium,
+            validator: (value) => AuthValidators.validateEmail(value),
             decoration: InputDecoration(
               labelText: 'Email',
               hintText: 'Enter your email',
@@ -499,11 +500,14 @@ class _RegisterScreenState extends State<RegisterScreen>
 
           const SizedBox(height: AppSpacing.md),
 
-          // Password Field (optional, no validation)
+          // Password Field with inline validation
           TextFormField(
             controller: _passwordController,
             obscureText: _obscurePassword,
+            textInputAction: TextInputAction.done,
             style: AppTextStyles.bodyMedium,
+            validator: (value) => AuthValidators.validatePassword(value),
+            onFieldSubmitted: (_) => _handleSignUp(),
             decoration: InputDecoration(
               labelText: 'Password',
               hintText: 'Enter your password',
@@ -556,6 +560,7 @@ class _RegisterScreenState extends State<RegisterScreen>
           // Sign In Link
           _buildSignInLink(context),
         ],
+        ),
       ),
     );
   }

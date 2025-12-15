@@ -224,11 +224,9 @@ class ImagePreviewDialog extends StatelessWidget {
       );
 
       if (avatarUrl == null) {
+        // Don't show SnackBar here - let parent screen handle all feedback
         if (context.mounted) {
-          _showErrorSnackBar(
-            context,
-            profileProvider.errorMessage ?? 'Failed to upload image',
-          );
+          Navigator.pop(context, false);
         }
         return;
       }
@@ -241,18 +239,12 @@ class ImagePreviewDialog extends StatelessWidget {
 
       if (!context.mounted) return;
 
-      if (success) {
-        _showSuccessSnackBar(context, 'Profile picture updated successfully!');
-        Navigator.pop(context, true);
-      } else {
-        _showErrorSnackBar(
-          context,
-          profileProvider.errorMessage ?? 'Failed to update profile',
-        );
-      }
+      // Return success/failure to parent screen - let it handle feedback
+      Navigator.pop(context, success);
     } catch (e) {
       if (context.mounted) {
-        _showErrorSnackBar(context, 'An error occurred: $e');
+        // Return failure to parent screen - let it handle feedback
+        Navigator.pop(context, false);
       }
     }
   }

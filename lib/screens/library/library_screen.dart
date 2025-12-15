@@ -118,40 +118,49 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     );
                   }
 
-                  // Error state
+                  // Error state - with pull-to-refresh
                   if (provider.hasError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              AppIcons.info,
-                              size: 64,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              'Failed to load plants',
-                              style: AppTextStyles.heading3,
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(
-                              provider.plantsError ?? 'Unknown error',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: AppColors.textSecondary,
+                    return RefreshIndicator(
+                      onRefresh: () => provider.retryPlants(),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: [
+                          SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    AppIcons.info,
+                                    size: 64,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text(
+                                    'Failed to load plants',
+                                    style: AppTextStyles.heading3,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Text(
+                                    provider.plantsError ?? 'Unknown error',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: AppSpacing.lg),
+                                  ElevatedButton(
+                                    onPressed: () => provider.retryPlants(),
+                                    child: const Text('Retry'),
+                                  ),
+                                ],
                               ),
-                              textAlign: TextAlign.center,
                             ),
-                            const SizedBox(height: AppSpacing.lg),
-                            ElevatedButton(
-                              onPressed: () => provider.retryPlants(),
-                              child: const Text('Retry'),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     );
                   }

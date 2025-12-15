@@ -34,12 +34,13 @@ class ScanProvider with ChangeNotifier {
     required String plantName,
     required String userId,
   }) async {
-    print('\n🔬 [SCAN PROVIDER] performScan() called');
-    print('   Parameters:');
-    print('      - Plant Name: $plantName');
-    print('      - User ID: $userId');
-    print('      - Plant ID: $plantId');
-    print('      - Image Path: ${imageFile.path}');
+    // Reduced verbose logging - uncomment for debugging
+    // print('\n🔬 [SCAN PROVIDER] performScan() called');
+    // print('   Parameters:');
+    // print('      - Plant Name: $plantName');
+    // print('      - User ID: $userId');
+    // print('      - Plant ID: $plantId');
+    // print('      - Image Path: ${imageFile.path}');
 
     _isScanning = true;
     _errorMessage = null;
