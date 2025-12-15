@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/models/deficiency.dart';
+import 'package:fyllens/models/notification.dart';
 import 'package:fyllens/services/database_service.dart';
 import 'package:fyllens/services/ml_service.dart';
 import 'package:fyllens/services/storage_service.dart';
@@ -186,6 +187,19 @@ class ScanProvider with ChangeNotifier {
       print('      - Scan ID: ${_currentScanResult!.id}');
       print('      - Deficiency: ${_currentScanResult!.deficiencyDetected}');
 
+      // Create notification for scan result
+      print('   🔔 [SCAN PROVIDER] Step 6: Creating notification...');
+      await _createScanNotification(
+        userId: userId,
+        scanId: _currentScanResult!.id,
+        plantId: plantId,
+        plantName: plantName,
+        deficiency: deficiency,
+        isHealthy: isHealthy,
+        confidence: (mlResult['confidence'] as num?)?.toDouble() ?? 0.0,
+        severity: isHealthy ? null : (geminiInfo['severity'] as String?),
+      );
+
       _isScanning = false;
       notifyListeners();
 
@@ -212,6 +226,13 @@ class ScanProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set current scan result (used when loading from notification/history)
+  void setCurrentScanResult(ScanResult scanResult) {
+    print('📝 [SCAN PROVIDER] Setting current scan result: ${scanResult.id}');
+    _currentScanResult = scanResult;
+    notifyListeners();
+  }
+
   void clearError() {
     _errorMessage = null;
     notifyListeners();
@@ -229,6 +250,59 @@ class ScanProvider with ChangeNotifier {
     print('🧹 [SCAN PROVIDER] Clearing plant preselection');
     _preselectedPlant = null;
     notifyListeners();
+  }
+
+  /// Create notification for scan result
+  Future<void> _createScanNotification({
+    required String userId,
+    required String scanId,
+    String? plantId,
+    required String plantName,
+    required String deficiency,
+    required bool isHealthy,
+    required double confidence,
+    String? severity,
+  }) async {
+    try {
+      String notificationType;
+      String title;
+      String body;
+
+      if (isHealthy) {
+        // Healthy plant - celebration notification
+        notificationType = NotificationType.healthyCelebration;
+        title = '🌟 Great News!';
+        body = 'Your $plantName is healthy! Keep up the good care.';
+      } else {
+        // Deficiency detected - alert notification
+        notificationType = NotificationType.deficiencyAlert;
+        title = '⚠️ Deficiency Detected';
+        body = '$deficiency detected in your $plantName';
+
+        if (severity != null) {
+          body += ' (${severity.toLowerCase()} severity)';
+        }
+
+        body += '. Tap to view treatment recommendations.';
+      }
+
+      await _databaseService.createNotification(
+        userId: userId,
+        title: title,
+        body: body,
+        notificationType: notificationType,
+        scanId: scanId,
+        plantId: plantId,
+        plantName: plantName,
+        actionType: 'view_scan_result',
+        actionData: {'scanId': scanId},
+      );
+
+      print('   ✅ [SCAN PROVIDER] Notification created successfully');
+    } catch (e) {
+      print('   ⚠️  [SCAN PROVIDER] Failed to create notification: $e');
+      // Don't throw - notification failure shouldn't break scan flow
+    }
   }
 
   String _extractErrorMessage(Object error) {

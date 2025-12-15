@@ -29,6 +29,9 @@ class AppRoutes {
   // Chat Routes
   static const String chat = '/chat';
 
+  // Notification Routes
+  static const String notifications = '/notifications';
+
   // Settings
   static const String settings = '/settings';
 }

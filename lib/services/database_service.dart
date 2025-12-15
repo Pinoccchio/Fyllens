@@ -264,4 +264,232 @@ class DatabaseService {
       rethrow;
     }
   }
+
+  // ============================================================================
+  // NOTIFICATION METHODS
+  // ============================================================================
+
+  /// Create a new notification
+  Future<Map<String, dynamic>> createNotification({
+    required String userId,
+    required String title,
+    required String body,
+    required String notificationType,
+    String? scanId,
+    String? plantId,
+    String? plantName,
+    DateTime? scheduledFor,
+    String? actionType,
+    Map<String, dynamic>? actionData,
+  }) async {
+    print('\n🔔 [DATABASE] Creating notification for user: $userId');
+    print('   Type: $notificationType');
+    print('   Title: $title');
+
+    try {
+      final notificationData = {
+        'user_id': userId,
+        'title': title,
+        'body': body,
+        'notification_type': notificationType,
+        if (scanId != null) 'scan_id': scanId,
+        if (plantId != null) 'plant_id': plantId,
+        if (plantName != null) 'plant_name': plantName,
+        if (scheduledFor != null) 'scheduled_for': scheduledFor.toIso8601String(),
+        if (actionType != null) 'action_type': actionType,
+        if (actionData != null) 'action_data': actionData,
+        'sent_at': DateTime.now().toIso8601String(),
+      };
+
+      final notification = await _supabaseService
+          .from('notifications')
+          .insert(notificationData)
+          .select()
+          .single();
+
+      print('   ✅ [DATABASE] Notification created: ${notification['id']}');
+      return notification;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error creating notification: $e');
+      rethrow;
+    }
+  }
+
+  /// Fetch notifications for a user
+  Future<List<Map<String, dynamic>>> fetchNotifications(
+    String userId, {
+    int limit = 50,
+    bool unreadOnly = false,
+  }) async {
+    print('\n🔔 [DATABASE] Fetching notifications for user: $userId');
+    print('   Limit: $limit');
+    print('   Unread only: $unreadOnly');
+
+    try {
+      var query = _supabaseService
+          .from('notifications')
+          .select()
+          .eq('user_id', userId);
+
+      if (unreadOnly) {
+        query = query.eq('is_read', false);
+      }
+
+      final notifications = await query
+          .order('created_at', ascending: false)
+          .limit(limit);
+
+      print('   ✅ [DATABASE] Fetched ${notifications.length} notifications');
+      return List<Map<String, dynamic>>.from(notifications);
+    } catch (e) {
+      print('   🚨 [DATABASE] Error fetching notifications: $e');
+      rethrow;
+    }
+  }
+
+  /// Get unread notification count
+  Future<int> getUnreadNotificationCount(String userId) async {
+    print('\n🔔 [DATABASE] Getting unread count for user: $userId');
+
+    try {
+      final notifications = await _supabaseService
+          .from('notifications')
+          .select()
+          .eq('user_id', userId)
+          .eq('is_read', false);
+
+      final count = notifications.length;
+      print('   ✅ [DATABASE] Unread count: $count');
+      return count;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error getting unread count: $e');
+      return 0;
+    }
+  }
+
+  /// Mark notification as read
+  Future<Map<String, dynamic>> markNotificationAsRead(String notificationId) async {
+    print('\n🔔 [DATABASE] Marking notification as read: $notificationId');
+
+    try {
+      final notification = await _supabaseService
+          .from('notifications')
+          .update({
+            'is_read': true,
+            'read_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', notificationId)
+          .select()
+          .single();
+
+      print('   ✅ [DATABASE] Notification marked as read');
+      return notification;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error marking notification as read: $e');
+      rethrow;
+    }
+  }
+
+  /// Mark notification as actioned
+  Future<Map<String, dynamic>> markNotificationAsActioned(String notificationId) async {
+    print('\n🔔 [DATABASE] Marking notification as actioned: $notificationId');
+
+    try {
+      final notification = await _supabaseService
+          .from('notifications')
+          .update({
+            'is_actioned': true,
+            'actioned_at': DateTime.now().toIso8601String(),
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', notificationId)
+          .select()
+          .single();
+
+      print('   ✅ [DATABASE] Notification marked as actioned');
+      return notification;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error marking notification as actioned: $e');
+      rethrow;
+    }
+  }
+
+  /// Delete notification
+  Future<void> deleteNotification(String notificationId) async {
+    print('\n🔔 [DATABASE] Deleting notification: $notificationId');
+
+    try {
+      await _supabaseService
+          .from('notifications')
+          .delete()
+          .eq('id', notificationId);
+
+      print('   ✅ [DATABASE] Notification deleted');
+    } catch (e) {
+      print('   🚨 [DATABASE] Error deleting notification: $e');
+      rethrow;
+    }
+  }
+
+  /// Get or create notification preferences for user
+  Future<Map<String, dynamic>> getOrCreateNotificationPreferences(
+    String userId,
+  ) async {
+    print('\n🔔 [DATABASE] Getting notification preferences for user: $userId');
+
+    try {
+      // Try to fetch existing preferences
+      final existing = await _supabaseService
+          .from('notification_preferences')
+          .select()
+          .eq('user_id', userId)
+          .maybeSingle();
+
+      if (existing != null) {
+        print('   ✅ [DATABASE] Found existing preferences');
+        return existing;
+      }
+
+      // Create default preferences
+      print('   📝 [DATABASE] Creating default preferences...');
+      final newPreferences = await _supabaseService
+          .from('notification_preferences')
+          .insert({'user_id': userId})
+          .select()
+          .single();
+
+      print('   ✅ [DATABASE] Created default preferences');
+      return newPreferences;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error getting/creating preferences: $e');
+      rethrow;
+    }
+  }
+
+  /// Update notification preferences
+  Future<Map<String, dynamic>> updateNotificationPreferences(
+    String userId,
+    Map<String, dynamic> updates,
+  ) async {
+    print('\n🔔 [DATABASE] Updating notification preferences for user: $userId');
+
+    try {
+      final preferences = await _supabaseService
+          .from('notification_preferences')
+          .update({
+            ...updates,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('user_id', userId)
+          .select()
+          .single();
+
+      print('   ✅ [DATABASE] Preferences updated');
+      return preferences;
+    } catch (e) {
+      print('   🚨 [DATABASE] Error updating preferences: $e');
+      rethrow;
+    }
+  }
 }

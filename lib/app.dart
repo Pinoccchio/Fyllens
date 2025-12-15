@@ -16,6 +16,7 @@ import 'package:fyllens/screens/profile/edit_profile_screen.dart';
 import 'package:fyllens/screens/scan/camera_screen.dart';
 import 'package:fyllens/screens/scan/scan_results_screen.dart';
 import 'package:fyllens/screens/chat/chat_screen.dart';
+import 'package:fyllens/screens/notifications/notification_center_screen.dart';
 
 // Import providers for scan data
 import 'package:fyllens/providers/scan_provider.dart';
@@ -82,7 +83,8 @@ class MyApp extends StatelessWidget {
         final isGoingToProtectedRoute =
             state.matchedLocation == AppRoutes.home ||
             state.matchedLocation == AppRoutes.editProfile ||
-            state.matchedLocation == AppRoutes.chat;
+            state.matchedLocation == AppRoutes.chat ||
+            state.matchedLocation == AppRoutes.notifications;
 
         // If user is not authenticated and trying to access protected route
         if (!isAuthenticated && isGoingToProtectedRoute) {
@@ -166,6 +168,13 @@ class MyApp extends StatelessWidget {
         GoRoute(
           path: AppRoutes.chat,
           builder: (context, state) => const ChatScreen(),
+        ),
+
+        // Notification Center screen
+        // PROTECTED: Requires authentication (enforced by redirect logic)
+        GoRoute(
+          path: AppRoutes.notifications,
+          builder: (context, state) => const NotificationCenterScreen(),
         ),
 
         // Camera screen for plant scanning

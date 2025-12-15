@@ -11,6 +11,7 @@ import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
+import 'package:fyllens/providers/notification_provider.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/screens/history/history_result_screen.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
@@ -44,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadHistory() async {
     final authProvider = context.read<AuthProvider>();
     final historyProvider = context.read<HistoryProvider>();
+    final notificationProvider = context.read<NotificationProvider>();
 
     final userId = authProvider.currentUser?.id;
     if (userId == null) {
@@ -53,12 +55,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
     debugPrint('📚 [HOME] Loading scan history for user: $userId');
     await historyProvider.loadHistory(userId);
+
+    // Load notifications
+    debugPrint('🔔 [HOME] Loading notifications for user: $userId');
+    await notificationProvider.loadNotifications(userId);
   }
 
   @override
   Widget build(BuildContext context) {
     final historyProvider = context.watch<HistoryProvider>();
+    final notificationProvider = context.watch<NotificationProvider>();
     final recentScans = historyProvider.scans.take(3).toList();
+    final unreadCount = notificationProvider.unreadCount;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -76,12 +84,41 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: Icon(AppIcons.notifications),
-            color: AppColors.textSecondary,
-            onPressed: () {
-              // TODO: Navigate to notifications
-            },
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(AppIcons.notifications),
+                color: AppColors.textSecondary,
+                onPressed: () {
+                  context.push(AppRoutes.notifications);
+                },
+              ),
+              if (unreadCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 18,
+                      minHeight: 18,
+                    ),
+                    child: Text(
+                      unreadCount > 99 ? '99+' : '$unreadCount',
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ],
       ),

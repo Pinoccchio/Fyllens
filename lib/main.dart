@@ -12,6 +12,8 @@ import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/providers/library_provider.dart';
 import 'package:fyllens/providers/chat_provider.dart';
+import 'package:fyllens/providers/notification_provider.dart';
+import 'package:fyllens/services/notification_service.dart';
 
 void main() async {
   // Ensure Flutter bindings are initialized
@@ -66,6 +68,18 @@ void main() async {
     // App will fail when trying to authenticate - this is expected
   }
 
+  // Initialize Notification Service
+  debugPrint('\n🔔 Initializing Notification Service...');
+  try {
+    await NotificationService.instance.initialize();
+    debugPrint('✅ Notification Service initialized successfully');
+  } catch (e, stackTrace) {
+    debugPrint('❌ ERROR: Notification Service initialization FAILED');
+    debugPrint('   Error: $e');
+    debugPrint('   Stack trace: $stackTrace');
+    debugPrint('   Notifications may not work properly');
+  }
+
   // Run the app
   runApp(
     MultiProvider(
@@ -90,6 +104,9 @@ void main() async {
 
         // Chat provider for AI conversation
         ChangeNotifierProvider(create: (_) => ChatProvider()),
+
+        // Notification provider
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
       child: const MyApp(),
     ),
