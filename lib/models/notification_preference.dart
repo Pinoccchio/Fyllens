@@ -1,3 +1,5 @@
+import 'package:fyllens/core/utils/timezone_helper.dart';
+
 /// Notification Preference model - User's notification settings
 ///
 /// Stores user preferences for which notifications to receive and when.
@@ -61,9 +63,10 @@ class NotificationPreference {
       quietHoursEnabled: json['quiet_hours_enabled'] as bool? ?? false,
       quietHoursStart: json['quiet_hours_start'] as String?,
       quietHoursEnd: json['quiet_hours_end'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamps from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['updated_at'] as String)
           : null,
     );
   }

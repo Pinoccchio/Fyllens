@@ -15,8 +15,8 @@ import 'package:fyllens/providers/notification_provider.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/screens/history/history_result_screen.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
-import 'package:intl/intl.dart';
 import 'package:fyllens/screens/shared/widgets/severity_badge.dart';
+import 'package:fyllens/core/utils/timestamp_formatter.dart';
 
 /// Home page - Main dashboard
 ///
@@ -372,23 +372,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildScanItem(BuildContext context, ScanResult scan) {
-    final dateFormat = DateFormat('MMM dd, yyyy');
-    final now = DateTime.now();
-    final difference = now.difference(scan.createdAt);
-
-    // Format relative time
-    String timeAgo;
-    if (difference.inMinutes < 60) {
-      timeAgo = '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      timeAgo = '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      timeAgo = 'Yesterday';
-    } else if (difference.inDays < 7) {
-      timeAgo = '${difference.inDays}d ago';
-    } else {
-      timeAgo = dateFormat.format(scan.createdAt);
-    }
+    // Use TimestampFormatter to prevent negative durations ("-479m ago" bug)
+    final timeAgo = TimestampFormatter.formatAgo(scan.createdAt);
 
     return InkWell(
       onTap: () {

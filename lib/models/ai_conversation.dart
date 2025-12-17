@@ -1,3 +1,5 @@
+import 'package:fyllens/core/utils/timezone_helper.dart';
+
 /// AI Conversation Model
 ///
 /// Represents a chat conversation thread between a user and Fyllens AI.
@@ -25,8 +27,9 @@ class AIConversation {
       id: json['id'] as String,
       userId: json['user_id'] as String,
       title: json['title'] as String? ?? 'Chat with Fyllens AI',
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
+      // Parse UTC timestamps from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
+      updatedAt: TimezoneHelper.parseUtcToManila(json['updated_at'] as String),
       messageCount: json['message_count'] as int? ?? 0,
     );
   }

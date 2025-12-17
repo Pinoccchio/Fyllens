@@ -1,3 +1,6 @@
+import 'package:fyllens/core/utils/timezone_helper.dart';
+import 'package:fyllens/core/utils/timestamp_formatter.dart';
+
 /// Notification model - Represents an in-app notification
 ///
 /// Stores notification data including title, body, type, and action metadata.
@@ -64,21 +67,22 @@ class AppNotification {
       plantName: json['plant_name'] as String?,
       isRead: json['is_read'] as bool? ?? false,
       isActioned: json['is_actioned'] as bool? ?? false,
+      // Parse UTC timestamps from Supabase and convert to Manila time
       scheduledFor: json['scheduled_for'] != null
-          ? DateTime.parse(json['scheduled_for'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['scheduled_for'] as String)
           : null,
       sentAt: json['sent_at'] != null
-          ? DateTime.parse(json['sent_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['sent_at'] as String)
           : null,
       readAt: json['read_at'] != null
-          ? DateTime.parse(json['read_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['read_at'] as String)
           : null,
       actionedAt: json['actioned_at'] != null
-          ? DateTime.parse(json['actioned_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['actioned_at'] as String)
           : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['updated_at'] as String)
           : null,
       actionType: json['action_type'] as String?,
       actionData: json['action_data'] as Map<String, dynamic>?,
@@ -159,23 +163,12 @@ class AppNotification {
   bool get isSent => sentAt != null;
 
   /// Get time ago string for display
+  ///
+  /// Uses TimestampFormatter to prevent negative durations ("-479m ago" bug)
   String get timeAgo {
-    final now = DateTime.now();
-    final difference = now.difference(createdAt);
-
-    if (difference.inMinutes < 1) {
-      return 'Just now';
-    } else if (difference.inMinutes < 60) {
-      return '${difference.inMinutes}m ago';
-    } else if (difference.inHours < 24) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inDays == 1) {
-      return 'Yesterday';
-    } else if (difference.inDays < 7) {
-      return '${difference.inDays}d ago';
-    } else {
-      return '${createdAt.month}/${createdAt.day}/${createdAt.year}';
-    }
+    return TimezoneHelper.isInitialized()
+        ? TimestampFormatter.formatNotificationTime(createdAt)
+        : 'Just now'; // Fallback if timezone not initialized
   }
 
   @override

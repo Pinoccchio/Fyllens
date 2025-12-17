@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:fyllens/app.dart';
 import 'package:fyllens/core/config/supabase_config.dart';
 import 'package:fyllens/services/supabase_service.dart';
@@ -18,6 +19,17 @@ import 'package:fyllens/services/notification_service.dart';
 void main() async {
   // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone database for Philippine timezone support
+  debugPrint('\n🌏 Initializing timezone database...');
+  try {
+    tz.initializeTimeZones();
+    debugPrint('✅ Timezone database initialized (Philippine Time support enabled)');
+  } catch (e) {
+    debugPrint('❌ ERROR: Failed to initialize timezone database');
+    debugPrint('   Error: $e');
+    debugPrint('   Timestamps may not display correctly');
+  }
 
   // Load environment variables from .env file
   try {

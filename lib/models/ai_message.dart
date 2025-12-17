@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fyllens/core/utils/timezone_helper.dart';
 
 /// Message Sender Type
 ///
@@ -78,7 +79,8 @@ class AIMessage {
       conversationId: json['conversation_id'] as String,
       senderType: MessageSender.fromString(json['sender_type'] as String),
       messageText: json['message_text'] as String,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamp from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
       quickReplies: quickReplies,
       metadata: metadata,
     );

@@ -1,3 +1,5 @@
+import 'package:fyllens/core/utils/timezone_helper.dart';
+
 /// Plant model representing plant species in the database
 class Plant {
   final String id;
@@ -51,7 +53,8 @@ class Plant {
           ? List<String>.from(json['common_deficiencies'] as List)
           : null,
       healthyDescription: json['healthy_description'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamp from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
     );
   }
 

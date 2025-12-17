@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fyllens/core/utils/timestamp_formatter.dart';
+import 'package:fyllens/core/utils/timezone_helper.dart';
 
 /// String extensions
 extension StringExtensions on String {
@@ -18,32 +20,57 @@ extension StringExtensions on String {
 }
 
 /// DateTime extensions
+///
+/// Provides convenient timestamp formatting using TimestampFormatter.
+/// All methods assume the DateTime is already in Philippine timezone (Manila time).
 extension DateTimeExtensions on DateTime {
-  /// Format as readable date (e.g., "Jan 15, 2024")
+  /// Format as readable date (e.g., "Dec 17, 2025")
+  ///
+  /// Uses TimestampFormatter for consistent Philippine timezone display
   String toReadableDate() {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return '${months[month - 1]} $day, $year';
+    return TimestampFormatter.formatDate(this);
   }
 
-  /// Format as time (e.g., "2:30 PM")
+  /// Format as readable time (e.g., "8:11 PM")
+  ///
+  /// Uses TimestampFormatter for consistent Philippine timezone display
   String toReadableTime() {
-    final hour12 = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-    final period = hour >= 12 ? 'PM' : 'AM';
-    final minuteStr = minute.toString().padLeft(2, '0');
-    return '$hour12:$minuteStr $period';
+    return TimestampFormatter.formatTime(this);
+  }
+
+  /// Format as "time ago" string (e.g., "2 hours ago", "Yesterday")
+  ///
+  /// Uses TimestampFormatter which handles negative durations correctly
+  String toTimeAgo() {
+    return TimestampFormatter.formatAgo(this);
+  }
+
+  /// Format as date and time (e.g., "Dec 17, 2025 | 8:11 PM")
+  ///
+  /// Uses TimestampFormatter for consistent Philippine timezone display
+  String toReadableDateTime() {
+    return TimestampFormatter.formatDateTime(this);
+  }
+
+  /// Format for chat messages (context-aware)
+  ///
+  /// Returns: "8:11 PM" (today), "Yesterday 8:11 PM", "Mon 8:11 PM", "Dec 17 8:11 PM"
+  String toChatTime() {
+    return TimestampFormatter.formatChatTime(this);
+  }
+
+  /// Convert Manila DateTime to UTC for Supabase
+  ///
+  /// Use when sending timestamps to Supabase database
+  DateTime toUtcFromManila() {
+    return TimezoneHelper.manilaToUtc(this);
+  }
+
+  /// Convert UTC DateTime to Manila timezone
+  ///
+  /// Use when receiving timestamps from Supabase database
+  DateTime toManilaTime() {
+    return TimezoneHelper.toManilaTime(this);
   }
 }
 

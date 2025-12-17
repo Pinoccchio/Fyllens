@@ -298,7 +298,8 @@ class DatabaseService {
         if (scheduledFor != null) 'scheduled_for': scheduledFor.toIso8601String(),
         if (actionType != null) 'action_type': actionType,
         if (actionData != null) 'action_data': actionData,
-        'sent_at': DateTime.now().toIso8601String(),
+        // Send UTC timestamp to Supabase (database stores in UTC)
+        'sent_at': DateTime.now().toUtc().toIso8601String(),
       };
 
       final notification = await _supabaseService
@@ -376,8 +377,9 @@ class DatabaseService {
           .from('notifications')
           .update({
             'is_read': true,
-            'read_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
+            // Send UTC timestamps to Supabase (database stores in UTC)
+            'read_at': DateTime.now().toUtc().toIso8601String(),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           })
           .eq('id', notificationId)
           .select()
@@ -400,8 +402,9 @@ class DatabaseService {
           .from('notifications')
           .update({
             'is_actioned': true,
-            'actioned_at': DateTime.now().toIso8601String(),
-            'updated_at': DateTime.now().toIso8601String(),
+            // Send UTC timestamps to Supabase (database stores in UTC)
+            'actioned_at': DateTime.now().toUtc().toIso8601String(),
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           })
           .eq('id', notificationId)
           .select()
@@ -479,7 +482,8 @@ class DatabaseService {
           .from('notification_preferences')
           .update({
             ...updates,
-            'updated_at': DateTime.now().toIso8601String(),
+            // Send UTC timestamp to Supabase (database stores in UTC)
+            'updated_at': DateTime.now().toUtc().toIso8601String(),
           })
           .eq('user_id', userId)
           .select()

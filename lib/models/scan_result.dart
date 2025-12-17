@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:fyllens/core/utils/timezone_helper.dart';
 
 /// Scan result model representing plant deficiency scan results
 class ScanResult {
@@ -130,7 +131,8 @@ class ScanResult {
       careTips: parseCareTips(),
       preventiveCare: parsePreventiveCare(),
       growthOptimization: parseGrowthOptimization(),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamp from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
     );
   }
 

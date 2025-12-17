@@ -11,9 +11,10 @@ import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/models/scan_result.dart';
-import 'package:intl/intl.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
+import 'package:fyllens/core/utils/timestamp_formatter.dart';
+import 'package:fyllens/core/utils/timezone_helper.dart';
 
 /// History page - Past scan results
 ///
@@ -71,7 +72,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       return scans;
     }
 
-    final now = DateTime.now();
+    final now = TimezoneHelper.nowInManila();
     if (_selectedFilter == 'This Week') {
       return scans
           .where((scan) => now.difference(scan.createdAt).inDays <= 7)
@@ -356,7 +357,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   /// Build individual history item
   Widget _buildHistoryItem(ScanResult scan) {
-    final dateFormat = DateFormat('MMM dd, yyyy | h:mm a');
+    // Use TimestampFormatter for consistent Philippine timezone display
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -577,7 +578,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            dateFormat.format(scan.createdAt),
+                            // Display timestamp in Philippine timezone (Manila time)
+                            TimestampFormatter.formatDateTime(scan.createdAt),
                             style: AppTextStyles.caption.copyWith(
                               color: AppColors.textSecondary,
                             ),

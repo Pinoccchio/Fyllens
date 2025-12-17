@@ -1,3 +1,5 @@
+import 'package:fyllens/core/utils/timezone_helper.dart';
+
 /// Deficiency model representing nutrient deficiency information
 class Deficiency {
   final String id;
@@ -73,7 +75,8 @@ class Deficiency {
       images: json['images'] != null
           ? List<String>.from(json['images'] as List)
           : null,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamp from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
     );
   }
 

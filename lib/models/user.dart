@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:fyllens/core/utils/timezone_helper.dart';
 
 /// User model representing authenticated users
 class User {
@@ -25,9 +26,10 @@ class User {
       email: authUser.email!,
       fullName: authUser.userMetadata?['full_name'] as String?,
       avatarUrl: authUser.userMetadata?['avatar_url'] as String?,
-      createdAt: DateTime.parse(authUser.createdAt),
+      // Parse UTC timestamps from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(authUser.createdAt),
       updatedAt: authUser.updatedAt != null
-          ? DateTime.parse(authUser.updatedAt!)
+          ? TimezoneHelper.parseUtcToManila(authUser.updatedAt!)
           : null,
     );
   }
@@ -39,9 +41,10 @@ class User {
       email: json['email'] as String,
       fullName: json['full_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
-      createdAt: DateTime.parse(json['created_at'] as String),
+      // Parse UTC timestamps from Supabase and convert to Manila time
+      createdAt: TimezoneHelper.parseUtcToManila(json['created_at'] as String),
       updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
+          ? TimezoneHelper.parseUtcToManila(json['updated_at'] as String)
           : null,
     );
   }

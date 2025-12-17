@@ -171,7 +171,8 @@ class ScanProvider with ChangeNotifier {
         'care_tips': isHealthy ? jsonEncode(geminiInfo['careTips'] ?? []) : null,
         'preventive_care': isHealthy ? jsonEncode(geminiInfo['preventiveCare'] ?? []) : null,
         'growth_optimization': isHealthy ? jsonEncode(geminiInfo['growthOptimization'] ?? []) : null,
-        'created_at': DateTime.now().toIso8601String(),
+        // CRITICAL FIX: Send UTC timestamp to database (device local time → UTC)
+        'created_at': DateTime.now().toUtc().toIso8601String(),
       };
 
       print('      - Scan Data: $scanData');

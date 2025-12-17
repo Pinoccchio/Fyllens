@@ -4,7 +4,7 @@ import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
-import 'package:intl/intl.dart';
+import 'package:fyllens/core/utils/timestamp_formatter.dart';
 
 /// Message Bubble Widget
 ///
@@ -212,27 +212,10 @@ class MessageBubble extends StatelessWidget {
     return name[0].toUpperCase();
   }
 
-  /// Format timestamp
+  /// Format timestamp using TimestampFormatter for consistent Philippine timezone display
   String _formatTimestamp(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    // Today: Show time only
-    if (difference.inDays == 0) {
-      return DateFormat('h:mm a').format(dateTime);
-    }
-
-    // Yesterday
-    if (difference.inDays == 1) {
-      return 'Yesterday ${DateFormat('h:mm a').format(dateTime)}';
-    }
-
-    // This week: Show day name
-    if (difference.inDays < 7) {
-      return DateFormat('EEE h:mm a').format(dateTime);
-    }
-
-    // Older: Show date
-    return DateFormat('MMM d, h:mm a').format(dateTime);
+    // Use TimestampFormatter.formatChatTime for chat-specific formatting
+    // Returns: "8:11 PM" (today), "Yesterday 8:11 PM", "Mon 8:11 PM", "Dec 17 8:11 PM"
+    return TimestampFormatter.formatChatTime(dateTime);
   }
 }
