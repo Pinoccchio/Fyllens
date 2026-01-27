@@ -142,6 +142,9 @@ abstract class AppIcons {
   /// Check/checkmark icon
   static PhosphorIconData get check => PhosphorIcons.check;
 
+  /// Checkmark icon (alias)
+  static PhosphorIconData get checkmark => PhosphorIcons.check;
+
   /// Check circle icon
   static PhosphorIconData get checkCircle => PhosphorIcons.checkCircle;
 
@@ -207,6 +210,9 @@ abstract class AppIcons {
 
   /// Delete/trash icon
   static PhosphorIconData get delete => PhosphorIcons.trash;
+
+  /// Refresh/arrows clockwise icon
+  static PhosphorIconData get refresh => PhosphorIcons.arrowsClockwise;
 
   // ==================== COMMUNICATION ICONS ====================
 

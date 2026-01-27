@@ -150,28 +150,34 @@ class HistoryResultScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Tap indicator overlay
+                        // Tap indicator overlay (clickable)
                         if (imageAssetPath != null)
                           Positioned(
                             bottom: 12,
                             right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                            child: GestureDetector(
+                              onTap: () => ImageViewerDialog.show(
+                                context: context,
+                                imageUrl: imageAssetPath!,
                               ),
-                              child: Icon(
-                                PhosphorIcons.arrowsOutBold,
-                                color: Colors.white,
-                                size: 20,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(20),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  PhosphorIcons.arrowsOutBold,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
                               ),
                             ),
                           ),

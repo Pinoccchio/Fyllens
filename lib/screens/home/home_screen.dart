@@ -7,6 +7,7 @@ import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_constants.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/core/theme/app_icons.dart';
+import 'package:fyllens/core/theme/app_gradients.dart';
 import 'package:fyllens/providers/history_provider.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
@@ -15,15 +16,18 @@ import 'package:fyllens/providers/notification_provider.dart';
 import 'package:fyllens/models/scan_result.dart';
 import 'package:fyllens/screens/history/history_result_screen.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
-import 'package:fyllens/screens/shared/widgets/severity_badge.dart';
 import 'package:fyllens/core/utils/timestamp_formatter.dart';
+import 'package:fyllens/screens/shared/widgets/custom_button.dart';
+import 'package:fyllens/screens/shared/widgets/custom_card.dart';
+import 'package:fyllens/screens/shared/widgets/leaf_loader.dart';
 
-/// Home page - Main dashboard
+/// Home page - Main dashboard with "Organic Luxury" design
 ///
 /// Displays the main dashboard with:
-/// - Quick scan action card
-/// - Recent scan history (from database)
-/// - Fyllens AI assistant chat interface
+/// - Hero scan card with forest gradient
+/// - Quick stats row
+/// - Horizontal scrolling recent scans
+/// - Fyllens AI assistant card with gold-coral gradient
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -65,43 +69,119 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final historyProvider = context.watch<HistoryProvider>();
     final notificationProvider = context.watch<NotificationProvider>();
-    final recentScans = historyProvider.scans.take(3).toList();
+    final recentScans = historyProvider.scans.take(5).toList();
     final unreadCount = notificationProvider.unreadCount;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        title: Text(
-          AppConstants.appName.toUpperCase(),
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _loadHistory,
+          color: AppColors.accentGold,
+          backgroundColor: AppColors.surfaceLight,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Custom App Bar
+              SliverToBoxAdapter(
+                child: _buildAppBar(context, unreadCount),
+              ),
+
+              // Main content
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenPadding),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Hero Scan Card
+                    _buildHeroScanCard(context),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Quick Stats Row
+                    _buildQuickStatsRow(context, historyProvider),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Recent Scans section (horizontal scroll)
+                    _buildRecentScansSection(context, historyProvider, recentScans),
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Fyllens AI Assistant section
+                    _buildFyllensAISection(context),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ]),
+                ),
+              ),
+            ],
           ),
         ),
-        actions: [
+      ),
+    );
+  }
+
+  /// Premium App Bar with botanical styling
+  Widget _buildAppBar(BuildContext context, int unreadCount) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenPadding,
+        AppSpacing.md,
+        AppSpacing.screenPadding,
+        0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Logo and title
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppConstants.appName.toUpperCase(),
+                style: AppTextStyles.displayMedium.copyWith(
+                  color: AppColors.primaryForest,
+                  letterSpacing: 3.0,
+                ),
+              ),
+              Text(
+                'Plant Health Assistant',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ],
+          ),
+
+          // Notification button
           Stack(
             children: [
-              IconButton(
-                icon: Icon(AppIcons.notifications),
-                color: AppColors.textSecondary,
-                onPressed: () {
-                  context.push(AppRoutes.notifications);
-                },
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceWarm,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  boxShadow: AppSpacing.shadowSubtle,
+                ),
+                child: IconButton(
+                  icon: Icon(AppIcons.notifications),
+                  color: AppColors.primaryForest,
+                  onPressed: () => context.push(AppRoutes.notifications),
+                ),
               ),
               if (unreadCount > 0)
                 Positioned(
-                  right: 8,
-                  top: 8,
+                  right: 6,
+                  top: 6,
                   child: Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: AppColors.error,
+                      gradient: AppGradients.goldCoral,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.accentCoral.withValues(alpha: 0.4),
+                          blurRadius: 4,
+                        ),
+                      ],
                     ),
                     constraints: const BoxConstraints(
                       minWidth: 18,
@@ -122,62 +202,47 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: _loadHistory,
-          color: AppColors.primaryGreenModern,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Scan action card
-                  _buildScanCard(context),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Recent Scans section (from database)
-                  _buildRecentScansSection(context, historyProvider, recentScans),
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Fyllens AI Assistant section
-                  _buildFyllensAISection(context),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 
-  Widget _buildScanCard(BuildContext context) {
+  /// Hero Scan Card - Forest gradient with gold CTA
+  Widget _buildHeroScanCard(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.cardPaddingLg),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryGreenModern,
-            AppColors.primaryGreenModern.withValues(alpha: 0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
+        gradient: AppGradients.forest,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primaryForest.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Fyllens logo
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    width: 1,
+                  ),
                 ),
-                child: Icon(AppIcons.camera, color: Colors.white, size: 32),
+                child: Image.asset(
+                  'assets/images/fyllens_logo.png',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -186,16 +251,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       'Scan Your Plant',
-                      style: AppTextStyles.heading2.copyWith(
+                      style: AppTextStyles.displaySmall.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Get instant diagnosis',
+                      'Get instant AI-powered diagnosis\nfor nutrient deficiencies',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: Colors.white.withValues(alpha: 0.9),
+                        color: Colors.white.withValues(alpha: 0.85),
+                        height: 1.4,
                       ),
                     ),
                   ],
@@ -203,43 +268,110 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.md),
-          ElevatedButton(
+          const SizedBox(height: AppSpacing.lg),
+
+          // Gold "Start Scanning" button
+          CustomButton.primary(
+            text: 'Start Scanning',
+            icon: AppIcons.camera,
             onPressed: () {
-              // Navigate to Scan tab using TabProvider
               context.read<TabProvider>().setTab(2);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              foregroundColor: AppColors.primaryGreenModern,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.md,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25),
-              ),
-              elevation: 0,
-            ),
-            child: Text(
-              'Start Scanning',
-              style: AppTextStyles.bodyLarge.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            fullWidth: true,
           ),
         ],
       ),
     );
   }
 
+  /// Quick Stats Row - 3 mini metric cards
+  Widget _buildQuickStatsRow(BuildContext context, HistoryProvider provider) {
+    final totalScans = provider.scans.length;
+    final healthyCount = provider.scans.where((s) => s.isHealthy).length;
+    final issuesCount = totalScans - healthyCount;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            context,
+            icon: AppIcons.history,
+            value: '$totalScans',
+            label: 'Total Scans',
+            gradient: AppGradients.sage,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            icon: AppIcons.checkmark,
+            value: '$healthyCount',
+            label: 'Healthy',
+            gradient: AppGradients.mint,
+          ),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            icon: AppIcons.warning,
+            value: '$issuesCount',
+            label: 'Issues Found',
+            gradient: AppGradients.goldCoral,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(
+    BuildContext context, {
+    required IconData icon,
+    required String value,
+    required String label,
+    required LinearGradient gradient,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        gradient: gradient,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        boxShadow: AppSpacing.shadowLight,
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: Colors.white, size: AppSpacing.iconMd),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            value,
+            style: AppTextStyles.displaySmall.copyWith(
+              color: Colors.white,
+              fontSize: 24,
+            ),
+          ),
+          Text(
+            label,
+            style: AppTextStyles.caption.copyWith(
+              color: Colors.white.withValues(alpha: 0.85),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Recent Scans Section with horizontal scrolling cards
   Widget _buildRecentScansSection(
     BuildContext context,
     HistoryProvider provider,
     List<ScanResult> recentScans,
   ) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Section header
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -247,94 +379,238 @@ class _HomeScreenState extends State<HomeScreen> {
               'Recent Scans',
               style: AppTextStyles.heading2.copyWith(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
               ),
             ),
             TextButton(
               onPressed: () {
-                // Navigate to history screen using GoRouter
                 context.go(AppRoutes.home, extra: {'tab': '3'});
                 context.read<TabProvider>().setTab(3);
               },
-              child: Text(
-                'View All',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.primaryGreenModern,
-                  fontWeight: FontWeight.w600,
-                ),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accentGold,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'View All',
+                    style: AppTextStyles.labelMedium.copyWith(
+                      color: AppColors.accentGold,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(
+                    AppIcons.chevronRight,
+                    size: 16,
+                    color: AppColors.accentGold,
+                  ),
+                ],
               ),
             ),
           ],
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Loading state
+        // Content
         if (provider.isLoading && provider.scans.isEmpty)
           _buildLoadingState()
-
-        // Empty state
         else if (recentScans.isEmpty)
           _buildEmptyState()
-
-        // Recent scans list
         else
-          Column(
-            children: recentScans.map((scan) => _buildScanItem(context, scan)).toList(),
-          ),
+          _buildHorizontalScansList(context, recentScans),
       ],
     );
   }
 
-  /// Loading state with shimmer effect
+  /// Horizontal scrolling list of scan cards
+  Widget _buildHorizontalScansList(BuildContext context, List<ScanResult> scans) {
+    return SizedBox(
+      height: 180,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        clipBehavior: Clip.none,
+        itemCount: scans.length,
+        separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
+        itemBuilder: (context, index) => _buildScanCard(context, scans[index]),
+      ),
+    );
+  }
+
+  /// Individual scan card for horizontal list
+  Widget _buildScanCard(BuildContext context, ScanResult scan) {
+    final timeAgo = TimestampFormatter.formatAgo(scan.createdAt);
+
+    return GestureDetector(
+      onTap: () => _navigateToScanResult(context, scan),
+      child: Container(
+        width: 160,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceWarm,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          border: Border.all(
+            color: scan.isHealthy
+                ? AppColors.statusHealthy.withValues(alpha: 0.3)
+                : AppColors.statusWarning.withValues(alpha: 0.3),
+            width: 1,
+          ),
+          boxShadow: AppSpacing.shadowCard,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image with health indicator
+            Stack(
+              children: [
+                Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceCream,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    child: Image.network(
+                      scan.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Center(
+                        child: Icon(
+                          AppIcons.seedling,
+                          color: AppColors.primarySage,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                // Health badge
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: scan.isHealthy
+                          ? AppColors.statusHealthy
+                          : HealthStatusHelper.getHealthColor(
+                              isHealthy: scan.isHealthy,
+                              severity: scan.severity,
+                            ),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+                    ),
+                    child: Text(
+                      scan.isHealthy ? 'Healthy' : scan.severity ?? 'Issue',
+                      style: AppTextStyles.caption.copyWith(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+
+            // Plant name
+            Text(
+              scan.plantName,
+              style: AppTextStyles.labelLarge.copyWith(
+                color: AppColors.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 2),
+
+            // Deficiency or healthy status
+            Text(
+              scan.isHealthy
+                  ? 'No issues detected'
+                  : scan.deficiencyDetected ?? 'Unknown',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            const Spacer(),
+
+            // Time ago
+            Text(
+              timeAgo,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.textTertiary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToScanResult(BuildContext context, ScanResult scan) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoryResultScreen(
+          plantName: scan.plantName,
+          imageAssetPath: scan.imageUrl,
+          deficiencyName: scan.deficiencyDetected ?? 'Unknown Deficiency',
+          severity: scan.severity ?? 'Unknown',
+          symptoms: scan.symptoms ?? ['No symptoms recorded'],
+          treatments: (scan.geminiTreatments ?? [
+            {
+              'icon': 'fertilizer',
+              'title': 'Balanced Fertilizer',
+              'description': 'Apply recommended NPK fertilizer',
+            }
+          ])
+              .map((t) => {
+                    'icon': t['icon']?.toString() ?? 'fertilizer',
+                    'title': t['title']?.toString() ?? 'Treatment',
+                    'description':
+                        t['description']?.toString() ?? 'Apply appropriate treatment',
+                  })
+              .toList(),
+          careTips: scan.isHealthy ? scan.careTips : null,
+          preventiveCare: scan.isHealthy ? scan.preventiveCare : null,
+          growthOptimization: scan.isHealthy ? scan.growthOptimization : null,
+          preventionTips: !scan.isHealthy ? scan.preventionTips : null,
+          onRescanPressed: () {
+            debugPrint('🔄 [HOME RESCAN] Callback triggered');
+            context.read<ScanProvider>().preselectPlant(scan.plantName);
+            context.read<ScanProvider>().clearCurrentScan();
+            Navigator.pop(context);
+            context.read<TabProvider>().setTab(2);
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Loading state with leaf animation
   Widget _buildLoadingState() {
-    return Column(
-      children: List.generate(
-        2,
-        (index) => Container(
-          margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceGray,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.borderLight, width: 1),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: AppColors.borderLight,
-                  borderRadius: BorderRadius.circular(8),
-                ),
+    return SizedBox(
+      height: 180,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const LeafLoader.medium(),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Loading your scans...',
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
               ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 120,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: AppColors.borderLight,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: 180,
-                      height: 14,
-                      decoration: BoxDecoration(
-                        color: AppColors.borderLight,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -342,304 +618,99 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Empty state for no scans
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      child: Column(
-        children: [
-          Icon(
-            AppIcons.history,
-            size: 64,
-            color: AppColors.textSecondary.withValues(alpha: 0.5),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            'No scan history yet',
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Start scanning plants to see history here',
-            textAlign: TextAlign.center,
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScanItem(BuildContext context, ScanResult scan) {
-    // Use TimestampFormatter to prevent negative durations ("-479m ago" bug)
-    final timeAgo = TimestampFormatter.formatAgo(scan.createdAt);
-
-    return InkWell(
-      onTap: () {
-        // Navigate to HistoryResultScreen with scan data
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => HistoryResultScreen(
-              plantName: scan.plantName,
-              imageAssetPath: scan.imageUrl,
-              deficiencyName: scan.deficiencyDetected ?? 'Unknown Deficiency',
-              severity: scan.severity ?? 'Unknown',
-              symptoms: scan.symptoms ?? ['No symptoms recorded'],
-              treatments: (scan.geminiTreatments ?? [
-                {
-                  'icon': 'fertilizer',
-                  'title': 'Balanced Fertilizer',
-                  'description': 'Apply recommended NPK fertilizer',
-                }
-              ])
-                  .map((t) => {
-                        'icon': t['icon']?.toString() ?? 'fertilizer',
-                        'title': t['title']?.toString() ?? 'Treatment',
-                        'description': t['description']?.toString() ??
-                            'Apply appropriate treatment',
-                      })
-                  .toList(),
-              careTips: scan.isHealthy ? scan.careTips : null,
-              preventiveCare: scan.isHealthy ? scan.preventiveCare : null,
-              growthOptimization:
-                  scan.isHealthy ? scan.growthOptimization : null,
-              preventionTips: !scan.isHealthy ? scan.preventionTips : null,
-              onRescanPressed: () {
-                debugPrint('🔄 [HOME RESCAN] Callback triggered');
-
-                // Pre-select the plant before navigating
-                debugPrint('🌱 [HOME RESCAN] Pre-selecting plant: ${scan.plantName}');
-                context.read<ScanProvider>().preselectPlant(scan.plantName);
-                debugPrint('✅ [HOME RESCAN] Plant pre-selected successfully');
-
-                // Clear current scan
-                debugPrint('🧹 [HOME RESCAN] Clearing current scan...');
-                context.read<ScanProvider>().clearCurrentScan();
-                debugPrint('✅ [HOME RESCAN] Scan cleared successfully');
-
-                // Pop result screen
-                debugPrint('🔙 [HOME RESCAN] Popping HistoryResultScreen...');
-                Navigator.pop(context);
-
-                // Switch to Scan tab
-                debugPrint('🎯 [HOME RESCAN] Switching to Scan tab...');
-                context.read<TabProvider>().setTab(2);
-                debugPrint('✅ [HOME RESCAN] Tab switch complete!');
-              },
-            ),
-          ),
-        );
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.borderLight, width: 1),
-        ),
-        child: Row(
+    return SizedBox(
+      width: double.infinity,
+      child: CustomCard.outlined(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
           children: [
-            // Plant image with health indicator
-            Stack(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color:
-                        AppColors.primaryGreenModern.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      scan.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        AppIcons.seedling,
-                        color: AppColors.primaryGreenModern,
-                        size: 24,
-                      ),
-                    ),
-                  ),
-                ),
-                // Health status icon overlay
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(4),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      HealthStatusHelper.getHealthIcon(
-                        isHealthy: scan.isHealthy,
-                        severity: scan.severity,
-                      ),
-                      size: 12,
-                      color: HealthStatusHelper.getHealthColor(
-                        isHealthy: scan.isHealthy,
-                        severity: scan.severity,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          scan.plantName,
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      // Show severity badge or healthy badge
-                      if (!scan.isHealthy && scan.severity != null) ...[
-                        const SizedBox(width: AppSpacing.sm),
-                        SeverityBadge(severity: scan.severity!),
-                      ],
-                      if (scan.isHealthy) ...[
-                        const SizedBox(width: AppSpacing.sm),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: HealthStatusHelper.healthyColor
-                                .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'Healthy',
-                            style: AppTextStyles.caption.copyWith(
-                              color: HealthStatusHelper.healthyColor,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 10,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    scan.deficiencyDetected ?? 'No deficiency detected',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Row(
-                    children: [
-                      Text(
-                        timeAgo,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      if (scan.confidence != null) ...[
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          '• ${(scan.confidence! * 100).toStringAsFixed(0)}%',
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.primaryGreenModern,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ],
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.primarySage.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                AppIcons.seedling,
+                size: 48,
+                color: AppColors.primarySage,
               ),
             ),
-            Icon(AppIcons.chevronRight, color: AppColors.textSecondary),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'No scans yet',
+              style: AppTextStyles.heading3.copyWith(
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Scan your first plant to start\ntracking its health',
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
+  /// Fyllens AI Section with gold-coral gradient
   Widget _buildFyllensAISection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header with AI icon
+        // Section header
         Row(
           children: [
-            Icon(
-              AppIcons.sparkle,
-              color: AppColors.primaryGreenModern,
-              size: 24,
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                gradient: AppGradients.goldCoral,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusXs),
+              ),
+              child: Icon(
+                AppIcons.sparkle,
+                color: Colors.white,
+                size: 16,
+              ),
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              'Talk with Fyllens AI',
+              'Fyllens AI',
               style: AppTextStyles.heading2.copyWith(
                 color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.md),
 
-        // AI chat card with "Open Chat" button
-        InkWell(
+        // AI chat card
+        GestureDetector(
           onTap: () => context.push(AppRoutes.chat),
-          borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.all(AppSpacing.cardPadding),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF4CAF50),
-                  Color(0xFF66BB6A),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              gradient: AppGradients.goldCoral,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+              boxShadow: AppSpacing.shadowGold,
             ),
             child: Row(
               children: [
-                // AI icon
+                // AI avatar
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.2),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      width: 1,
+                    ),
                   ),
                   child: Icon(
                     AppIcons.chat,
@@ -655,28 +726,35 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Chat with Fyllens AI",
+                        'Ask Fyllens AI',
                         style: AppTextStyles.heading3.copyWith(
                           color: Colors.white,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Ask about plant care, diseases, and more",
+                        'Get expert advice on plant care,\ndiseases, and treatments',
                         style: AppTextStyles.bodyMedium.copyWith(
                           color: Colors.white.withValues(alpha: 0.9),
+                          height: 1.3,
                         ),
                       ),
                     ],
                   ),
                 ),
 
-                // Arrow icon
-                Icon(
-                  AppIcons.chevronRight,
-                  color: Colors.white.withValues(alpha: 0.8),
-                  size: 20,
+                // Arrow
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    AppIcons.chevronRight,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
               ],
             ),

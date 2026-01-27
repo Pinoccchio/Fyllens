@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import '../../../services/image_download_service.dart';
 
 /// Full-screen image viewer dialog with pinch-to-zoom functionality
 ///
@@ -49,6 +50,7 @@ class _ImageViewerDialogState extends State<ImageViewerDialog> {
   bool _isLoading = true;
   bool _hasError = false;
   double _currentScale = 1.0;
+  bool _isDownloading = false;
 
   @override
   void dispose() {
@@ -85,6 +87,51 @@ class _ImageViewerDialogState extends State<ImageViewerDialog> {
       setState(() {
         _currentScale = scale;
       });
+    }
+  }
+
+  /// Download the image to device gallery
+  Future<void> _downloadImage() async {
+    if (_isDownloading) return;
+
+    setState(() {
+      _isDownloading = true;
+    });
+
+    try {
+      final downloadService = ImageDownloadService.instance;
+      final fileName = downloadService.generateFileName('fyllens_image', 0);
+
+      DownloadResult result;
+      if (ImageDownloadService.isNetworkUrl(widget.imageUrl)) {
+        // Network image (from Supabase or other URL)
+        result = await downloadService.saveNetworkImage(
+          widget.imageUrl,
+          fileName,
+        );
+      } else {
+        // Asset image (local)
+        result = await downloadService.saveAssetImage(
+          widget.imageUrl,
+          fileName,
+        );
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.message),
+            backgroundColor: result.success ? Colors.green : Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isDownloading = false;
+        });
+      }
     }
   }
 
@@ -190,6 +237,52 @@ class _ImageViewerDialogState extends State<ImageViewerDialog> {
                         color: Colors.white,
                         size: 24,
                       ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Download button - Top-Right
+          Positioned(
+            top: 8,
+            right: 8,
+            child: SafeArea(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _isDownloading ? null : _downloadImage,
+                    borderRadius: BorderRadius.circular(28),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: _isDownloading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor:
+                                    AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(
+                              PhosphorIcons.downloadSimpleBold,
+                              color: Colors.white,
+                              size: 24,
+                            ),
                     ),
                   ),
                 ),

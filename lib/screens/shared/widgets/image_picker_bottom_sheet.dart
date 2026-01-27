@@ -18,6 +18,9 @@ class ImagePickerBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get bottom padding for safe area
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+
     return Container(
       decoration: const BoxDecoration(
         color: AppColors.surfaceLight,
@@ -25,68 +28,68 @@ class ImagePickerBottomSheet extends StatelessWidget {
           top: Radius.circular(AppSpacing.radiusLg),
         ),
       ),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg,
-        vertical: AppSpacing.xl,
+      padding: EdgeInsets.only(
+        left: AppSpacing.lg,
+        right: AppSpacing.lg,
+        top: AppSpacing.md,
+        bottom: bottomPadding + AppSpacing.md,
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Handle indicator
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.borderLight,
-                borderRadius: BorderRadius.circular(2),
-              ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Handle indicator
+          Container(
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.borderLight,
+              borderRadius: BorderRadius.circular(2),
             ),
-            const SizedBox(height: AppSpacing.xl),
+          ),
+          const SizedBox(height: AppSpacing.lg),
 
-            // Title
-            const Text(
-              'Choose Photo Source',
+          // Title
+          const Text(
+            'Choose Photo Source',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Camera option
+          _SourceOption(
+            icon: Icons.camera_alt,
+            label: 'Take Photo',
+            onTap: () => Navigator.pop(context, ImageSource.camera),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Gallery option
+          _SourceOption(
+            icon: Icons.photo_library,
+            label: 'Choose from Gallery',
+            onTap: () => Navigator.pop(context, ImageSource.gallery),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              minimumSize: const Size(double.infinity, 44),
+            ),
+            child: const Text(
+              'Cancel',
               style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textSecondary,
+                fontSize: 16,
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-
-            // Camera option
-            _SourceOption(
-              icon: Icons.camera_alt,
-              label: 'Take Photo',
-              onTap: () => Navigator.pop(context, ImageSource.camera),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Gallery option
-            _SourceOption(
-              icon: Icons.photo_library,
-              label: 'Choose from Gallery',
-              onTap: () => Navigator.pop(context, ImageSource.gallery),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            // Cancel button
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

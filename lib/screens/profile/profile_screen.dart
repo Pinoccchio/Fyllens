@@ -6,9 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fyllens/core/theme/app_colors.dart';
 import 'package:fyllens/core/theme/app_text_styles.dart';
+import 'package:fyllens/core/theme/app_gradients.dart';
 import 'package:fyllens/core/constants/app_spacing.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
-import 'package:fyllens/screens/shared/widgets/custom_list_tile.dart';
+import 'package:fyllens/screens/shared/widgets/custom_card.dart';
+import 'package:fyllens/screens/shared/widgets/custom_button.dart';
 import 'package:fyllens/screens/shared/widgets/profile_avatar.dart';
 import 'package:fyllens/screens/shared/widgets/image_picker_bottom_sheet.dart';
 import 'package:fyllens/screens/shared/widgets/image_preview_dialog.dart';
@@ -16,194 +18,331 @@ import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/providers/auth_provider.dart';
 import 'package:fyllens/providers/profile_provider.dart';
 
-/// Profile page - User account and settings
+/// Profile screen - "Organic Luxury" Design
 ///
-/// Displays authenticated user's profile information and settings.
-/// Includes logout functionality that redirects to splash/login screen.
+/// Premium user profile experience with:
+/// - Blurred avatar header background
+/// - Forest gradient profile card
+/// - Warm settings sections
+/// - About dialog with team credits
+/// - Smooth animations throughout
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Get current authenticated user from AuthProvider
     final authProvider = context.watch<AuthProvider>();
     final currentUser = authProvider.currentUser;
-
-    // Get profile provider for upload state
     final profileProvider = context.watch<ProfileProvider>();
     final isUploadingAvatar = profileProvider.isUploading;
 
-    // Extract user display information
-    final displayName = currentUser?.fullName ?? currentUser?.email.split('@').first ?? 'User';
+    final displayName =
+        currentUser?.fullName ?? currentUser?.email.split('@').first ?? 'User';
     final displayEmail = currentUser?.email ?? 'No email';
     final isLoading = authProvider.isLoading;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        centerTitle: false,
-        title: Text(
-          'Profile',
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: RefreshIndicator(
-          onRefresh: () => _refreshProfile(context),
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Green profile card (like scan card on home screen)
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryGreenModern,
-                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primaryGreenModern.withValues(alpha: 0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
+      backgroundColor: AppColors.background,
+      body: RefreshIndicator(
+        onRefresh: () => _refreshProfile(context),
+        color: AppColors.accentGold,
+        backgroundColor: AppColors.surfaceWarm,
+        child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            // Premium header with avatar
+            SliverAppBar(
+              expandedHeight: 280,
+              pinned: true,
+              backgroundColor: AppColors.primaryForest,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    // Avatar with camera icon overlay and preview on tap
-                    GestureDetector(
-                      onTap: currentUser?.avatarUrl != null
-                          ? () => _showAvatarPreview(context, currentUser!.avatarUrl!)
-                          : null,
-                      child: ProfileAvatar(
-                        avatarUrl: currentUser?.avatarUrl,
-                        displayName: currentUser?.fullName,
-                        email: currentUser?.email,
-                        size: 70,
-                        showEditButton: true,
-                        onEditPressed: () => _handleEditAvatar(context),
-                        isUploading: isUploadingAvatar,
+                    // Gradient background
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: AppGradients.forest,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.md),
-                    // Name and email
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            displayName,
-                            style: AppTextStyles.heading2.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                    // Botanical pattern overlay
+                    Positioned(
+                      top: -50,
+                      right: -50,
+                      child: Opacity(
+                        opacity: 0.08,
+                        child: Icon(
+                          AppIcons.leaf,
+                          size: 200,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 50,
+                      left: -30,
+                      child: Opacity(
+                        opacity: 0.06,
+                        child: Icon(
+                          AppIcons.leaf,
+                          size: 120,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    // Profile content
+                    SafeArea(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: AppSpacing.xl),
+                            // Avatar with edit button
+                            GestureDetector(
+                              onTap: currentUser?.avatarUrl != null
+                                  ? () => _showAvatarPreview(
+                                      context, currentUser!.avatarUrl!)
+                                  : null,
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppColors.accentGold,
+                                        width: 3,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withValues(alpha: 0.2),
+                                          blurRadius: 20,
+                                          spreadRadius: 2,
+                                        ),
+                                      ],
+                                    ),
+                                    child: ProfileAvatar(
+                                      avatarUrl: currentUser?.avatarUrl,
+                                      displayName: currentUser?.fullName,
+                                      email: currentUser?.email,
+                                      size: 100,
+                                      showEditButton: false,
+                                      isUploading: isUploadingAvatar,
+                                    ),
+                                  ),
+                                  // Edit button
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () => _handleEditAvatar(context),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.accentGold,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: AppColors.accentGold
+                                                  .withValues(alpha: 0.4),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Icon(
+                                          AppIcons.camera,
+                                          size: 18,
+                                          color: AppColors.textOnGold,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            displayEmail,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: Colors.white.withValues(alpha: 0.95),
+                            const SizedBox(height: AppSpacing.md),
+                            // User name
+                            Text(
+                              displayName,
+                              style: AppTextStyles.heading1.copyWith(
+                                color: Colors.white,
+                              ),
                             ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
+                            const SizedBox(height: AppSpacing.xs),
+                            // Email
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.md,
+                                vertical: AppSpacing.xs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(
+                                    AppSpacing.radiusPill),
+                              ),
+                              child: Text(
+                                displayEmail,
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white.withValues(alpha: 0.9),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
+              title: Text(
+                'Profile',
+                style: AppTextStyles.heading2.copyWith(
+                  color: Colors.white,
+                ),
+              ),
+              centerTitle: true,
+            ),
 
-              // Account section
-              Padding(
-                padding: EdgeInsets.zero,
+            // Profile content
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.screenPadding),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Account section
                     Text(
                       'Account',
-                      style: AppTextStyles.heading3,
+                      style: AppTextStyles.heading3.copyWith(
+                        color: AppColors.primaryForest,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    CustomListTile(
+                    _buildSettingsCard(
+                      context,
                       icon: AppIcons.profile,
                       title: 'Edit Full Name',
-                      onTap: () {
-                        context.push(AppRoutes.editProfile);
-                      },
+                      subtitle: 'Update your display name',
+                      onTap: () => context.push(AppRoutes.editProfile),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              // Preferences section
-              Padding(
-                padding: EdgeInsets.zero,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Preferences section
                     Text(
                       'Preferences',
-                      style: AppTextStyles.heading3,
+                      style: AppTextStyles.heading3.copyWith(
+                        color: AppColors.primaryForest,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    CustomListTile(
+                    _buildSettingsCard(
+                      context,
                       icon: AppIcons.info,
                       title: 'About Fyllens',
+                      subtitle: 'App info and team credits',
                       onTap: () => _showAboutDialog(context),
                     ),
-                    CustomListTile(
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildSettingsCard(
+                      context,
                       icon: AppIcons.info,
                       title: 'Help & Support',
+                      subtitle: 'FAQ and assistance',
                       onTap: () => _showHelpSupportDialog(context),
                     ),
-                    const SizedBox(height: AppSpacing.md),
-                    // Logout button with confirmation dialog
-                    CustomListTile(
+
+                    const SizedBox(height: AppSpacing.xl),
+
+                    // Logout button
+                    CustomButton.outlined(
+                      text: 'Logout',
                       icon: AppIcons.signOut,
-                      title: 'Logout',
-                      onTap: isLoading ? null : () => _showLogoutConfirmation(context, authProvider),
-                      iconColor: Theme.of(context).colorScheme.error,
-                      iconBackgroundColor: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                      onPressed: isLoading
+                          ? () {}
+                          : () => _showLogoutConfirmation(context, authProvider),
                     ),
+
+                    const SizedBox(height: AppSpacing.xxl),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-            ],
-          ),
-        ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Refresh profile data from server
+  Widget _buildSettingsCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+    Color? iconColor,
+  }) {
+    return CustomCard.standard(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                color: (iconColor ?? AppColors.primarySage)
+                    .withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+              child: Icon(
+                icon,
+                size: 22,
+                color: iconColor ?? AppColors.primarySage,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primaryForest,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: AppTextStyles.bodySmall.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              AppIcons.chevronRight,
+              color: AppColors.textTertiary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   static Future<void> _refreshProfile(BuildContext context) async {
     final authProvider = context.read<AuthProvider>();
     await authProvider.refreshProfile();
   }
 
-  /// Handle avatar edit - shows image picker and preview
   Future<void> _handleEditAvatar(BuildContext context) async {
     debugPrint('\n📸 ProfileScreen: Edit avatar requested');
 
@@ -213,16 +352,9 @@ class ProfileScreen extends StatelessWidget {
       return;
     }
 
-    // Show image source picker bottom sheet
     final imageSource = await ImagePickerBottomSheet.show(context);
-    if (imageSource == null) {
-      debugPrint('   User cancelled image source selection');
-      return;
-    }
+    if (imageSource == null) return;
 
-    debugPrint('   Image source selected: $imageSource');
-
-    // Pick image from selected source
     final picker = ImagePicker();
     XFile? pickedFile;
 
@@ -234,28 +366,21 @@ class ProfileScreen extends StatelessWidget {
         imageQuality: 85,
       );
     } catch (e) {
-      debugPrint('❌ ProfileScreen: Image picker error: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to pick image: $e'),
-            backgroundColor: AppColors.error,
+            backgroundColor: AppColors.statusCritical,
           ),
         );
       }
       return;
     }
 
-    if (pickedFile == null) {
-      debugPrint('   User cancelled image selection');
-      return;
-    }
-
-    debugPrint('   Image selected: ${pickedFile.path}');
+    if (pickedFile == null) return;
 
     if (!context.mounted) return;
 
-    // Show preview dialog with upload functionality
     final success = await ImagePreviewDialog.show(
       context: context,
       imageFile: File(pickedFile.path),
@@ -265,53 +390,31 @@ class ProfileScreen extends StatelessWidget {
     if (!context.mounted) return;
 
     if (success == true) {
-      debugPrint('✅ ProfileScreen: Avatar updated successfully');
-
-      // Refresh auth provider to get updated user data
       final authProvider = context.read<AuthProvider>();
       await authProvider.refreshProfile();
 
       if (!context.mounted) return;
 
-      // Check if refresh had errors
-      if (authProvider.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Avatar uploaded but failed to refresh: ${authProvider.errorMessage}'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            action: SnackBarAction(
-              label: 'Retry',
-              textColor: AppColors.textOnPrimary,
-              onPressed: () => authProvider.refreshProfile(),
-            ),
-          ),
-        );
-      } else {
-        // Success - show confirmation
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Profile picture updated successfully!'),
-            backgroundColor: AppColors.primaryGreenModern,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
-    } else if (success == false) {
-      debugPrint('❌ ProfileScreen: Avatar update failed');
-
-      // Show error message from profile provider
-      final profileProvider = context.read<ProfileProvider>();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(profileProvider.errorMessage ?? 'Failed to update profile picture'),
-          backgroundColor: AppColors.error,
-          duration: const Duration(seconds: 3),
+          content: Row(
+            children: [
+              Icon(AppIcons.checkCircle, color: Colors.white, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              const Text('Profile picture updated!'),
+            ],
+          ),
+          backgroundColor: AppColors.statusHealthy,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          ),
+          margin: const EdgeInsets.all(AppSpacing.md),
         ),
       );
     }
   }
 
-  /// Show avatar preview dialog - Minimal TikTok/Instagram style with blur background
   void _showAvatarPreview(BuildContext context, String avatarUrl) {
     showDialog(
       context: context,
@@ -320,7 +423,7 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         child: Stack(
           children: [
-            // Blurred background image
+            // Blurred background
             Positioned.fill(
               child: ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -333,15 +436,13 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Dark overlay
+            // Overlay
             Positioned.fill(
               child: Container(
                 color: Colors.black.withValues(alpha: 0.5),
               ),
             ),
-
-            // Circular preview (centered)
+            // Avatar preview
             Center(
               child: Container(
                 width: 280,
@@ -349,13 +450,13 @@ class ProfileScreen extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.white,
+                    color: AppColors.accentGold,
                     width: 4,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 20,
+                      color: AppColors.accentGold.withValues(alpha: 0.3),
+                      blurRadius: 30,
                       spreadRadius: 5,
                     ),
                   ],
@@ -372,15 +473,15 @@ class ProfileScreen extends StatelessWidget {
                               ? loadingProgress.cumulativeBytesLoaded /
                                   loadingProgress.expectedTotalBytes!
                               : null,
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppColors.primaryGreenModern,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            AppColors.accentGold,
                           ),
                         ),
                       );
                     },
                     errorBuilder: (context, error, stackTrace) => Center(
                       child: Icon(
-                        Icons.error_outline,
+                        AppIcons.error,
                         color: Colors.white,
                         size: 48,
                       ),
@@ -389,23 +490,19 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Close button at top-right
+            // Close button
             Positioned(
               top: 20,
               right: 20,
               child: SafeArea(
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
+                    color: AppColors.surfaceWarm.withValues(alpha: 0.9),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white, size: 26),
-                    iconSize: 26,
-                    padding: const EdgeInsets.all(8),
+                    icon: Icon(AppIcons.close, color: AppColors.primaryForest),
                     onPressed: () => Navigator.pop(context),
-                    tooltip: 'Close',
                   ),
                 ),
               ),
@@ -416,93 +513,77 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Show logout confirmation dialog
-  Future<void> _showLogoutConfirmation(BuildContext context, AuthProvider authProvider) async {
-    debugPrint('\n🚪 ProfileScreen: Logout confirmation requested');
-
+  Future<void> _showLogoutConfirmation(
+      BuildContext context, AuthProvider authProvider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: AppColors.surfaceWarm,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
         ),
         title: Text(
           'Logout',
-          style: AppTextStyles.heading2,
+          style: AppTextStyles.heading2.copyWith(
+            color: AppColors.primaryForest,
+          ),
         ),
         content: Text(
           'Are you sure you want to logout?',
-          style: AppTextStyles.bodyMedium,
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textSecondary,
+          ),
         ),
         actions: [
-          // Cancel button
           TextButton(
-            onPressed: () {
-              debugPrint('   User cancelled logout');
-              Navigator.pop(dialogContext, false);
-            },
+            onPressed: () => Navigator.pop(dialogContext, false),
             child: Text(
               'Cancel',
-              style: AppTextStyles.buttonMedium.copyWith(
+              style: AppTextStyles.labelLarge.copyWith(
                 color: AppColors.textSecondary,
               ),
             ),
           ),
-          // Logout button
-          TextButton(
-            onPressed: () {
-              debugPrint('   ✅ User confirmed logout');
-              Navigator.pop(dialogContext, true);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: Text(
-              'Logout',
-              style: AppTextStyles.buttonMedium.copyWith(
-                color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.w600,
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.statusCritical,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
             ),
+            child: const Text('Logout'),
           ),
         ],
       ),
     );
 
-    // Only proceed with logout if user confirmed
     if (confirmed == true) {
       await _handleLogout(context, authProvider);
     }
   }
 
-  /// Handle logout - Signs out user and navigates to login screen
-  ///
-  /// Logout flow:
-  /// 1. Call AuthProvider.signOut() to clear session
-  /// 2. AuthProvider notifies listeners of auth state change
-  /// 3. GoRouter's refreshListenable detects change and triggers redirect
-  /// 4. Explicit navigation to login as fallback safety measure
-  Future<void> _handleLogout(BuildContext context, AuthProvider authProvider) async {
-    debugPrint('\n🚪 ProfileScreen: Logout initiated');
-
-    // Call AuthProvider.signOut()
+  Future<void> _handleLogout(
+      BuildContext context, AuthProvider authProvider) async {
     final success = await authProvider.signOut();
 
     if (!context.mounted) return;
 
-    if (success) {
-      debugPrint('✅ ProfileScreen: Logout successful');
-      debugPrint('   Auth state changed - notifyListeners() called');
-      debugPrint('   GoRouter.refreshListenable will detect change');
-      debugPrint('   GoRouter will automatically redirect to splash');
-      // No manual navigation needed - GoRouter's redirect logic handles it
-    } else {
-      debugPrint('❌ ProfileScreen: Logout failed');
-      // Show error message to user
+    if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? 'Logout failed. Please try again.'),
-          backgroundColor: Theme.of(context).colorScheme.error,
+          content: Row(
+            children: [
+              Icon(AppIcons.error, color: Colors.white, size: 20),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
+                    authProvider.errorMessage ?? 'Logout failed. Please try again.'),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.statusCritical,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -513,50 +594,45 @@ class ProfileScreen extends StatelessWidget {
     }
   }
 
-  /// Show About Fyllens dialog with app info and team credits
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        contentPadding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xl,
         ),
-        content: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header with gradient
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryGreenModern,
-                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: Container(
+            color: AppColors.surfaceWarm,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header with gradient - edge to edge
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: const BoxDecoration(
+                    gradient: AppGradients.forest,
                   ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.radiusMd),
-                    topRight: Radius.circular(AppSpacing.radiusMd),
-                  ),
-                ),
                 child: Column(
                   children: [
-                    // App logo
+                    // Logo
                     Container(
                       width: 80,
                       height: 80,
                       padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.95),
+                        color: Colors.white,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                          ),
+                        ],
                       ),
                       child: Image.asset(
                         'assets/images/fyllens_logo.png',
@@ -564,29 +640,27 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    // App name
                     Text(
                       'Fyllens',
-                      style: AppTextStyles.heading1.copyWith(
+                      style: AppTextStyles.displayMedium.copyWith(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    // Version badge
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm,
                         vertical: AppSpacing.xs,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(12),
+                        color: AppColors.accentGold,
+                        borderRadius:
+                            BorderRadius.circular(AppSpacing.radiusPill),
                       ),
                       child: Text(
                         'v1.0.0',
-                        style: AppTextStyles.caption.copyWith(
-                          color: Colors.white,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textOnGold,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -600,22 +674,19 @@ class ProfileScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Description
                     Text(
                       'Advanced plant health detection powered by AI and machine learning. Identify nutrient deficiencies and diseases in Rice, Corn, Okra, and Cucumber plants.',
                       style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
+                        color: AppColors.textSecondary,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    // Team credits section
                     Text(
                       'Development Team',
                       style: AppTextStyles.heading3.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryForest,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -626,12 +697,11 @@ class ProfileScreen extends StatelessWidget {
                     _buildTeamMember('MARLAN DIVA', 'ML Training'),
                     _buildTeamMember('JOAQUIM OLACO', 'QA & Testing'),
                     const SizedBox(height: AppSpacing.md),
-                    // Footer
                     Center(
                       child: Text(
                         'CSP Computer Science Students',
-                        style: AppTextStyles.caption.copyWith(
-                          color: AppColors.textSecondary,
+                        style: AppTextStyles.labelSmall.copyWith(
+                          color: AppColors.textTertiary,
                           fontStyle: FontStyle.italic,
                         ),
                       ),
@@ -647,35 +717,19 @@ class ProfileScreen extends StatelessWidget {
                   AppSpacing.lg,
                   AppSpacing.lg,
                 ),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreenModern,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      ),
-                    ),
-                    child: Text(
-                      'Close',
-                      style: AppTextStyles.buttonMedium,
-                    ),
-                  ),
+                child: CustomButton.primary(
+                  text: 'Close',
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
             ],
           ),
         ),
+        ),
       ),
     );
   }
 
-  /// Build team member row
   Widget _buildTeamMember(String name, String role) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
@@ -685,7 +739,7 @@ class ProfileScreen extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: AppColors.primaryGreenModern,
+              color: AppColors.accentGold,
               shape: BoxShape.circle,
             ),
           ),
@@ -714,139 +768,106 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  /// Show Help & Support dialog with FAQ
   void _showHelpSupportDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xl,
         ),
-        child: Container(
-          constraints: const BoxConstraints(maxHeight: 600),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      AppColors.primaryGreenModern,
-                      AppColors.primaryGreenModern.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(AppSpacing.radiusMd),
-                    topRight: Radius.circular(AppSpacing.radiusMd),
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      AppIcons.info,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Text(
-                      'Help & Support',
-                      style: AppTextStyles.heading2.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // FAQ content
-              Expanded(
-                child: SingleChildScrollView(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusCard),
+          child: Container(
+            constraints: const BoxConstraints(maxHeight: 500),
+            color: AppColors.surfaceWarm,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header - edge to edge
+                Container(
+                  width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  decoration: const BoxDecoration(
+                    gradient: AppGradients.forest,
+                  ),
+                  child: Row(
                     children: [
+                      Icon(
+                        AppIcons.info,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                      const SizedBox(width: AppSpacing.md),
                       Text(
-                        'Frequently Asked Questions',
-                        style: AppTextStyles.heading3.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
+                        'Help & Support',
+                        style: AppTextStyles.heading2.copyWith(
+                          color: Colors.white,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.md),
-                      _buildFAQItem(
-                        'How do I scan a plant?',
-                        'Navigate to the Scan tab, select your plant species (Rice, Corn, Okra, or Cucumber), then tap the camera button. Ensure good lighting and focus on affected leaves for best results.',
-                      ),
-                      _buildFAQItem(
-                        'What plants are supported?',
-                        'Currently, Fyllens supports Rice, Corn, Okra, and Cucumber. We are working on adding more crop types in future updates.',
-                      ),
-                      _buildFAQItem(
-                        'How accurate are the results?',
-                        'Our machine learning model provides a confidence score (0-100%) with each detection. Higher confidence scores indicate more reliable results. For best accuracy, ensure clear, well-lit photos.',
-                      ),
-                      _buildFAQItem(
-                        'What if my plant isn\'t detected correctly?',
-                        'Try rescanning with better lighting or a different angle. Focus on the most affected parts of the plant. You can also use the Fyllens AI chat for additional plant care advice.',
-                      ),
-                      _buildFAQItem(
-                        'Can I view my scan history?',
-                        'Yes! Navigate to the History tab to view all your past scans, including detected deficiencies, treatments, and recommendations.',
-                      ),
-                      _buildFAQItem(
-                        'How does the AI chat work?',
-                        'Fyllens AI is powered by Google Gemini and can answer questions about plant care, nutrient deficiencies, and diseases. Access it from the Chat tab or Home screen.',
-                      ),
                     ],
                   ),
                 ),
-              ),
-              // Close button
-              Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGreenModern,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: AppSpacing.md,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      ),
-                    ),
-                    child: Text(
-                      'Close',
-                      style: AppTextStyles.buttonMedium,
+                // FAQ content
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.lg),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Frequently Asked Questions',
+                          style: AppTextStyles.heading3.copyWith(
+                            color: AppColors.primaryForest,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        _buildFAQItem(
+                          'How do I scan a plant?',
+                          'Navigate to the Scan tab, select your plant species (Rice, Corn, Okra, or Cucumber), then tap the camera button.',
+                        ),
+                        _buildFAQItem(
+                          'What plants are supported?',
+                          'Currently, Fyllens supports Rice, Corn, Okra, and Cucumber.',
+                        ),
+                        _buildFAQItem(
+                          'How accurate are the results?',
+                          'Our ML model provides a confidence score (0-100%) with each detection. Higher scores indicate more reliable results.',
+                        ),
+                        _buildFAQItem(
+                          'Can I view my scan history?',
+                          'Yes! Navigate to the History tab to view all your past scans.',
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-            ],
+                // Close button
+                Padding(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: CustomButton.primary(
+                    text: 'Close',
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  /// Build FAQ item
   Widget _buildFAQItem(String question, String answer) {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.md),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.primaryGreenModern.withValues(alpha: 0.05),
+        color: AppColors.primarySage.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(
-          color: AppColors.primaryGreenModern.withValues(alpha: 0.2),
-          width: 1,
+          color: AppColors.primarySage.withValues(alpha: 0.15),
         ),
       ),
       child: Column(
@@ -857,15 +878,15 @@ class ProfileScreen extends StatelessWidget {
             children: [
               Icon(
                 AppIcons.checkCircle,
-                size: 20,
-                color: AppColors.primaryGreenModern,
+                size: 18,
+                color: AppColors.accentGold,
               ),
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   question,
                   style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textPrimary,
+                    color: AppColors.primaryForest,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -874,7 +895,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Padding(
-            padding: const EdgeInsets.only(left: 28),
+            padding: const EdgeInsets.only(left: 26),
             child: Text(
               answer,
               style: AppTextStyles.bodySmall.copyWith(
