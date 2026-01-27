@@ -8,6 +8,7 @@ import 'package:fyllens/providers/library_provider.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
 import 'package:fyllens/presentation/shared/widgets/plant_image_carousel.dart';
+import 'package:fyllens/services/image_download_service.dart';
 
 /// Plant detail page showing comprehensive plant information from Supabase
 class PlantDetailScreen extends StatefulWidget {
@@ -23,6 +24,10 @@ class PlantDetailScreen extends StatefulWidget {
 }
 
 class _PlantDetailScreenState extends State<PlantDetailScreen> {
+  bool _isDownloadingAll = false;
+  int _downloadProgress = 0;
+  int _downloadTotal = 0;
+
   @override
   void initState() {
     super.initState();
@@ -37,6 +42,77 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
     // Clear plant detail when leaving screen
     context.read<LibraryProvider>().clearPlantDetail();
     super.dispose();
+  }
+
+  Future<void> _downloadAllImages(List<String> imagePaths, String plantName) async {
+    if (_isDownloadingAll || imagePaths.isEmpty) return;
+
+    setState(() {
+      _isDownloadingAll = true;
+      _downloadProgress = 0;
+      _downloadTotal = imagePaths.length;
+    });
+
+    final service = ImageDownloadService.instance;
+    final results = await service.saveMultipleAssetImages(
+      imagePaths,
+      plantName,
+      onProgress: (current, total) {
+        if (mounted) {
+          setState(() {
+            _downloadProgress = current;
+            _downloadTotal = total;
+          });
+        }
+      },
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isDownloadingAll = false;
+    });
+
+    // Count successes and failures
+    final successCount = results.where((r) => r.success).length;
+    final failCount = results.length - successCount;
+
+    String message;
+    bool isSuccess;
+
+    if (failCount == 0) {
+      message = '$successCount image${successCount > 1 ? 's' : ''} saved to gallery';
+      isSuccess = true;
+    } else if (successCount == 0) {
+      message = 'Failed to save images. Check storage permissions.';
+      isSuccess = false;
+    } else {
+      message = '$successCount saved, $failCount failed';
+      isSuccess = true;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isSuccess ? Icons.check_circle : Icons.error,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 12),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        backgroundColor: isSuccess
+            ? AppColors.primaryGreenModern
+            : AppColors.error,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+        ),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -127,11 +203,22 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                           PlantImageCarousel(
                             imagePaths: plant.images!,
                             height: 250,
+                            plantName: plant.name,
                           )
                         else if (plant.imageUrl != null)
                           _buildSingleImage(plant.imageUrl!)
                         else
                           _buildPlaceholder(),
+
+                        // Save for Offline button (only show if there are images)
+                        if ((plant.images != null && plant.images!.isNotEmpty) ||
+                            plant.imageUrl != null) ...[
+                          const SizedBox(height: AppSpacing.md),
+                          _buildDownloadAllButton(
+                            plant.images ?? [plant.imageUrl!],
+                            plant.name,
+                          ),
+                        ],
 
                         const SizedBox(height: AppSpacing.lg),
 
@@ -291,7 +378,6 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
                           child: ElevatedButton(
                             onPressed: () {
                               // Pre-select this plant in scan screen
-                              print('🌱 [PLANT DETAIL] Pre-selecting plant: ${plant.name}');
                               context.read<ScanProvider>().preselectPlant(plant.name);
 
                               // Navigate back to home and switch to Scan tab
@@ -571,6 +657,93 @@ class _PlantDetailScreenState extends State<PlantDetailScreen> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDownloadAllButton(List<String> imagePaths, String plantName) {
+    final imageCount = imagePaths.length;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGreenModern.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: AppColors.primaryGreenModern.withValues(alpha: 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.download_for_offline_outlined,
+            color: AppColors.primaryGreenModern,
+            size: 24,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Save for Offline Scanning',
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  '$imageCount image${imageCount > 1 ? 's' : ''} available',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          _isDownloadingAll
+              ? SizedBox(
+                  width: 80,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: AppColors.primaryGreenModern,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '$_downloadProgress/$_downloadTotal',
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.primaryGreenModern,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : TextButton(
+                  onPressed: () => _downloadAllImages(imagePaths, plantName),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primaryGreenModern,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                  ),
+                  child: Text(
+                    'Save All',
+                    style: AppTextStyles.buttonSmall.copyWith(
+                      color: AppColors.primaryGreenModern,
+                    ),
+                  ),
+                ),
         ],
       ),
     );

@@ -9,6 +9,9 @@ import 'package:fyllens/core/theme/app_icons.dart';
 import 'package:fyllens/core/constants/app_routes.dart';
 import 'package:fyllens/providers/scan_provider.dart';
 import 'package:fyllens/providers/tab_provider.dart';
+import 'package:fyllens/providers/auth_provider.dart';
+import 'package:fyllens/providers/history_provider.dart';
+import 'package:fyllens/providers/notification_provider.dart';
 import 'package:fyllens/screens/shared/widgets/image_viewer_dialog.dart';
 import 'package:fyllens/core/utils/health_status_helper.dart';
 
@@ -599,6 +602,16 @@ class ScanResultsScreen extends StatelessWidget {
                       height: 48,
                       child: ElevatedButton(
                         onPressed: () {
+                          // Get user ID for refreshing data
+                          final userId = context.read<AuthProvider>().currentUser?.id;
+
+                          // Refresh history and notifications so new scan appears
+                          if (userId != null) {
+                            // Fire and forget - don't await to keep UI responsive
+                            context.read<HistoryProvider>().loadHistory(userId);
+                            context.read<NotificationProvider>().loadNotifications(userId);
+                          }
+
                           // Clear current scan result
                           context.read<ScanProvider>().clearCurrentScan();
 

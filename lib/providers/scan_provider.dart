@@ -9,6 +9,7 @@ import 'package:fyllens/services/ml_service.dart';
 import 'package:fyllens/services/storage_service.dart';
 import 'package:fyllens/services/gemini_ai_service.dart';
 import 'package:fyllens/services/supabase_service.dart';
+import 'package:fyllens/services/notification_service.dart';
 
 /// Scan provider - manages plant scan operations
 class ScanProvider with ChangeNotifier {
@@ -16,6 +17,7 @@ class ScanProvider with ChangeNotifier {
   final MLService _mlService = MLService.instance;
   final StorageService _storageService = StorageService.instance;
   final GeminiAIService _geminiService = GeminiAIService.instance;
+  final NotificationService _notificationService = NotificationService.instance;
   final _supabase = SupabaseService.instance.client;
 
   bool _isScanning = false;
@@ -288,6 +290,7 @@ class ScanProvider with ChangeNotifier {
         body += '. Tap to view treatment recommendations.';
       }
 
+      // Save notification to database
       await _databaseService.createNotification(
         userId: userId,
         title: title,
@@ -300,7 +303,19 @@ class ScanProvider with ChangeNotifier {
         actionData: {'scanId': scanId},
       );
 
-      print('   ✅ [SCAN PROVIDER] Notification created successfully');
+      print('   ✅ [SCAN PROVIDER] Notification saved to database');
+
+      // Show local push notification
+      final channelId = _notificationService.getChannelForType(notificationType);
+      await _notificationService.showNotification(
+        id: scanId.hashCode,
+        title: title,
+        body: body,
+        payload: scanId,
+        channelId: channelId,
+      );
+
+      print('   ✅ [SCAN PROVIDER] Local push notification shown');
     } catch (e) {
       print('   ⚠️  [SCAN PROVIDER] Failed to create notification: $e');
       // Don't throw - notification failure shouldn't break scan flow

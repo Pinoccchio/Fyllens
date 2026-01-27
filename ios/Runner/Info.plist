@@ -54,6 +54,9 @@
 	<!-- Permission description for notifications -->
 	<key>NSUserNotificationAlertStyle</key>
 	<string>alert</string>
+	<!-- Photo library permission for saving plant images -->
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Fyllens needs access to save plant images for offline scanning practice.</string>
 	<!-- Deep linking configuration for password reset -->
 	<key>CFBundleURLTypes</key>
 	<array>

@@ -79,6 +79,11 @@ dependencies:
   # Deep linking for password reset
   app_links: ^6.3.2
 
+  # Image download to gallery
+  gal: ^2.3.0
+  permission_handler: ^11.3.0
+  path_provider: ^2.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
