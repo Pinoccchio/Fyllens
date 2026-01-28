@@ -290,38 +290,41 @@ class _HomeScreenState extends State<HomeScreen> {
     final healthyCount = provider.scans.where((s) => s.isHealthy).length;
     final issuesCount = totalScans - healthyCount;
 
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: AppIcons.history,
-            value: '$totalScans',
-            label: 'Total Scans',
-            gradient: AppGradients.sage,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _buildStatCard(
+              context,
+              icon: AppIcons.history,
+              value: '$totalScans',
+              label: 'Total Scans',
+              gradient: AppGradients.sage,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: AppIcons.checkmark,
-            value: '$healthyCount',
-            label: 'Healthy',
-            gradient: AppGradients.mint,
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _buildStatCard(
+              context,
+              icon: AppIcons.checkmark,
+              value: '$healthyCount',
+              label: 'Healthy',
+              gradient: AppGradients.mint,
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: _buildStatCard(
-            context,
-            icon: AppIcons.warning,
-            value: '$issuesCount',
-            label: 'Issues Found',
-            gradient: AppGradients.goldCoral,
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _buildStatCard(
+              context,
+              icon: AppIcons.warning,
+              value: '$issuesCount',
+              label: 'Issues Found',
+              gradient: AppGradients.goldCoral,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -340,6 +343,8 @@ class _HomeScreenState extends State<HomeScreen> {
         boxShadow: AppSpacing.shadowLight,
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Icon(icon, color: Colors.white, size: AppSpacing.iconMd),
           const SizedBox(height: AppSpacing.xs),
